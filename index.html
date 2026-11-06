@@ -3,51 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Тотальное уничтожение сетевого кэширования провайдеров -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            // ==========================================================================
-            // КОРЕНЬ СИСТЕМЫ: Единственная точка правды для версии v5.0.2-ALPHA
-            // ==========================================================================
-            window.KHAMACH_CRITICAL_VERSION = "v5.0.2-ALPHA";
-            window.GAME_VERSION = window.KHAMACH_CRITICAL_VERSION;
+            // Единственная и чистая точка правды для версии сборки
+            window.GAME_VERSION = "v5.1.0-ALPHA";
             
-            // Если браузер зацепил старый localStorage или версию — тотальный снос под корень
-            if (localStorage.getItem('khamach_sys_version') !== window.KHAMACH_CRITICAL_VERSION) {
-                const gold = localStorage.getItem('khamach_gold') || '0';
-                const tier = localStorage.getItem('khamach_max_tier') || '1';
-                const tut = localStorage.getItem('khamach_combat_tutorial_done') || 'false';
-                
-                localStorage.clear();
-                
-                localStorage.setItem('khamach_gold', gold);
-                localStorage.setItem('khamach_max_tier', tier);
-                localStorage.setItem('khamach_combat_tutorial_done', tut);
-                localStorage.setItem('khamach_sys_version', window.KHAMACH_CRITICAL_VERSION);
-                
-                if (window.caches) {
-                    caches.keys().then(names => names.forEach(n => caches.delete(n)));
-                }
-                
-                console.warn("КХАМАЧ: Обнаружена старая версия! Полная зачистка и ребут...");
-                window.location.reload(true);
-                return;
+            if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
+                localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
             }
 
-            if (navigator.serviceWorker) {
-                navigator.serviceWorker.getRegistrations().then(regs => {
-                    for (let r of regs) r.unregister();
-                });
-            }
-
-            const enforceBuster = Date.now() + '_CORE_' + Math.floor(Math.random() * 999999);
+            // Классический неуязвимый генератор штампа против дискового кэша
+            const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
+            
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'styles.css?v=' + window.KHAMACH_CRITICAL_VERSION + '&t=' + enforceBuster;
+            link.href = 'styles.css?t=' + enforceBuster;
             document.head.appendChild(link);
 
             const scripts = [
@@ -59,70 +33,56 @@
                 'squad-engine-logic.js', 'squad-engine.js', 'combat.js', 'game-listeners.js'
             ];
 
-            function startVersionGuard() {
-                const target = document.getElementById('game-version');
-                if (!target) return;
-                target.innerText = window.KHAMACH_CRITICAL_VERSION;
-                const observer = new MutationObserver(() => {
-                    if (target.innerText !== window.KHAMACH_CRITICAL_VERSION) {
-                        observer.disconnect();
-                        target.innerText = window.KHAMACH_CRITICAL_VERSION;
-                        observer.observe(target, { characterData: true, childList: true });
-                    }
-                });
-                observer.observe(target, { characterData: true, childList: true });
-            }
-
-            function applyProgressionLocks() {
-                const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
-                if (!tutorialDone) {
-                    const lockIds = ['to-squad-btn', 'to-storage-btn', 'to-chronicle-btn', 'to-clans-btn'];
-                    lockIds.forEach(id => {
-                        const btn = document.getElementById(id);
-                        if (btn) btn.classList.add('progression-locked');
-                    });
-                }
-            }
-
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    if (typeof initDispatcherModule === 'function') initDispatcherModule();
-                    applyProgressionLocks();
-                    startVersionGuard();
-                    setTimeout(startVersionGuard, 150);
-                    document.body.addEventListener('click', function initAudioOnFirstTouch() {
-                        if (typeof initAudioContext === 'function') initAudioContext();
-                        if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
-                        document.body.removeEventListener('click', initAudioOnFirstTouch);
-                    }, { once: true });
+                    console.log("КХАМАЧ: Модули успешно загружены.");
+                    if (typeof initDispatcherModule === 'function') {
+                        initDispatcherModule();
+                    }
+                    
+                    // Ультра-простая онбординг-блокировка кнопок прямо при старте
+                    const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
+                    if (!tutorialDone) {
+                        ['to-squad-btn', 'to-storage-btn', 'to-chronicle-btn', 'to-clans-btn'].forEach(id => {
+                            const btn = document.getElementById(id);
+                            if (btn) btn.classList.add('progression-locked');
+                        });
+                    }
                     return;
                 }
+                
                 const script = document.createElement('script');
-                script.src = scripts[index] + '?v=' + window.KHAMACH_CRITICAL_VERSION + '&t=' + enforceBuster;
+                script.src = scripts[index] + '?v=' + window.GAME_VERSION + '&t=' + enforceBuster;
                 script.async = false; 
                 script.onload = function() { injectScript(index + 1); };
                 document.head.appendChild(script);
             }
 
-            document.addEventListener("DOMContentLoaded", () => injectScript(0));
+            document.addEventListener("DOMContentLoaded", function() {
+                injectScript(0);
+            });
         })();
     </script>
 </head>
 <body>
     <canvas id="bg-canvas"></canvas>
+
     <div id="game-interface">
+        
         <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
         <div id="main-menu" class="game-window" style="display: flex;">
-            <!-- Компактная шапка ресурсов -->
+            
+            <!-- Интегрированная компактная шапка ресурсов -->
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px; padding: 0 4px; background: rgba(20, 15, 12, 0.5); border-bottom: 1px double #544432; box-sizing: border-box;">
                 <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0</span>
                 <h1 style="font-size: 24px; margin: 0; letter-spacing: 2px; padding: 4px 0;">КХАМАЧ</h1>
                 <span id="team-fatigue-display" style="color: #ffb3ba; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffb3ba'">🥱 0%</span>
             </div>
+            
             <span class="subtitle" style="font-size: 11px; margin-bottom: 10px; padding-bottom: 4px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
             
-            <!-- Полностью изолированный верхний ряд управления -->
-            <div id="menu-system-top-row" style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 14px; box-sizing: border-box; position: relative; z-index: 10;">
+            <!-- Служебный верхний ряд управления -->
+            <div style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 14px; box-sizing: border-box;">
                 <button id="to-settings-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">⚙️ Настройки</button>
                 <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
             </div>
@@ -137,12 +97,13 @@
                 <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
             </div>
 
-            <!-- Жестко вшитый неуязвимый футер версии -->
-            <div id="game-version" class="version-footer">v5.0.2-ALPHA</div>
+            <div id="game-version" class="version-footer">v5.1.0-ALPHA</div>
         </div>
+
         <div id="dynamic-town-screens"></div>
         <div id="squad-screen" class="game-window" style="display: none;"></div>
         <div id="dynamic-combat-screen"></div>
+
     </div>
 </body>
 </html>
