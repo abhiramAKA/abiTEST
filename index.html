@@ -13,10 +13,9 @@
             // ==========================================================================
             // ЕДИНСТВЕННАЯ ТОЧКА ПРАВДЫ: Меняй версию ТОЛЬКО здесь.
             // ==========================================================================
-            window.GAME_VERSION = "v4.9.27-BETA";
+            window.GAME_VERSION = "v4.9.28-BETA";
             
-            // АВТО-ПЕРЕЗАГРУЗКА: Если браузер подсунул старый index.html, этот скрипт 
-            // обнаружит несовпадение с localStorage и мгновенно обновит страницу с сервера!
+            // АВТО-ПЕРЕЗАГРУЗКА: Защита от старого дискового кэша браузера
             if (localStorage.getItem('khamach_sys_version') && localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
                 localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
                 if (window.caches) { caches.keys().then(names => names.forEach(n => caches.delete(n))); }
@@ -62,9 +61,22 @@
                 observer.observe(target, { characterData: true, childList: true });
             }
 
+            // Динамическое наложение классов блокировки до первого боя
+            function applyProgressionLocks() {
+                const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
+                if (!tutorialDone) {
+                    const lockIds = ['to-squad-btn', 'to-storage-btn', 'to-chronicle-btn', 'to-clans-btn'];
+                    lockIds.forEach(id => {
+                        const btn = document.getElementById(id);
+                        if (btn) btn.classList.add('progression-locked');
+                    });
+                }
+            }
+
             function injectScript(index) {
                 if (index >= scripts.length) {
                     if (typeof initDispatcherModule === 'function') initDispatcherModule();
+                    applyProgressionLocks();
                     startVersionGuard();
                     setTimeout(startVersionGuard, 100);
                     document.body.addEventListener('click', function initAudioOnFirstTouch() {
@@ -98,13 +110,13 @@
             </div>
             <span class="subtitle" style="font-size: 11px; margin-bottom: 10px; padding-bottom: 4px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
             
-            <!-- Служебный верхний ряд управления (поднят из самого низа) -->
+            <!-- Служебный верхний ряд управления -->
             <div style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 14px; box-sizing: border-box;">
                 <button id="to-settings-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">⚙️ Настройки</button>
                 <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
             </div>
 
-            <!-- Обновленная сетка кнопок по твоей новой схеме расположения -->
+            <!-- Игровая сетка кнопок-эмодзи -->
             <div class="menu-emoji-grid">
                 <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
                 <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
@@ -114,7 +126,7 @@
                 <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
             </div>
 
-            <div id="game-version" class="version-footer">v4.9.27-BETA</div>
+            <div id="game-version" class="version-footer">v4.9.28-BETA</div>
         </div>
         <div id="dynamic-town-screens"></div>
         <div id="squad-screen" class="game-window" style="display: none;"></div>
