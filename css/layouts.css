@@ -1,5 +1,5 @@
 /* ==========================================================================
-   2. СТРУКТУРА ОКОН, ВЫРАВНИВАНИЕ И ЖИВОЙ ФОН (МОДЕРНИЗИРОВАН - v4.9.20-BETA)
+   2. СТРУКТУРА ОКОН, ВЫРАВНИВАНИЕ И ЖИВОЙ ФОН (ОБНОВЛЕН - v4.9.28-BETA)
    ========================================================================== */
 
 #bg-canvas {
@@ -62,7 +62,7 @@
     margin: 2px 0;
 }
 
-/* УЛЬТРА-РАЗМЕР ЗНАЧКОВ (74PX) — МАКСИМАЛЬНОЕ ЗАПОЛНЕНИЕ ПРОСТРАНСТВА КНОПКИ */
+/* УЛЬТРА-РАЗМЕР ЗНАЧКОВ (74PX) */
 .emoji-grid-btn {
     aspect-ratio: 1 / 1;
     font-size: 74px;
@@ -99,7 +99,17 @@
     transform: scale(0.96);
 }
 
-/* КАРТОЧКИ ХУДОЖЕСТВЕННЫХ ГЛАВ ДЛЯ РЕЖИМА ПРИКЛЮЧЕНИЙ */
+/* СТИЛИЗАЦИЯ ЗАБЛОКИРОВАННЫХ КНОПОК ДО ПЕРВОГО БОЯ */
+.emoji-grid-btn.progression-locked {
+    opacity: 0.18 !important;
+    filter: grayscale(1) contrast(0.8) !important;
+    cursor: not-allowed !important;
+    border-color: #2b221a !important;
+    box-shadow: none !important;
+    pointer-events: none !important; /* Полное физическое отключение кликов */
+}
+
+/* КАРТОЧКИ ХУДОЖЕСТВЕННЫХ ГЛАВ ДЛЯ ПРИКЛЮЧЕНИЙ */
 .chapter-gothic-card {
     background: linear-gradient(to bottom, #241d19, #0d0a08);
     border: 1px solid #4a3f2c;
