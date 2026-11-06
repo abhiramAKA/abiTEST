@@ -3,93 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Жёсткие мета-теги блокировки кэша для серверов -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v4.9.25-BETA";
+            // ==========================================================================
+            // ЕДИНСТВЕННАЯ ТОЧКА ПРАВДЫ: Меняй версию ТОЛЬКО здесь.
+            // ==========================================================================
+            window.GAME_VERSION = "v4.9.27-BETA";
             
-            if (navigator.serviceWorker) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for (let registration of registrations) {
-                        registration.unregister();
-                    }
-                });
-            }
-
-            if (window.caches) {
-                caches.keys().then(function(names) {
-                    for (let name of names) caches.delete(name);
-                });
-            }
-            
-            if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
-                const savedGold = localStorage.getItem('khamach_gold') || '0';
-                const savedTier = localStorage.getItem('khamach_max_tier') || '1';
-                
-                const legacyKeys = ['GAME_TEXTS', 'town_dom_backup', 'main_menu_html_v2', 'khamach_menu_backup', 'town_dom_html', 'town_dom_backup_html', 'khamach_html_backup', 'cached_menu_dom'];
-                legacyKeys.forEach(k => localStorage.removeItem(k));
-                
-                localStorage.setItem('khamach_gold', savedGold);
-                localStorage.setItem('khamach_max_tier', savedTier);
+            // АВТО-ПЕРЕЗАГРУЗКА: Если браузер подсунул старый index.html, этот скрипт 
+            // обнаружит несовпадение с localStorage и мгновенно обновит страницу с сервера!
+            if (localStorage.getItem('khamach_sys_version') && localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
+                localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
+                if (window.caches) { caches.keys().then(names => names.forEach(n => caches.delete(n))); }
+                console.warn("КХАМАЧ: Обнаружен старый кэш! Принудительный сброс...");
+                window.location.reload(true);
+                return;
+            } else {
                 localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
             }
 
+            if (navigator.serviceWorker) {
+                navigator.serviceWorker.getRegistrations().then(regs => {
+                    for (let r of regs) r.unregister();
+                });
+            }
+
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
-            
             const link = document.createElement('link');
             link.rel = 'stylesheet';
             link.href = 'styles.css?t=' + enforceBuster;
             document.head.appendChild(link);
 
             const scripts = [
-                'game.js',
-                'background.js',
-                'audio-engine.js',
-                'match3-fx.js',
-                'match3-input.js',
-                'match3.js',
-                'match3-logic.js',
-                'match3-data.js',
-                'match3-progression.js',
-                'town-engine.js',
-                'town-chronicle.js',
-                'town-missions-pool.js',
-                'town-missions-engine.js',
-                'town-dom.js',
-                'squad-dom.js',
-                'combat-dom.js',
-                'town-missions-dom.js',
-                'squad-engine-logic.js',
-                'squad-engine.js',
-                'combat.js',
-                'game-listeners.js'
+                'game.js', 'background.js', 'audio-engine.js', 'match3-fx.js',
+                'match3-input.js', 'match3.js', 'match3-logic.js', 'match3-data.js',
+                'match3-progression.js', 'town-engine.js', 'town-chronicle.js',
+                'town-missions-pool.js', 'town-missions-engine.js', 'town-dom.js',
+                'squad-dom.js', 'combat-dom.js', 'town-missions-dom.js',
+                'squad-engine-logic.js', 'squad-engine.js', 'combat.js', 'game-listeners.js'
             ];
 
             function startVersionGuard() {
                 const target = document.getElementById('game-version');
                 if (!target) return;
                 target.innerText = window.GAME_VERSION;
-                const observer = new MutationObserver(function(mutations) {
-                    mutations.forEach(function(mutation) {
-                        if (target.innerText !== window.GAME_VERSION) {
-                            observer.disconnect();
-                            target.innerText = window.GAME_VERSION;
-                            observer.observe(target, { characterData: true, childList: true });
-                        }
-                    });
+                const observer = new MutationObserver(() => {
+                    if (target.innerText !== window.GAME_VERSION) {
+                        observer.disconnect();
+                        target.innerText = window.GAME_VERSION;
+                        observer.observe(target, { characterData: true, childList: true });
+                    }
                 });
                 observer.observe(target, { characterData: true, childList: true });
             }
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули " + window.GAME_VERSION + " успешно загружены.");
-                    if (typeof initDispatcherModule === 'function') {
-                        initDispatcherModule();
-                    }
+                    if (typeof initDispatcherModule === 'function') initDispatcherModule();
                     startVersionGuard();
                     setTimeout(startVersionGuard, 100);
                     document.body.addEventListener('click', function initAudioOnFirstTouch() {
@@ -106,52 +81,44 @@
                 document.head.appendChild(script);
             }
 
-            document.addEventListener("DOMContentLoaded", function() {
-                injectScript(0);
-            });
+            document.addEventListener("DOMContentLoaded", () => injectScript(0));
         })();
     </script>
 </head>
 <body>
     <canvas id="bg-canvas"></canvas>
-
     <div id="game-interface">
-        
         <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
         <div id="main-menu" class="game-window" style="display: flex;">
-            
-            <!-- Интегрированная компактная шапка ресурсов -->
+            <!-- Компактная шапка ресурсов -->
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px; padding: 0 4px; background: rgba(20, 15, 12, 0.5); border-bottom: 1px double #544432; box-sizing: border-box;">
                 <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0</span>
                 <h1 style="font-size: 24px; margin: 0; letter-spacing: 2px; padding: 4px 0;">КХАМАЧ</h1>
                 <span id="team-fatigue-display" style="color: #ffb3ba; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffb3ba'">🥱 0%</span>
             </div>
+            <span class="subtitle" style="font-size: 11px; margin-bottom: 10px; padding-bottom: 4px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
             
-            <span class="subtitle" style="font-size: 11px; margin-bottom: 14px; padding-bottom: 6px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
-            
-            <!-- Сетка крупных кнопок: Эмодзи зафиксированы строго по твоей схеме, а ID перелинкованы для идеальной работы кода -->
+            <!-- Служебный верхний ряд управления (поднят из самого низа) -->
+            <div style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 14px; box-sizing: border-box;">
+                <button id="to-settings-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">⚙️ Настройки</button>
+                <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
+            </div>
+
+            <!-- Обновленная сетка кнопок по твоей новой схеме расположения -->
             <div class="menu-emoji-grid">
                 <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
+                <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
                 <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
                 <button id="to-storage-btn" class="emoji-grid-btn">🏋️</button>
-                <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
                 <button id="to-chronicle-btn" class="emoji-grid-btn">📜</button>
                 <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
             </div>
 
-            <!-- Служебный нижний ряд управления -->
-            <div style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-top: 14px; box-sizing: border-box;">
-                <button id="to-settings-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">⚙️ Настройки</button>
-                <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
-            </div>
-            
-            <div id="game-version" class="version-footer">v4.9.25-BETA</div>
+            <div id="game-version" class="version-footer">v4.9.27-BETA</div>
         </div>
-
         <div id="dynamic-town-screens"></div>
         <div id="squad-screen" class="game-window" style="display: none;"></div>
         <div id="dynamic-combat-screen"></div>
-
     </div>
 </body>
 </html>
