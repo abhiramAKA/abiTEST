@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v4.9.2-BETA)
+   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v4.9.19-BETA)
    ========================================================================== */
 
 function injectTownScreensDOM() {
@@ -8,11 +8,12 @@ function injectTownScreensDOM() {
 
     container.innerHTML = `
         <div id="dragon-select-screen" class="game-window" style="display: none;">
-            <h2>ДОСКА ОБЪЯВЛЕНИЙ ОХОТЫ</h2>
-            <span class="subtitle">24 Бестиария Горнила</span>
-            <p>Выберите доступного дракона. Следующий уровень угрозы откроется только после полной ликвидации текущей цели.</p>
-            <div id="dragon-levels-grid" style="max-height: 40vh; overflow-y: auto; padding: 4px; margin-bottom: 15px; border: 1px solid #4a3e31; background: rgba(0,0,0,0.4); border-radius: 4px;"></div>
-            <button id="from-select-to-menu-btn" class="menu-btn back-btn" style="margin-top: 0; width: 100%;">Назад в меню</button>
+            <h2 style="font-size: 20px; margin-bottom: 4px;">РЕЖИМ ПРИКЛЮЧЕНИЯ</h2>
+            <span class="subtitle" style="margin-bottom: 12px; padding-bottom: 4px;">Пространства и Проклятые Главы</span>
+            
+            <!-- Контейнер для навигации по главам и списка боссов -->
+            <div id="dragon-levels-grid" style="max-height: 52vh; overflow-y: auto; padding: 4px; margin-bottom: 12px; border: 1px solid #4a3e31; background: rgba(0,0,0,0.5); border-radius: 4px;"></div>
+            <button id="from-select-to-menu-btn" class="menu-btn back-btn" style="margin-top: 0; width: 100%; padding: 12px;">Назад в меню</button>
         </div>
 
         <div id="info-screen" class="game-window" style="display: none;">
@@ -97,4 +98,3 @@ function injectTownScreensDOM() {
         </div>
     `;
 }
-
