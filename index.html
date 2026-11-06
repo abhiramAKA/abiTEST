@@ -9,12 +9,8 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            // ==========================================================================
-            // ЕДИНСТВЕННАЯ ТОЧКА ПРАВДЫ: Меняй версию ТОЛЬКО здесь, и она обновится везде!
-            // ==========================================================================
-            window.GAME_VERSION = "v4.9.19-BETA";
+            window.GAME_VERSION = "v4.9.20-BETA";
             
-            // Жесткое принудительное удаление старых кэшей сервис-воркеров
             if (navigator.serviceWorker) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
                     for (let registration of registrations) {
@@ -29,7 +25,6 @@
                 });
             }
             
-            // Синхронизация версии в локальном хранилище
             if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
                 const savedGold = localStorage.getItem('khamach_gold') || '0';
                 const savedTier = localStorage.getItem('khamach_max_tier') || '1';
@@ -42,7 +37,6 @@
                 localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
             }
 
-            // Наш неуязвимый Паттерн Каскадного Сброса Кэша
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
             
             const link = document.createElement('link');
@@ -73,13 +67,10 @@
                 'game-listeners.js'
             ];
 
-            // Включаем неуязвимого наблюдателя за футером
             function startVersionGuard() {
                 const target = document.getElementById('game-version');
                 if (!target) return;
-                
                 target.innerText = window.GAME_VERSION;
-                
                 const observer = new MutationObserver(function(mutations) {
                     mutations.forEach(function(mutation) {
                         if (target.innerText !== window.GAME_VERSION) {
@@ -95,16 +86,11 @@
             function injectScript(index) {
                 if (index >= scripts.length) {
                     console.log("КХАМАЧ: Модули " + window.GAME_VERSION + " успешно загружены.");
-
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
-                    
-                    // Запускаем защиту версии сразу после загрузки всех модулей
                     startVersionGuard();
                     setTimeout(startVersionGuard, 100);
-                    setTimeout(startVersionGuard, 500);
-
                     document.body.addEventListener('click', function initAudioOnFirstTouch() {
                         if (typeof initAudioContext === 'function') initAudioContext();
                         if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
@@ -112,7 +98,6 @@
                     }, { once: true });
                     return;
                 }
-                
                 const script = document.createElement('script');
                 script.src = scripts[index] + '?v=' + window.GAME_VERSION + '&t=' + enforceBuster;
                 script.async = false; 
@@ -120,7 +105,6 @@
                 document.head.appendChild(script);
             }
 
-            // Запуск инжектора
             document.addEventListener("DOMContentLoaded", function() {
                 injectScript(0);
             });
@@ -135,7 +119,7 @@
         <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
         <div id="main-menu" class="game-window" style="display: flex;">
             
-            <!-- Интегрированная компактная шапка -->
+            <!-- Интегрированная компактная шапка ресурсов -->
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px; padding: 0 4px; background: rgba(20, 15, 12, 0.5); border-bottom: 1px double #544432; box-sizing: border-box;">
                 <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0</span>
                 <h1 style="font-size: 24px; margin: 0; letter-spacing: 2px; padding: 4px 0;">КХАМАЧ</h1>
@@ -144,9 +128,9 @@
             
             <span class="subtitle" style="font-size: 11px; margin-bottom: 14px; padding-bottom: 6px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
             
-            <!-- Сетка крупных квадратных кнопок-эмодзи -->
+            <!-- Сетка ультра-крупных кнопок. Вместо скрещенных мечей теперь Вулкан 🌋 -->
             <div class="menu-emoji-grid">
-                <button id="to-combat-btn" class="emoji-grid-btn">⚔️</button>
+                <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
                 <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
                 <button id="to-storage-btn" class="emoji-grid-btn">👥</button>
                 <button id="to-missions-btn" class="emoji-grid-btn">📜</button>
@@ -160,8 +144,7 @@
                 <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
             </div>
             
-            <!-- Защищенный контейнер версии -->
-            <div id="game-version" class="version-footer">v4.9.19-BETA</div>
+            <div id="game-version" class="version-footer">v4.9.20-BETA</div>
         </div>
 
         <div id="dynamic-town-screens"></div>
