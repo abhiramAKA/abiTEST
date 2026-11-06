@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v4.9.17-BETA";
+            window.GAME_VERSION = "v4.9.18-BETA";
             
             if (navigator.serviceWorker) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -82,7 +82,7 @@
                 }
                 
                 const script = document.createElement('script');
-                script.src = scripts[index] + '?t=' + enforceBuster;
+                script.src = scripts[index] + '?v=' + window.GAME_VERSION + '&t=' + enforceBuster;
                 script.async = false; 
                 script.onload = function() { injectScript(index + 1); };
                 document.head.appendChild(script);
@@ -99,36 +99,33 @@
         
         <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
         <div id="main-menu" class="game-window" style="display: flex;">
-            <h1>КХАМАЧ</h1>
-            <span class="subtitle">Легенды Абхирамбурга</span>
             
-            <!-- Ресурсы и усталость -->
-            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; font-size: 16px; font-weight: bold; background: rgba(30, 20, 15, 0.4); padding: 6px 14px; border: 1px double #544432; border-radius: 4px; border-left: none; border-right: none;">
-                <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0</span>
-                <span style="color: #4a3e31; font-weight: normal;">|</span>
-                <span id="team-fatigue-display" style="color: #ffb3ba; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffb3ba'">🥱 0%</span>
+            <!-- Интегрированная компактная шапка: ресурсы слева и справа от названия -->
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px; padding: 0 4px; background: rgba(20, 15, 12, 0.5); border-bottom: 1px double #544432; box-sizing: border-box;">
+                <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0</span>
+                <h1 style="font-size: 24px; margin: 0; letter-spacing: 2px; padding: 4px 0;">КХАМАЧ</h1>
+                <span id="team-fatigue-display" style="color: #ffb3ba; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffb3ba'">🥱 0%</span>
             </div>
-
-            <!-- Текстовый индикатор выбранного режима -->
-            <div id="menu-mode-indicator" style="font-size: 13px; font-weight: bold; color: #e6c280; letter-spacing: 1px; min-height: 18px; margin-bottom: 10px; text-transform: uppercase; text-shadow: 1px 1px 2px #000;">Выберите зал управления</div>
             
-            <!-- Новая сетка крупных квадратных кнопок-эмодзи (2 в ряд) -->
+            <span class="subtitle" style="font-size: 11px; margin-bottom: 14px; padding-bottom: 6px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
+            
+            <!-- Новая сетка крупных квадратных кнопок-эмодзи (2 в ряд, текстовый индикатор полностью удален) -->
             <div class="menu-emoji-grid">
-                <button id="to-combat-btn" class="emoji-grid-btn" onmouseover="document.getElementById('menu-mode-indicator').innerText='⚔️ В БОЙ'" onmouseout="document.getElementById('menu-mode-indicator').innerText='Выберите зал управления'">⚔️</button>
-                <button id="to-squad-btn" class="emoji-grid-btn" onmouseover="document.getElementById('menu-mode-indicator').innerText='🏙️ Цитадель'" onmouseout="document.getElementById('menu-mode-indicator').innerText='Выберите зал управления'">🏙️</button>
-                <button id="to-storage-btn" class="emoji-grid-btn" onmouseover="document.getElementById('menu-mode-indicator').innerText='👥 Военный Лагерь'" onmouseout="document.getElementById('menu-mode-indicator').innerText='Выберите зал управления'">👥</button>
-                <button id="to-missions-btn" class="emoji-grid-btn" onmouseover="document.getElementById('menu-mode-indicator').innerText='📜 Поручения'" onmouseout="document.getElementById('menu-mode-indicator').innerText='Выберите зал управления'">📜</button>
-                <button id="to-chronicle-btn" class="emoji-grid-btn" onmouseover="document.getElementById('menu-mode-indicator').innerText='📖 Летопись'" onmouseout="document.getElementById('menu-mode-indicator').innerText='Выберите зал управления'">📖</button>
-                <button id="to-clans-btn" class="emoji-grid-btn" onmouseover="document.getElementById('menu-mode-indicator').innerText='🛡️ Кланы'" onmouseout="document.getElementById('menu-mode-indicator').innerText='Выберите зал управления'">🛡️</button>
+                <button id="to-combat-btn" class="emoji-grid-btn">⚔️</button>
+                <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
+                <button id="to-storage-btn" class="emoji-grid-btn">👥</button>
+                <button id="to-missions-btn" class="emoji-grid-btn">📜</button>
+                <button id="to-chronicle-btn" class="emoji-grid-btn">📖</button>
+                <button id="to-clans-btn" class="emoji-grid-btn">🛡️</button>
             </div>
 
             <!-- Служебный нижний ряд управления -->
-            <div style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-top: 15px; box-sizing: border-box;">
-                <button id="to-settings-btn" class="info-btn" style="flex: 1; height: 40px; font-size: 16px;" onmouseover="document.getElementById('menu-mode-indicator').innerText='⚙️ Настройки звука'" onmouseout="document.getElementById('menu-mode-indicator').innerText='Выберите зал управления'">⚙️ Настройки</button>
-                <button id="info-btn" class="info-btn" style="flex: 1; height: 40px; font-size: 16px;" onmouseover="document.getElementById('menu-mode-indicator').innerText='❓ Справка об игре'" onmouseout="document.getElementById('menu-mode-indicator').innerText='Выберите зал управления'">❓ Справка</button>
+            <div style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-top: 14px; box-sizing: border-box;">
+                <button id="to-settings-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">⚙️ Настройки</button>
+                <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
             </div>
             
-            <div id="game-version" class="version-footer">v4.9.17-BETA</div>
+            <div id="game-version" class="version-footer">v4.9.18-BETA</div>
         </div>
 
         <div id="dynamic-town-screens"></div>
