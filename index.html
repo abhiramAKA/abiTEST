@@ -11,9 +11,9 @@
     <script>
         (function() {
             // ==========================================================================
-            // КОРЕНЬ СИСТЕМЫ: Глобальный выжигатель старого кэша v5.0.0-ALPHA
+            // КОРЕНЬ СИСТЕМЫ: Единственная точка правды для версии v5.0.1-ALPHA
             // ==========================================================================
-            window.KHAMACH_CRITICAL_VERSION = "v5.0.0-ALPHA";
+            window.KHAMACH_CRITICAL_VERSION = "v5.0.1-ALPHA";
             window.GAME_VERSION = window.KHAMACH_CRITICAL_VERSION;
             
             // Если браузер зацепил старый localStorage или версию — тотальный снос под корень
@@ -121,7 +121,7 @@
             </div>
             <span class="subtitle" style="font-size: 11px; margin-bottom: 10px; padding-bottom: 4px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
             
-            <!-- Полностью изолированный верхний ряд управления, защищенный от ложных кликов -->
+            <!-- Полностью изолированный верхний ряд управления -->
             <div id="menu-system-top-row" style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 14px; box-sizing: border-box; position: relative; z-index: 10;">
                 <button id="to-settings-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">⚙️ Настройки</button>
                 <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
@@ -137,8 +137,8 @@
                 <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
             </div>
 
-            <!-- Жестко вшитый неуязвимый футер -->
-            <div id="game-version" class="version-footer">v5.0.0-ALPHA</div>
+            <!-- Жестко вшитый неуязвимый футер версии -->
+            <div id="game-version" class="version-footer">v5.0.1-ALPHA</div>
         </div>
         <div id="dynamic-town-screens"></div>
         <div id="squad-screen" class="game-window" style="display: none;"></div>
