@@ -24,8 +24,8 @@
 }
 
 .game-window {
-    width: 90vw;
-    max-width: 460px;
+    width: 95vw;
+    max-width: 420px;
     background: radial-gradient(circle, #1a1512 0%, #0d0a08 100%);
     border: 4px solid #1a1613;
     outline: 2px solid #8a7350;
@@ -35,7 +35,7 @@
         inset 0 0 30px rgba(0, 0, 0, 0.8),
         0 0 20px rgba(138, 115, 80, 0.2);
     border-radius: 2px;
-    padding: 30px 25px;
+    padding: 24px 20px;
     text-align: center;
     position: relative;
     box-sizing: border-box;
@@ -52,9 +52,53 @@
     align-items: center;
 }
 
-/* ⚔️ КНОПКА ЗНАКА ВОПРОСА */
+/* СЕТКА КРУПНЫХ КВАДРАТНЫХ КНОПОК-ЭМОДЗИ (2 В РЯД) */
+.menu-emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 4px 0;
+}
+
+/* КРУПНАЯ КВАДРАТНАЯ ГОТИЧЕСКАЯ КНОПКА */
+.emoji-grid-btn {
+    aspect-ratio: 1 / 1;
+    font-size: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #cdb38c;
+    background: linear-gradient(to bottom, #2d2621 0%, #171311 100%);
+    border: 1px solid #544432;
+    box-shadow: 
+        inset 0 1px 3px rgba(255,255,255,0.1),
+        0 5px 10px rgba(0,0,0,0.6);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.emoji-grid-btn:hover {
+    color: #fff;
+    background: linear-gradient(to bottom, #3d332c 0%, #211b18 100%);
+    border-color: #cbb281;
+    box-shadow: 
+        0 0 20px rgba(203, 178, 129, 0.6),
+        inset 0 0 8px rgba(203, 178, 129, 0.4);
+    transform: scale(1.03);
+    font-size: 46px;
+}
+
+.emoji-grid-btn:active {
+    transform: scale(0.96);
+}
+
+/* ⚔️ КНОПКА ЗНАКА ВОПРОСА И НАСТРОЕК */
 .info-btn {
-    width: 50px;
+    width: auto;
     height: 51px;
     font-size: 16px;
     font-weight: bold;
@@ -68,6 +112,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 4px;
 }
 
 .info-btn:hover {
@@ -78,7 +123,7 @@
 }
 
 .info-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.97);
 }
 
 .version-footer {
@@ -92,7 +137,7 @@
     pointer-events: none;
 }
 
-/* ИСПРАВЛЕНО: ЧИСТЫЙ ОВЕРЛЕЙ, БЕЗ ФОРСИРОВАННОГО ОТОБРАЖЕНИЯ ПРИ СТАРТЕ */
+/* ОВЕРЛЕИ И ПОП-АПЫ */
 .combat-help-popup {
     position: fixed;
     top: 0;
@@ -114,7 +159,6 @@
     box-sizing: border-box;
 }
 
-/* Красивая готическая карточка внутри полноэкранного оверлея */
 .combat-help-content {
     width: 90vw;
     max-width: 440px;
@@ -130,7 +174,6 @@
     overflow-y: auto;
 }
 
-/* АДАПТИВНЫЙ СТИЛЬ ДЛЯ СМАРТФОНОВ */
 @media (max-width: 480px) {
     .combat-help-popup {
         padding: 12px;
