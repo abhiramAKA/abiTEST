@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И ОТРИСОВКИ РЕЖИМА ПРИКЛЮЧЕНИЙ (v5.0.2-ALPHA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И ОТРИСОВКИ РЕЖИМА ПРИКЛЮЧЕНИЙ (v5.1.0-ALPHA)
    ========================================================================== */
 
 window.currentActiveChapterView = null;
@@ -40,7 +40,7 @@ function renderDragonSelectionGrid() {
             const card = document.createElement('div');
             card.className = "chapter-gothic-card";
             
-            // ЖЕЛЕЗНОЕ ИСПРАВЛЕНИЕ: Добавлен строгий индекс [0] для чтения тира первого босса главы!
+            // Абсолютно безопасный расчет блокировки по первому боссу через нулевой индекс массива
             let isChapterLocked = true;
             if (ch.bosses && ch.bosses.length > 0) {
                 const firstBossTier = ch.bosses[0].tier;
