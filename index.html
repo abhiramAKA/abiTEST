@@ -3,38 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Абсолютная блокировка кэширования на уровне сетевых шлюзов -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <!-- Тотальное уничтожение сетевого кэширования провайдеров -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
             // ==========================================================================
-            // АБСОЛЮТНАЯ ТОЧКА ПРАВДЫ: Версия v4.9.28-BETA зафиксирована железно!
+            // КОРЕНЬ СИСТЕМЫ: Глобальный выжигатель старого кэша v5.0.0-ALPHA
             // ==========================================================================
-            window.GAME_VERSION = "v4.9.28-BETA";
+            window.KHAMACH_CRITICAL_VERSION = "v5.0.0-ALPHA";
+            window.GAME_VERSION = window.KHAMACH_CRITICAL_VERSION;
             
-            // Если в localStorage записана любая старая версия — выжигаем кэш и ребутаем сервер
-            if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
-                const savedGold = localStorage.getItem('khamach_gold') || '0';
-                const savedTier = localStorage.getItem('khamach_max_tier') || '1';
-                const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') || 'false';
+            // Если браузер зацепил старый localStorage или версию — тотальный снос под корень
+            if (localStorage.getItem('khamach_sys_version') !== window.KHAMACH_CRITICAL_VERSION) {
+                const gold = localStorage.getItem('khamach_gold') || '0';
+                const tier = localStorage.getItem('khamach_max_tier') || '1';
+                const tut = localStorage.getItem('khamach_combat_tutorial_done') || 'false';
                 
-                // Полная очистка старых забагованных ключей
                 localStorage.clear();
                 
-                // Возвращаем только чистый прогресс игрока
-                localStorage.setItem('khamach_gold', savedGold);
-                localStorage.setItem('khamach_max_tier', savedTier);
-                localStorage.setItem('khamach_combat_tutorial_done', tutorialDone);
-                localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
+                localStorage.setItem('khamach_gold', gold);
+                localStorage.setItem('khamach_max_tier', tier);
+                localStorage.setItem('khamach_combat_tutorial_done', tut);
+                localStorage.setItem('khamach_sys_version', window.KHAMACH_CRITICAL_VERSION);
                 
                 if (window.caches) {
                     caches.keys().then(names => names.forEach(n => caches.delete(n)));
                 }
                 
-                console.warn("КХАМАЧ: Выжигание старого кэша! Переход на v4.9.28-BETA...");
+                console.warn("КХАМАЧ: Обнаружена старая версия! Полная зачистка и ребут...");
                 window.location.reload(true);
                 return;
             }
@@ -45,10 +44,10 @@
                 });
             }
 
-            const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
+            const enforceBuster = Date.now() + '_CORE_' + Math.floor(Math.random() * 999999);
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'styles.css?v=' + window.GAME_VERSION + '&t=' + enforceBuster;
+            link.href = 'styles.css?v=' + window.KHAMACH_CRITICAL_VERSION + '&t=' + enforceBuster;
             document.head.appendChild(link);
 
             const scripts = [
@@ -63,11 +62,11 @@
             function startVersionGuard() {
                 const target = document.getElementById('game-version');
                 if (!target) return;
-                target.innerText = window.GAME_VERSION;
+                target.innerText = window.KHAMACH_CRITICAL_VERSION;
                 const observer = new MutationObserver(() => {
-                    if (target.innerText !== window.GAME_VERSION) {
+                    if (target.innerText !== window.KHAMACH_CRITICAL_VERSION) {
                         observer.disconnect();
-                        target.innerText = window.GAME_VERSION;
+                        target.innerText = window.KHAMACH_CRITICAL_VERSION;
                         observer.observe(target, { characterData: true, childList: true });
                     }
                 });
@@ -90,7 +89,7 @@
                     if (typeof initDispatcherModule === 'function') initDispatcherModule();
                     applyProgressionLocks();
                     startVersionGuard();
-                    setTimeout(startVersionGuard, 100);
+                    setTimeout(startVersionGuard, 150);
                     document.body.addEventListener('click', function initAudioOnFirstTouch() {
                         if (typeof initAudioContext === 'function') initAudioContext();
                         if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
@@ -99,7 +98,7 @@
                     return;
                 }
                 const script = document.createElement('script');
-                script.src = scripts[index] + '?v=' + window.GAME_VERSION + '&t=' + enforceBuster;
+                script.src = scripts[index] + '?v=' + window.KHAMACH_CRITICAL_VERSION + '&t=' + enforceBuster;
                 script.async = false; 
                 script.onload = function() { injectScript(index + 1); };
                 document.head.appendChild(script);
@@ -122,13 +121,13 @@
             </div>
             <span class="subtitle" style="font-size: 11px; margin-bottom: 10px; padding-bottom: 4px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
             
-            <!-- Служебный верхний ряд управления -->
-            <div style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 14px; box-sizing: border-box;">
+            <!-- Полностью изолированный верхний ряд управления, защищенный от ложных кликов -->
+            <div id="menu-system-top-row" style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 14px; box-sizing: border-box; position: relative; z-index: 10;">
                 <button id="to-settings-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">⚙️ Настройки</button>
                 <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
             </div>
 
-            <!-- Игровая сетка кнопок-эмодзи -->
+            <!-- Игровая сетка крупных кнопок-эмодзи -->
             <div class="menu-emoji-grid">
                 <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
                 <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
@@ -138,8 +137,8 @@
                 <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
             </div>
 
-            <!-- Жестко зафиксированный защищенный футер версии -->
-            <div id="game-version" class="version-footer">v4.9.28-BETA</div>
+            <!-- Жестко вшитый неуязвимый футер -->
+            <div id="game-version" class="version-footer">v5.0.0-ALPHA</div>
         </div>
         <div id="dynamic-town-screens"></div>
         <div id="squad-screen" class="game-window" style="display: none;"></div>
