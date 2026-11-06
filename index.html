@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Жёсткие мета-теги блокировки кэша для серверов -->
+    <!-- Абсолютная блокировка кэширования на уровне сетевых шлюзов -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -11,19 +11,32 @@
     <script>
         (function() {
             // ==========================================================================
-            // ЕДИНСТВЕННАЯ ТОЧКА ПРАВДЫ: Меняй версию ТОЛЬКО здесь.
+            // АБСОЛЮТНАЯ ТОЧКА ПРАВДЫ: Версия v4.9.28-BETA зафиксирована железно!
             // ==========================================================================
             window.GAME_VERSION = "v4.9.28-BETA";
             
-            // АВТО-ПЕРЕЗАГРУЗКА: Защита от старого дискового кэша браузера
-            if (localStorage.getItem('khamach_sys_version') && localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
+            // Если в localStorage записана любая старая версия — выжигаем кэш и ребутаем сервер
+            if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
+                const savedGold = localStorage.getItem('khamach_gold') || '0';
+                const savedTier = localStorage.getItem('khamach_max_tier') || '1';
+                const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') || 'false';
+                
+                // Полная очистка старых забагованных ключей
+                localStorage.clear();
+                
+                // Возвращаем только чистый прогресс игрока
+                localStorage.setItem('khamach_gold', savedGold);
+                localStorage.setItem('khamach_max_tier', savedTier);
+                localStorage.setItem('khamach_combat_tutorial_done', tutorialDone);
                 localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
-                if (window.caches) { caches.keys().then(names => names.forEach(n => caches.delete(n))); }
-                console.warn("КХАМАЧ: Обнаружен старый кэш! Принудительный сброс...");
+                
+                if (window.caches) {
+                    caches.keys().then(names => names.forEach(n => caches.delete(n)));
+                }
+                
+                console.warn("КХАМАЧ: Выжигание старого кэша! Переход на v4.9.28-BETA...");
                 window.location.reload(true);
                 return;
-            } else {
-                localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
             }
 
             if (navigator.serviceWorker) {
@@ -35,7 +48,7 @@
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'styles.css?t=' + enforceBuster;
+            link.href = 'styles.css?v=' + window.GAME_VERSION + '&t=' + enforceBuster;
             document.head.appendChild(link);
 
             const scripts = [
@@ -61,7 +74,6 @@
                 observer.observe(target, { characterData: true, childList: true });
             }
 
-            // Динамическое наложение классов блокировки до первого боя
             function applyProgressionLocks() {
                 const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
                 if (!tutorialDone) {
@@ -126,6 +138,7 @@
                 <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
             </div>
 
+            <!-- Жестко зафиксированный защищенный футер версии -->
             <div id="game-version" class="version-footer">v4.9.28-BETA</div>
         </div>
         <div id="dynamic-town-screens"></div>
