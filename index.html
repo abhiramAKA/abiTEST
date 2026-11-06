@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v4.9.20-BETA";
+            window.GAME_VERSION = "v4.9.23-BETA";
             
             if (navigator.serviceWorker) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -44,6 +44,7 @@
             link.href = 'styles.css?t=' + enforceBuster;
             document.head.appendChild(link);
 
+            // Интегрировано чистое имя match3-data.js строго перед файлом логики приключений
             const scripts = [
                 'game.js',
                 'background.js',
@@ -52,6 +53,7 @@
                 'match3-input.js',
                 'match3.js',
                 'match3-logic.js',
+                'match3-data.js',
                 'match3-progression.js',
                 'town-engine.js',
                 'town-chronicle.js',
@@ -128,14 +130,14 @@
             
             <span class="subtitle" style="font-size: 11px; margin-bottom: 14px; padding-bottom: 6px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
             
-            <!-- Сетка ультра-крупных кнопок. Вместо скрещенных мечей теперь Вулкан 🌋 -->
+            <!-- Сетка крупных кнопок. На главной кнопке теперь Вулкан 🌋 -->
             <div class="menu-emoji-grid">
                 <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
                 <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
-                <button id="to-storage-btn" class="emoji-grid-btn">🏋️</button>
+                <button id="to-storage-btn" class="emoji-grid-btn">👥</button>
                 <button id="to-missions-btn" class="emoji-grid-btn">📜</button>
                 <button id="to-chronicle-btn" class="emoji-grid-btn">📖</button>
-                <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
+                <button id="to-clans-btn" class="emoji-grid-btn">🛡️</button>
             </div>
 
             <!-- Служебный нижний ряд управления -->
@@ -144,7 +146,7 @@
                 <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
             </div>
             
-            <div id="game-version" class="version-footer">v4.9.20-BETA</div>
+            <div id="game-version" class="version-footer">v4.9.23-BETA</div>
         </div>
 
         <div id="dynamic-town-screens"></div>
