@@ -9,8 +9,12 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v4.9.18-BETA";
+            // ==========================================================================
+            // ЕДИНСТВЕННАЯ ТОЧКА ПРАВДЫ: Меняй версию ТОЛЬКО здесь, и она обновится везде!
+            // ==========================================================================
+            window.GAME_VERSION = "v4.9.19-BETA";
             
+            // Жесткое принудительное удаление старых кэшей сервис-воркеров
             if (navigator.serviceWorker) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
                     for (let registration of registrations) {
@@ -25,6 +29,7 @@
                 });
             }
             
+            // Синхронизация версии в локальном хранилище
             if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
                 const savedGold = localStorage.getItem('khamach_gold') || '0';
                 const savedTier = localStorage.getItem('khamach_max_tier') || '1';
@@ -37,6 +42,7 @@
                 localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
             }
 
+            // Наш неуязвимый Паттерн Каскадного Сброса Кэша
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
             
             const link = document.createElement('link');
@@ -70,9 +76,23 @@
             function injectScript(index) {
                 if (index >= scripts.length) {
                     console.log("КХАМАЧ: Модули " + window.GAME_VERSION + " успешно загружены.");
+                    
+                    // Жесткая принудительная вставка версии в DOM на лету (игнорируем то, что напишут другие JS)
+                    const applyVersionToUI = () => {
+                        const versionElement = document.getElementById('game-version');
+                        if (versionElement) {
+                            versionElement.innerText = window.GAME_VERSION;
+                        }
+                    };
+
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
+                    
+                    // Принудительно ставим версию сразу и через микро-задержку после инициализации ядра
+                    applyVersionToUI();
+                    setTimeout(applyVersionToUI, 50);
+
                     document.body.addEventListener('click', function initAudioOnFirstTouch() {
                         if (typeof initAudioContext === 'function') initAudioContext();
                         if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
@@ -109,7 +129,7 @@
             
             <span class="subtitle" style="font-size: 11px; margin-bottom: 14px; padding-bottom: 6px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
             
-            <!-- Новая сетка крупных квадратных кнопок-эмодзи (2 в ряд, текстовый индикатор полностью удален) -->
+            <!-- Сетка крупных квадратных кнопок-эмодзи -->
             <div class="menu-emoji-grid">
                 <button id="to-combat-btn" class="emoji-grid-btn">⚔️</button>
                 <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
@@ -125,7 +145,8 @@
                 <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
             </div>
             
-            <div id="game-version" class="version-footer">v4.9.18-BETA</div>
+            <!-- Сюда скрипт принудительно запишет актуальную версию -->
+            <div id="game-version" class="version-footer">ЗАГРУЗКА...</div>
         </div>
 
         <div id="dynamic-town-screens"></div>
