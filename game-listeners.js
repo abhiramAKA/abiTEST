@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.17-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.28-BETA)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
@@ -21,7 +21,7 @@ function setupAllGameListeners() {
     document.onclick = null;
     document.body.onclick = null;
 
-    // ПАТТЕРН НАДЁЖНОГО ПЕРЕХВАТА КЛИКОВ ЧЕРЕЗ CLOSEST
+    // ПАТТЕРН НАДЁЖНОГО ИЗОЛИРОВАННОГО ПЕРЕХВАТА КЛИКОВ КНОПОК
     const mainMenuEl = document.getElementById('main-menu');
     if (mainMenuEl) {
         mainMenuEl.onclick = function(e) {
@@ -34,6 +34,12 @@ function setupAllGameListeners() {
             const missionsBtn = e.target.closest('#to-missions-btn');
             const chronicleBtn = e.target.closest('#to-chronicle-btn');
 
+            // Если элемент заблокирован онбордингом — прерываем обработку клика полностью
+            if (e.target.closest('.progression-locked')) {
+                e.preventDefault(); e.stopPropagation();
+                return false;
+            }
+
             if (clansBtn) {
                 e.preventDefault(); e.stopPropagation();
                 if (typeof window.openModeDescription === 'function') {
@@ -42,25 +48,32 @@ function setupAllGameListeners() {
                     openModeDescription('clans');
                 }
             } else if (combatBtn) {
+                e.preventDefault(); e.stopPropagation();
                 showScreen('dragon-select-screen');
             } else if (settingsBtn) {
+                e.preventDefault(); e.stopPropagation();
                 document.getElementById('volume-music-slider').value = (parseFloat(localStorage.getItem('khamach_vol_music') || '0.5') * 100);
                 document.getElementById('volume-fx-slider').value = (parseFloat(localStorage.getItem('khamach_vol_fx') || '0.7') * 100);
                 if (typeof initAudioContext === 'function') initAudioContext();
                 document.getElementById('main-menu').style.display = 'none';
                 document.getElementById('settings-screen').style.display = 'flex';
             } else if (infoBtn) {
+                e.preventDefault(); e.stopPropagation();
                 const textContainer = document.getElementById('info-screen-text');
                 if (textContainer) textContainer.innerHTML = typeof getTownText === 'function' ? getTownText('mainInfo') : '';
                 showScreen('info-screen');
             } else if (squadBtn) {
+                e.preventDefault(); e.stopPropagation();
                 showScreen('squad-screen');
             } else if (storageBtn) {
+                e.preventDefault(); e.stopPropagation();
                 if (typeof updateSquadHeroesSpecScreenDOM === 'function') updateSquadHeroesSpecScreenDOM();
                 showScreen('squad-heroes-spec-screen');
             } else if (missionsBtn) {
+                e.preventDefault(); e.stopPropagation();
                 showScreen('missions-screen');
             } else if (chronicleBtn) {
+                e.preventDefault(); e.stopPropagation();
                 showScreen('chronicle-screen');
             }
         };
@@ -185,6 +198,12 @@ function setupCombatHelpListeners() {
             if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
             const screen = document.getElementById('combat-welcome-tutorial-screen');
             if (screen) screen.style.display = 'none';
+            // После закрытия туториала принудительно снимаем классы блокировок с иконок меню без перезагрузки страницы
+            const lockIds = ['to-squad-btn', 'to-storage-btn', 'to-chronicle-btn', 'to-clans-btn'];
+            lockIds.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.classList.remove('progression-locked');
+            });
         };
     }
 }
