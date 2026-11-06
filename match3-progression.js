@@ -1,6 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ПРОГРЕССИИ И ДОСКИ 24 ТИРОВ (ИСПРАВЛЕН - v4.8.4-BETA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И ОТРИСОВКИ РЕЖИМА ПРИКЛЮЧЕНИЙ (v4.9.23-BETA)
    ========================================================================== */
+
+window.currentActiveChapterView = null;
 
 function getMaxUnlockedTier() {
     const saved = localStorage.getItem('khamach_max_tier');
@@ -9,75 +11,124 @@ function getMaxUnlockedTier() {
 
 function saveCompletedTier(tier) {
     const currentMax = getMaxUnlockedTier();
-    if (tier >= currentMax && tier < 24) {
+    if (tier >= currentMax && tier < 30) {
         localStorage.setItem('khamach_max_tier', tier + 1);
     }
 }
 
 function renderDragonSelectionGrid() {
     const gridContainer = document.getElementById('dragon-levels-grid');
-    if (!gridContainer) return;
+    const backBtn = document.getElementById('from-select-to-menu-btn');
+    if (!gridContainer || !window.ADVENTURE_CHAPTERS) return;
     
     gridContainer.innerHTML = '';
     const maxUnlocked = getMaxUnlockedTier();
     
-    const uniqueFirstDragons = [
-        "Дракон-Падальщик Разлома",
-        "Чешуйчатый Тиран Забытых Гор",
-        "Пещерный Змей Глубоких Склепов",
-        "Древний Левиафан Стонущих Скал"
-    ];
+    // ЭКРАН 1: Выбор художественной главы кампании
+    if (window.currentActiveChapterView === null) {
+        if (backBtn) {
+            backBtn.innerText = "Назад в меню";
+            backBtn.onclick = function() { showScreen('main-menu'); };
+        }
+        
+        const scrTitle = document.getElementById('adventure-screen-title');
+        const scrSubtitle = document.getElementById('adventure-screen-subtitle');
+        if (scrTitle) scrTitle.innerText = "РЕЖИМ ПРИКЛЮЧЕНИЯ";
+        if (scrSubtitle) scrSubtitle.innerText = "Выберите Пространство или Бестиарий";
+
+        window.ADVENTURE_CHAPTERS.forEach((ch, idx) => {
+            const card = document.createElement('div');
+            card.className = "chapter-gothic-card";
+            
+            // Расчет блокировки главы основывается на тире её самого первого босса
+            const firstBossTier = ch.bosses[0].tier;
+            const isChapterLocked = firstBossTier > maxUnlocked;
+            
+            if (isChapterLocked) {
+                card.style.opacity = "0.4";
+                card.style.filter = "grayscale(1)";
+                card.style.cursor = "not-allowed";
+                card.innerHTML = `
+                    <div class="chapter-card-icon">🔒</div>
+                    <div style="flex:1;">
+                        <div style="color:#6a5335; font-weight:bold; font-size:13px;">${ch.title}</div>
+                        <div style="color:#4a3f2c; font-size:10px; margin-top:2px;">Победите предыдущие тиры для открытия доступа.</div>
+                    </div>
+                `;
+            } else {
+                card.innerHTML = `
+                    <div class="chapter-card-icon">${ch.icon}</div>
+                    <div style="flex:1;">
+                        <div style="color:#e6c280; font-weight:bold; font-size:13px;">${ch.title}</div>
+                        <div style="color:#cdb38c; font-size:10px; line-height:1.2; margin-top:2px;">${ch.description}</div>
+                    </div>
+                `;
+                card.onclick = function() {
+                    window.currentActiveChapterView = idx;
+                    renderDragonSelectionGrid();
+                };
+            }
+            gridContainer.appendChild(card);
+        });
+        return;
+    }
     
+    // ЭКРАН 2: Список конкретных боссов внутри выбранной главы
+    const activeChapter = window.ADVENTURE_CHAPTERS[window.currentActiveChapterView];
+    
+    if (backBtn) {
+        backBtn.innerText = "↩️ Назад к списку глав";
+        backBtn.onclick = function() {
+            window.currentActiveChapterView = null;
+            renderDragonSelectionGrid();
+        };
+    }
+    
+    const scrTitle = document.getElementById('adventure-screen-title');
+    const scrSubtitle = document.getElementById('adventure-screen-subtitle');
+    if (scrTitle) scrTitle.innerText = activeChapter.icon + " СИЛЫ ГЛАВЫ";
+    if (scrSubtitle) scrSubtitle.innerText = activeChapter.title;
+
     const elements = ["Огонь", "Лед", "Тьма", "Свет"];
     
-    for (let t = 1; t <= 24; t++) {
-        const isLocked = t > maxUnlocked;
+    activeChapter.bosses.forEach(boss => {
+        const isLocked = boss.tier > maxUnlocked;
         
         const row = document.createElement('div');
         row.className = 'menu-row';
-        row.style.margin = '5px 0';
+        row.style.margin = '4px 0';
         
         const btn = document.createElement('button');
         btn.className = 'menu-btn dragon-level-btn';
-        btn.style.transition = 'all 0.2s ease';
+        btn.style.transition = 'all 0.15s ease';
+        btn.style.padding = "10px";
+        btn.style.fontSize = "12px";
         
         if (isLocked) {
             btn.classList.add('disabled');
-            btn.innerHTML = `🔒 Тир ${t} (Победите Тир ${t-1})`;
+            btn.innerHTML = `🔒 Тир ${boss.tier} (Заблокировано в этой главе)`;
         } else {
-            let label = "";
-            // Цветовая разметка стихий и уникальные первые 4 дракона
-            if (t <= 4) {
-                label = `🐲 Тир ${t}: ${uniqueFirstDragons[t-1]}`;
-                btn.style.background = "linear-gradient(to bottom, #2b231d, #14100e)";
-                btn.style.borderColor = "#6e5541";
-                btn.style.color = "#d9b391";
-            } else {
-                const element = elements[(t - 5) % 4];
-                label = `🐉 Тир ${t} [${element}]`;
-                
-                if (element === "Огонь") {
-                    btn.style.background = "linear-gradient(to bottom, #3b1717, #1c0a0a)";
-                    btn.style.borderColor = "#9c2a2a";
-                    btn.style.color = "#ff8c8c";
-                } else if (element === "Лед") {
-                    btn.style.background = "linear-gradient(to bottom, #162436, #0b121c)";
-                    btn.style.borderColor = "#2a629c";
-                    btn.style.color = "#8cd1ff";
-                } else if (element === "Тьма") {
-                    btn.style.background = "linear-gradient(to bottom, #28173b, #130a1c)";
-                    btn.style.borderColor = "#6d2a9c";
-                    btn.style.color = "#e58cff";
-                } else if (element === "Свет") {
-                    btn.style.background = "linear-gradient(to bottom, #362e19, #1a160c)";
-                    btn.style.borderColor = "#9c7f2a";
-                    btn.style.color = "#ffe88c";
-                }
-            }
+            const element = elements[(boss.tier - 1) % elements.length];
+            btn.innerHTML = `${boss.icon} Тир ${boss.tier}: ${boss.name} [${element}] — ${boss.baseHP} HP`;
+            btn.dataset.level = boss.tier;
             
-            const hp = 120 + (t - 1) * 60;
-            btn.innerHTML = `${label} — ${hp} HP`;
-            btn.dataset.level = t;
+            if (element === "Огонь") {
+                btn.style.background = "linear-gradient(to bottom, #3b1717, #1c0a0a)";
+                btn.style.borderColor = "#9c2a2a";
+                btn.style.color = "#ff8c8c";
+            } else if (element === "Лед") {
+                btn.style.background = "linear-gradient(to bottom, #162436, #0b121c)";
+                btn.style.borderColor = "#2a629c";
+                btn.style.color = "#8cd1ff";
+            } else if (element === "Тьма") {
+                btn.style.background = "linear-gradient(to bottom, #28173b, #130a1c)";
+                btn.style.borderColor = "#6d2a9c";
+                btn.style.color = "#e58cff";
+            } else if (element === "Свет") {
+                btn.style.background = "linear-gradient(to bottom, #362e19, #1a160c)";
+                btn.style.borderColor = "#9c7f2a";
+                btn.style.color = "#ffe88c";
+            }
             
             btn.addEventListener('click', (e) => {
                 selectedDragonLevel = parseInt(e.currentTarget.dataset.level);
@@ -91,5 +142,5 @@ function renderDragonSelectionGrid() {
         
         row.appendChild(btn);
         gridContainer.appendChild(row);
-    }
+    });
 }
