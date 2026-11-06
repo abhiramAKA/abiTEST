@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v4.9.23-BETA";
+            window.GAME_VERSION = "v4.9.25-BETA";
             
             if (navigator.serviceWorker) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -44,7 +44,6 @@
             link.href = 'styles.css?t=' + enforceBuster;
             document.head.appendChild(link);
 
-            // Интегрировано чистое имя match3-data.js строго перед файлом логики приключений
             const scripts = [
                 'game.js',
                 'background.js',
@@ -130,7 +129,7 @@
             
             <span class="subtitle" style="font-size: 11px; margin-bottom: 14px; padding-bottom: 6px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
             
-            <!-- Сетка крупных кнопок. На главной кнопке теперь Вулкан 🌋 -->
+            <!-- Сетка крупных кнопок: Эмодзи зафиксированы строго по твоей схеме, а ID перелинкованы для идеальной работы кода -->
             <div class="menu-emoji-grid">
                 <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
                 <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
@@ -146,7 +145,7 @@
                 <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
             </div>
             
-            <div id="game-version" class="version-footer">v4.9.23-BETA</div>
+            <div id="game-version" class="version-footer">v4.9.25-BETA</div>
         </div>
 
         <div id="dynamic-town-screens"></div>
