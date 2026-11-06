@@ -1,5 +1,5 @@
 /* ==========================================================================
-   2. СТРУКТУРА ОКОН, ВЫРАВНИВАНИЕ И ЖИВОЙ ФОН
+   2. СТРУКТУРА ОКОН, ВЫРАВНИВАНИЕ И ЖИВОЙ ФОН (ОБНОВЛЕН - v4.9.19-BETA)
    ========================================================================== */
 
 #bg-canvas {
@@ -35,7 +35,7 @@
         inset 0 0 30px rgba(0, 0, 0, 0.8),
         0 0 20px rgba(138, 115, 80, 0.2);
     border-radius: 2px;
-    padding: 20px 16px;
+    padding: 16px 12px;
     text-align: center;
     position: relative;
     box-sizing: border-box;
@@ -47,25 +47,25 @@
     display: flex;
     width: 100%;
     gap: 8px;
-    margin: 8px 0;
+    margin: 6px 0;
     box-sizing: border-box;
     align-items: center;
 }
 
-/* СЕТКА КРУПНЫХ КВАДРАТНЫХ КНОПОК-ЭМОДЗИ (2 В РЯД) */
+/* СЕТКА КРУПНЫХ КВАДРАТНЫХ КНОПОК-ЭМОДЗИ */
 .menu-emoji-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 10px;
     width: 100%;
     box-sizing: border-box;
     margin: 2px 0;
 }
 
-/* КРУПНАЯ КВАДРАТНАЯ ГОТИЧЕСКАЯ КНОПКА С МАКСИМАЛЬНЫМ РАЗМЕРОМ ЗНАЧКА */
+/* ЭКСТРЕМАЛЬНО УВЕЛИЧЕННЫЕ ЭМОДЗИ-ЗНАЧКИ ДЛЯ ИГРОВЫХ КНОПОК */
 .emoji-grid-btn {
     aspect-ratio: 1 / 1;
-    font-size: 52px;
+    font-size: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -76,7 +76,7 @@
         inset 0 1px 3px rgba(255,255,255,0.1),
         0 5px 10px rgba(0,0,0,0.6);
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
     box-sizing: border-box;
     border-radius: 4px;
     padding: 0;
@@ -91,18 +91,18 @@
         0 0 20px rgba(203, 178, 129, 0.6),
         inset 0 0 8px rgba(203, 178, 129, 0.4);
     transform: scale(1.02);
-    font-size: 56px;
+    font-size: 70px;
 }
 
 .emoji-grid-btn:active {
     transform: scale(0.96);
 }
 
-/* ⚔️ КНОПКА ЗНАКА ВОПРОСА И НАСТРОЕК */
+/* СЛУЖЕБНЫЕ КНОПКИ */
 .info-btn {
     width: auto;
-    height: 51px;
-    font-size: 16px;
+    height: 46px;
+    font-size: 14px;
     font-weight: bold;
     color: #e6c280;
     background: linear-gradient(to bottom, #241d19 0%, #14100e 100%);
@@ -124,13 +124,9 @@
     box-shadow: 0 0 10px rgba(138, 115, 80, 0.4);
 }
 
-.info-btn:active {
-    transform: scale(0.97);
-}
-
 .version-footer {
     position: absolute;
-    bottom: 6px;
+    bottom: 4px;
     left: 0;
     width: 100%;
     font-size: 11px;
@@ -155,34 +151,23 @@
     border-radius: 0;
     padding: 0;
     margin: 0;
-    
+    display: flex;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
 }
 
 .combat-help-content {
-    width: 90vw;
+    width: 92vw;
     max-width: 440px;
     background: radial-gradient(circle, #1a1512 0%, #0d0a08 100%);
     border: 4px solid #1a1613;
     outline: 2px solid #8a7350;
     outline-offset: -3px;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.95);
-    padding: 25px;
+    padding: 20px 16px;
     box-sizing: border-box;
     text-align: center;
-    max-height: 90vh;
+    max-height: 92vh;
     overflow-y: auto;
-}
-
-@media (max-width: 480px) {
-    .combat-help-popup {
-        padding: 12px;
-    }
-    .combat-help-content {
-        width: 100%;
-        max-height: 95vh;
-        padding: 20px 15px;
-    }
 }
