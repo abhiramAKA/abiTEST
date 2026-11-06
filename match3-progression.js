@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И ОТРИСОВКИ РЕЖИМА ПРИКЛЮЧЕНИЙ (v4.9.24-BETA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И ОТРИСОВКИ РЕЖИМА ПРИКЛЮЧЕНИЙ (v5.0.0-ALPHA)
    ========================================================================== */
 
 window.currentActiveChapterView = null;
@@ -40,9 +40,9 @@ function renderDragonSelectionGrid() {
             const card = document.createElement('div');
             card.className = "chapter-gothic-card";
             
-            // ИСПРАВЛЕНО: Безопасное чтение тира первого босса из массива через индекс [0]
+            // ЖЕЛЕЗНОЕ ИСПРАВЛЕНИЕ: Чтение тира первого босса строго через индекс массива [0]
             let isChapterLocked = true;
-            if (ch.bosses && ch.bosses.length > 0) {
+            if (ch.bosses && ch.bosses.length > 0 && ch.bosses[0]) {
                 const firstBossTier = ch.bosses[0].tier;
                 isChapterLocked = firstBossTier > maxUnlocked;
             }
