@@ -1,100 +1,216 @@
 /* ==========================================================================
-   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v4.9.19-BETA)
+   КХАМАЧ — МОДУЛЬ ПРОГРЕССИИ, ГЛАВ ПРИКЛЮЧЕНИЙ И 30 ТИРОВ ТВАРЕЙ (v4.9.20-BETA)
    ========================================================================== */
 
-function injectTownScreensDOM() {
-    const container = document.getElementById('dynamic-town-screens');
-    if (!container) return;
+// Состояние: null означает, что открыта доска выбора глав. Число — индекс запущенной главы.
+window.currentActiveChapterView = null;
 
-    container.innerHTML = `
-        <div id="dragon-select-screen" class="game-window" style="display: none;">
-            <h2 style="font-size: 20px; margin-bottom: 4px;">РЕЖИМ ПРИКЛЮЧЕНИЯ</h2>
-            <span class="subtitle" style="margin-bottom: 12px; padding-bottom: 4px;">Пространства и Проклятые Главы</span>
+const ADVENTURE_CHAPTERS = [
+    {
+        id: "ch_1",
+        title: "Глава I: Гнилые Топи",
+        icon: "🐛",
+        description: "Нижние ярусы затоплены ядовитой слизью. Здесь копошатся мерзкие насекомые и первые змеи-падальщики.",
+        bosses: [
+            { tier: 1, name: "Личинка Разлома", icon: "🐛", baseHP: 120 },
+            { tier: 2, name: "Скорпион-Трупник", icon: "`🦂`", baseHP: 180 },
+            { tier: 3, name: "Змей-Падальщик", icon: "🐲", baseHP: 240 },
+            { tier: 4, name: "Изумрудный Слизень", icon: "🐍", baseHP: 300 },
+            { tier: 5, name: "Паук Кровавых Нитей", icon: "🕷️", baseHP: 360 },
+            { tier: 6, name: "Ядовитый Исполин", icon: "🦎", baseHP: 420 }
+        ]
+    },
+    {
+        id: "ch_2",
+        title: "Глава II: Оплоты Безмолвия",
+        icon: "🦇",
+        description: "Заброшенные склепы древних правителей, облюбованные крылатыми бестиями и ископаемыми крокодилами.",
+        bosses: [
+            { tier: 7, name: "Адская Летучая Мышь", icon: "🦇", baseHP: 480 },
+            { tier: 8, name: "Чешуйчатый Тиран", icon: "🐉", baseHP: 540 },
+            { tier: 9, name: "Крокодил Бездны", icon: "🐊", baseHP: 600 },
+            { tier: 10, name: "Вепрь-Людоед", icon: "🐷", baseHP: 660 },
+            { tier: 11, name: "Змей Склепов", icon: "🐉", baseHP: 720 },
+            { tier: 12, name: "Костяной Старейшина", icon: "💀", baseHP: 780 }
+        ]
+    },
+    {
+        id: "ch_3",
+        title: "Глава III: Выжженные Скалы",
+        icon: "🦖",
+        description: "Раскаленная магма плавит гранит. Здесь бродят выжившие доисторические гиганты и огненные волки.",
+        bosses: [
+            { tier: 13, name: "Пепельный Волк", icon: "🐺", baseHP: 840 },
+            { tier: 14, name: "Левиафан Стонущих Скал", icon: "🐲", baseHP: 900 },
+            { tier: 15, name: "Тираннозавр Горнила", icon: "🦖", baseHP: 960 },
+            { tier: 16, name: "Лавовый Диплодок", icon: "🦕", baseHP: 1020 },
+            { tier: 17, name: "Огненный Лорд Стихий", icon: "👹", baseHP: 1080 },
+            { tier: 18, name: "Магматический Ящер", icon: "🐊", baseHP: 1140 }
+        ]
+    },
+    {
+        id: "ch_4",
+        title: "Глава IV: Чертоги Кошмаров",
+        icon: "🧟",
+        description: "Пространство искажено темным колдовством. Ожившие мертвецы и вампиры охраняют подступы к ядру.",
+        bosses: [
+            { tier: 19, name: "Некромант Ордена", icon: "👺", baseHP: 1200 },
+            { tier: 20, name: "Гниющий Зомби-Исполин", icon: "🧟", baseHP: 1260 },
+            { tier: 21, name: "Высший Вампир Разлома", icon: "🧛", baseHP: 1320 },
+            { tier: 22, name: "Рогатый Демон Бездны", icon: "😈", baseHP: 1380 },
+            { tier: 23, name: "Демонический Владыка", icon: "👿", baseHP: 1440 },
+            { tier: 24, name: "Призрачный Жнец Душ", icon: "👻", baseHP: 1500 }
+        ]
+    },
+    {
+        id: "ch_5",
+        title: "Глава V: Космический Шлюз",
+        icon: "👽",
+        description: "Высшая точка Горнила, где реальность трещит по швам. Инопланетные сущности, джинны и мифические фениксы.",
+        bosses: [
+            { tier: 25, name: "Джинн Иллюзий", icon: "🧞", baseHP: 1560 },
+            { tier: 26, name: "Разведчик Иных Миров", icon: "👽", baseHP: 1620 },
+            { tier: 27, name: "Космический Наблюдатель", icon: "🛸", baseHP: 1680 },
+            { tier: 28, name: "Монолит Бездны", icon: "🗿", baseHP: 1740 },
+            { tier: 29, name: "Пылающий Феникс Свет", icon: "🐦‍🔥", baseHP: 1800 },
+            { tier: 30, name: "ЧЕМПИОН КХАМАЧА", icon: "👑", baseHP: 2000 }
+        ]
+    }
+];
+
+function getMaxUnlockedTier() {
+    const saved = localStorage.getItem('khamach_max_tier');
+    return saved ? parseInt(saved) : 1;
+}
+
+function saveCompletedTier(tier) {
+    const currentMax = getMaxUnlockedTier();
+    if (tier >= currentMax && tier < 30) {
+        localStorage.setItem('khamach_max_tier', tier + 1);
+    }
+}
+
+function renderDragonSelectionGrid() {
+    const gridContainer = document.getElementById('dragon-levels-grid');
+    const backBtn = document.getElementById('from-select-to-menu-btn');
+    if (!gridContainer) return;
+    
+    gridContainer.innerHTML = '';
+    const maxUnlocked = getMaxUnlockedTier();
+    
+    // ЭКРАН 1: Если глава не выбрана, рисуем сочный список глав с описаниями (Никакого серого фона!)
+    if (window.currentActiveChapterView === null) {
+        if (backBtn) {
+            backBtn.innerText = "Назад в меню";
+            backBtn.onclick = function() { showScreen('main-menu'); };
+        }
+        
+        document.getElementById('adventure-screen-title').innerText = "РЕЖИМ ПРИКЛЮЧЕНИЯ";
+        document.getElementById('adventure-screen-subtitle').innerText = "Выберите Пространство или Бестиарий";
+
+        ADVENTURE_CHAPTERS.forEach((ch, idx) => {
+            const card = document.createElement('div');
+            card.className = "chapter-gothic-card";
             
-            <!-- Контейнер для навигации по главам и списка боссов -->
-            <div id="dragon-levels-grid" style="max-height: 52vh; overflow-y: auto; padding: 4px; margin-bottom: 12px; border: 1px solid #4a3e31; background: rgba(0,0,0,0.5); border-radius: 4px;"></div>
-            <button id="from-select-to-menu-btn" class="menu-btn back-btn" style="margin-top: 0; width: 100%; padding: 12px;">Назад в меню</button>
-        </div>
+            // Проверяем, доступна ли глава (открыт ли хотя бы первый босс этой главы)
+            const firstBossTier = ch.bosses[0].tier;
+            const isChapterLocked = firstBossTier > maxUnlocked;
+            
+            if (isChapterLocked) {
+                card.style.opacity = "0.4";
+                card.style.filter = "grayscale(1)";
+                card.style.cursor = "not-allowed";
+                card.innerHTML = `
+                    <div class="chapter-card-icon">🔒</div>
+                    <div style="flex:1;">
+                        <div style="color:#6a5335; font-weight:bold; font-size:13px;">${ch.title}</div>
+                        <div style="color:#4a3f2c; font-size:10px; margin-top:2px;">Победите предыдущие тиры для открытия доступа.</div>
+                    </div>
+                `;
+            } else {
+                card.innerHTML = `
+                    <div class="chapter-card-icon">${ch.icon}</div>
+                    <div style="flex:1;">
+                        <div style="color:#e6c280; font-weight:bold; font-size:13px;">${ch.title}</div>
+                        <div style="color:#cdb38c; font-size:10px; line-height:1.2; margin-top:2px;">${ch.description}</div>
+                    </div>
+                `;
+                card.onclick = function() {
+                    window.currentActiveChapterView = idx;
+                    renderDragonSelectionGrid();
+                };
+            }
+            gridContainer.appendChild(card);
+        });
+        return;
+    }
+    
+    // ЭКРАН 2: Окно конкретной выбранной главы приключений
+    const activeChapter = ADVENTURE_CHAPTERS[window.currentActiveChapterView];
+    
+    if (backBtn) {
+        backBtn.innerText = "↩️ Назад к списку глав";
+        backBtn.onclick = function() {
+            window.currentActiveChapterView = null;
+            renderDragonSelectionGrid();
+        };
+    }
+    
+    document.getElementById('adventure-screen-title').innerText = activeChapter.icon + " СИЛЫ ГЛАВЫ";
+    document.getElementById('adventure-screen-subtitle').innerText = activeChapter.title;
 
-        <div id="info-screen" class="game-window" style="display: none;">
-            <h2>КОНТЕКСТНАЯ СПРАВКА</h2>
-            <span class="subtitle">Базовый Инструктаж</span>
-            <p id="info-screen-text">Загрузка правил...</p>
-            <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
-        </div>
-
-        <div id="mode-desc-screen" class="game-window" style="display: none; padding: 25px 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; width: 100%;">
-                <h2 id="mode-desc-title" style="margin: 0; font-size: 20px;">ЗДЕНИЕ ЦИТАДЕЛИ</h2>
-                <button id="close-mode-desc-top-btn" class="info-btn back-btn" style="width: 26px; height: 26px; font-size: 11px; box-shadow: none; border-radius: 4px; margin: 0; padding: 0;" onclick="if(typeof window.closeModeDescriptionUnified === 'function') window.closeModeDescriptionUnified()">❌</button>
-            </div>
-            <div id="mode-desc-text" style="text-align: left; font-size: 13px; line-height: 1.5; color: #cdb38c; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid #4a3e31; border-radius: 4px;">Описание режима загружается...</div>
-            <button id="mode-buy-btn" class="menu-btn" style="margin-top: 15px; background: linear-gradient(to bottom, #1d421e 0%, #102411 100%); border-color: #316e34; color: #aae6ab;">⚒️ ПОСТРОИТЬ (🪙 100)</button>
-        </div>
-
-        <div id="settings-screen" class="game-window" style="display: none; padding: 20px;">
-            <h2>ЗВУКОВОЙ ПУЛЬТ</h2>
-            <span class="subtitle">Микшер Абхирамбурга</span>
-            <div style="text-align: left; font-size: 13px; color: #cdb38c; margin-bottom: 15px;">
-                <div style="margin-bottom: 10px;">
-                    <label>🎵 Громкость Музыки:</label>
-                    <input type="range" id="volume-music-slider" min="0" max="100" value="50" style="width: 100%; accent-color: #ffd700;">
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <label>🎇 Громкость Эффектов:</label>
-                    <input type="range" id="volume-fx-slider" min="0" max="100" value="70" style="width: 100%; accent-color: #ffd700;">
-                </div>
-            </div>
-            <button id="close-settings-btn" class="menu-btn back-btn" style="width: 100%;">Сохранить настройки</button>
-        </div>
-
-        <div id="storage-screen" class="game-window" style="display: none;">
-            <h2>СКЛАД ЦИТАДЕЛИ</h2>
-            <span class="subtitle">Учет Ресурсов и Трофеев</span>
-            <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0</div>
-            <div id="storage-resources-list" style="background: rgba(0, 0, 0, 0.4); border: 1px double #544432; padding: 15px; margin-bottom: 15px; border-radius: 4px; text-align: left;"></div>
-            <button id="close-storage-btn" class="menu-btn back-btn" style="width: 100%;">Назад в меню</button>
-        </div>
-
-        <div id="missions-screen" class="game-window" style="display: none;">
-            <h2>ГОРОДСКОЕ ПОРУЧЕНИЕ</h2>
-            <span class="subtitle">Доска Объявлений Абхирамбурга</span>
-            <p style="font-size: 12px; margin-bottom: 10px;">Отправляйте бойцов помогать горожанам. Занятые бойцы автоматически вернутся по истечении таймера!</p>
-            <div id="missions-list-container" style="max-height: 45vh; overflow-y: auto; padding: 4px; margin-bottom: 15px; border: 1px solid #4a3e31; background: rgba(0,0,0,0.4); border-radius: 4px; display: flex; flex-direction: column; gap: 8px;"></div>
-            <button id="close-missions-btn" class="menu-btn back-btn" style="width: 100%; margin-top: 0;">Назад в меню</button>
-        </div>
-
-        <div id="chronicle-screen" class="game-window" style="display: none;">
-            <h2>ЛЕТОПИСЬ ЦИТАДЕЛИ</h2>
-            <span class="subtitle">Архив Истории Абхирамбурга</span>
-            <div id="chronicle-list-container" style="max-height: 50vh; overflow-y: auto; padding: 10px; margin-bottom: 15px; border: 1px dashed #8a7350; background: rgba(10,8,6,0.6); border-radius: 4px; text-align: left; font-size: 12px; display: flex; flex-direction: column; gap: 6px;"></div>
-            <button id="clear-chronicle-btn" class="menu-btn" style="background: linear-gradient(to bottom, #421e1e, #241010); border-color: #6e3131; font-size: 12px; padding: 8px; margin-bottom: 8px;">Очистить архив</button>
-            <button id="close-chronicle-btn" class="menu-btn back-btn" style="width: 100%; margin-top: 0;">Назад в меню</button>
-        </div>
-
-        <div id="squad-fatigue-screen" class="game-window combat-help-popup" style="display: none;">
-            <div class="combat-help-content" style="max-width: 400px; padding: 20px 25px;">
-                <h2>СОСТОЯНИЕ ОТРЯДА</h2>
-                <span class="subtitle">Стихийное Истощение сил</span>
-                <div id="individual-fatigue-list-container" style="display: flex; flex-direction: column; gap: 10px; text-align: left; background: rgba(0,0,0,0.5); padding: 15px; border: 1px solid #544432; border-radius: 4px; font-size: 14px;"></div>
-                <button id="close-fatigue-screen-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в меню</button>
-            </div>
-        </div>
-
-        <div id="squad-heroes-spec-screen" class="game-window" style="display: none; padding: 20px 15px;">
-            <h2>ВАШ ОТРЯД</h2>
-            <span class="subtitle" style="margin-bottom: 10px;">Прокачка и тренировка бойцов</span>
-            <div id="heroes-upgrade-list-container" style="display: flex; flex-direction: column; gap: 6px; max-height: 52vh; overflow-y: auto; padding-right: 2px;"></div>
-            <button id="close-heroes-spec-btn" class="menu-btn back-btn" style="width: 100%; margin-top: 10px; padding: 12px;">Назад в меню</button>
-        </div>
-
-        <div id="welcome-palace-screen" class="game-window combat-help-popup" style="display: none;">
-            <div class="combat-help-content" style="max-width: 420px; padding: 25px;">
-                <h2>ПРИВЕТСТВИЕ</h2>
-                <span class="subtitle">Хроники Абхирамбурга</span>
-                <p style="font-size: 14px; color: #e6c280; text-align: left; line-height: 1.6; margin-bottom: 15px;">Добро пожаловать в мрачные чертоги тактической ролевой стратегии <strong>«КХАМАЧ»</strong>!</p>
-                <button id="close-welcome-palace-btn" class="menu-btn" style="margin-top: 20px; width: 100%; background: linear-gradient(to bottom, #1d3a1e, #0f2110); border-color: #316e34;">Принять командование</button>
-            </div>
-        </div>
-    `;
+    const elements = ["Огонь", "Лед", "Тьма", "Свет"];
+    
+    activeChapter.bosses.forEach(boss => {
+        const isLocked = boss.tier > maxUnlocked;
+        
+        const row = document.createElement('div');
+        row.className = 'menu-row';
+        row.style.margin = '4px 0';
+        
+        const btn = document.createElement('button');
+        btn.className = 'menu-btn dragon-level-btn';
+        btn.style.transition = 'all 0.15s ease';
+        btn.style.padding = "10px";
+        btn.style.fontSize = "12px";
+        
+        if (isLocked) {
+            btn.classList.add('disabled');
+            btn.innerHTML = `🔒 Тир ${boss.tier} (Заблокировано в этой главе)`;
+        } else {
+            const element = elements[(boss.tier - 1) % elements.length];
+            btn.innerHTML = `${boss.icon} Тир ${boss.tier}: ${boss.name} [${element}] — ${boss.baseHP} HP`;
+            btn.dataset.level = boss.tier;
+            
+            if (element === "Огонь") {
+                btn.style.background = "linear-gradient(to bottom, #3b1717, #1c0a0a)";
+                btn.style.borderColor = "#9c2a2a";
+                btn.style.color = "#ff8c8c";
+            } else if (element === "Лед") {
+                btn.style.background = "linear-gradient(to bottom, #162436, #0b121c)";
+                btn.style.borderColor = "#2a629c";
+                btn.style.color = "#8cd1ff";
+            } else if (element === "Тьма") {
+                btn.style.background = "linear-gradient(to bottom, #28173b, #130a1c)";
+                btn.style.borderColor = "#6d2a9c";
+                btn.style.color = "#e58cff";
+            } else if (element === "Свет") {
+                btn.style.background = "linear-gradient(to bottom, #362e19, #1a160c)";
+                btn.style.borderColor = "#9c7f2a";
+                btn.style.color = "#ffe88c";
+            }
+            
+            btn.addEventListener('click', (e) => {
+                selectedDragonLevel = parseInt(e.currentTarget.dataset.level);
+                if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
+                showScreen('combat-screen');
+                if (typeof startCombatSession === 'function') {
+                    startCombatSession(selectedDragonLevel);
+                }
+            });
+        }
+        
+        row.appendChild(btn);
+        gridContainer.appendChild(row);
+    });
 }
