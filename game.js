@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ОНБОРДИНГ - v5.7.23-FIX)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v5.7.25-FIX)
    ========================================================================== */
 
 const BOARD_ROWS = 8;
@@ -45,28 +45,19 @@ function sanitizeAndMigrateStorage() {
 }
 
 function updateMenuOnboardingVisibility() {
-    const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
     const gridContainer = document.getElementById('main-menu-grid');
     if (!gridContainer) return;
 
-    if (!tutorialDone) {
-        // НАЧАЛЬНОЕ ОКНО: Отображается ТОЛЬКО ОДНА кнопка с Вулканом 🌋
-        gridContainer.style.gridTemplateColumns = "1fr";
-        gridContainer.innerHTML = `
-            <button id="to-combat-btn" class="emoji-grid-btn" style="grid-column: span 2; height: 100px; font-size: 54px;">🌋</button>
-        `;
-    } else {
-        // ПОСЛЕ ПОБЕДЫ: Полноценная открытая сетка меню со всеми кнопками
-        gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
-        gridContainer.innerHTML = `
-            <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
-            <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
-            <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
-            <button id="to-storage-btn" class="emoji-grid-btn">🏋️</button>
-            <button id="to-chronicle-btn" class="emoji-grid-btn">📜</button>
-            <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
-        `;
-    }
+    // В Хабе ВСЕГДА рендерится полноценное готовое меню из 6 кнопок города
+    gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
+    gridContainer.innerHTML = `
+        <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
+        <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
+        <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
+        <button id="to-storage-btn" class="emoji-grid-btn">🏋️</button>
+        <button id="to-chronicle-btn" class="emoji-grid-btn">📜</button>
+        <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
+    `;
 }
 
 function initDispatcherModule() {
