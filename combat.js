@@ -6,7 +6,7 @@ let activeSessionLevel = 1;
 
 function startCombatSession(level) {
     if (typeof combatData === 'undefined' || !combatData) {
-        window.combatData = { currentRound: 1, squad: [] };
+        window.combatData = { currentRound: 1, squad: new Array() };
     }
 
     activeSessionLevel = level || 1;
@@ -25,7 +25,7 @@ function startCombatSession(level) {
     
     combatData.tankTaunting = shieldPerk > 0; 
     combatData.dragonBlinded = false;
-    combatData.isActionPhase = false;
+    combatData.isActionPhase = false; // Защитный флаг хода Дракона
     
     const bossNameEl = document.getElementById('boss-name');
     if (bossNameEl) {
@@ -74,10 +74,15 @@ function chargeHeroSuperpowers(effects) {
 }
 
 function usePlayerActionPoint() {
+    if (combatData.isActionPhase) return; // Защита: если Дракон уже ходит, игнорируем ложные вызовы каскадов
+    
     combatData.playerAP--;
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
+    
     if (combatData.playerAP <= 0) {
+        combatData.isActionPhase = true; 
         if (typeof isBoardLocked !== 'undefined') isBoardLocked = true;
+        
         const apDisplay = document.getElementById('combat-ap-display');
         if (apDisplay) apDisplay.innerText = "Ход Дракона...";
         setTimeout(executeDragonTurnAI, 700);
@@ -110,7 +115,6 @@ function executeDragonTurnAI() {
     setTimeout(() => {
         if (dModel) dModel.className = 'dragon-idle';
         
-        // РЕЖИМ ОТЛАДКИ: Если босс или отряд мертвы, просто воскрешаем их ради бесконечного геймплея
         if (combatData.dragonHP <= 0) {
             alert("Дракон повержен! Воскрешаем его для продолжения теста.");
             combatData.dragonHP = combatData.dragonMaxHP;
@@ -123,11 +127,14 @@ function executeDragonTurnAI() {
         combatData.currentRound++; 
         combatData.playerAP = combatData.playerMaxAP;
         
-        // ИСПРАВЛЕНО: Принудительно снимаем блокировку и возвращаем управление игроку
-        isBoardLocked = false;
+        // СБРОС СТЕЙТА ПОЛЯ: Снимаем любые блокировки мыши и свайпов, обнуляем выбор ячеек
+        combatData.isActionPhase = false;
+        if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
+        if (typeof selectedCell !== 'undefined') selectedCell = null;
         
         const apDisplay = document.getElementById('combat-ap-display');
         if (apDisplay) apDisplay.innerText = "Сделайте ход на поле!";
         if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
+        if (typeof renderBoardDOM === 'function') renderBoardDOM(); // Мягко перерисовываем сетку рун без эффектов intro
     }, 1000);
 }
