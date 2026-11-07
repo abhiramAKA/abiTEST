@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.9.15-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (СТАБИЛИЗИРОВАН - v5.2.9)
    ========================================================================== */
 
 const BOARD_ROWS = 8;
@@ -26,13 +26,11 @@ let combatData = {
 let match3BoardData = null;
 let selectedCell = null;
 let selectedDragonLevel = 1;
-
 window.currentOpenedModeKey = null;
 
 function sanitizeAndMigrateStorage() {
     const currentGold = localStorage.getItem('khamach_gold') || '0';
     const currentMaxTier = localStorage.getItem('khamach_max_tier') || '1';
-    
     const plasma = localStorage.getItem('khamach_res_plasma') || '0';
     const blood = localStorage.getItem('khamach_res_blood') || '0';
     const scale = localStorage.getItem('khamach_res_scale') || '0';
@@ -59,14 +57,14 @@ function initDispatcherModule() {
     if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
     if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
     if (typeof injectSquadInterfaceDOM === 'function') injectSquadInterfaceDOM();
+    if (typeof injectMissionsInterfaceBaseDOM === 'function') injectMissionsInterfaceBaseDOM();
     
     const versionElement = document.getElementById('game-version');
     if (versionElement && window.GAME_VERSION) versionElement.innerText = window.GAME_VERSION;
 
     if (typeof setupAllGameListeners === 'function') {
-        try { setupAllGameListeners(); } catch (e) { console.error("Ошибка навешивания листенеров:", e); }
+        try { setupAllGameListeners(); } catch (e) { console.error("Ошибка листенеров:", e); }
     }
-    
     if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
 
     setInterval(() => {
