@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (СТАБИЛИЗИРОВАН - v5.6.0)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v5.7.22-FIX)
    ========================================================================== */
 
 const BOARD_ROWS = 8;
@@ -29,7 +29,7 @@ let selectedDragonLevel = 1;
 window.currentOpenedModeKey = null;
 
 function sanitizeAndMigrateStorage() {
-    const currentGold = localStorage.getItem('khamach_gold') || '0';
+    const currentGold = localStorage.getItem('khamach_gold') || '500';
     const currentMaxTier = localStorage.getItem('khamach_max_tier') || '1';
     const plasma = localStorage.getItem('khamach_res_plasma') || '0';
     const blood = localStorage.getItem('khamach_res_blood') || '0';
@@ -50,14 +50,12 @@ function updateMenuOnboardingVisibility() {
     if (!gridContainer) return;
 
     if (!tutorialDone) {
-        // ПЕРВЫЙ ЗАПУСК: Четырех кнопок вообще нет на экране. Меняем стили сетки.
         gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
         gridContainer.innerHTML = `
             <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
             <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
         `;
     } else {
-        // ПОСЛЕ ПЕРВОГО СРАЖЕНИЯ: Полноценное открытое меню 2х3
         gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
         gridContainer.innerHTML = `
             <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
@@ -73,11 +71,13 @@ function updateMenuOnboardingVisibility() {
 function initDispatcherModule() {
     sanitizeAndMigrateStorage();
 
+    // ЖЕСТКАЯ ПРОВЕРКА: Если мы на странице hub.html, боевой интерфейс генерировать ЗАПРЕЩЕНО
+    const isHubPage = window.location.pathname.includes('hub.html');
+
     try { if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM(); } catch(e) { console.error(e); }
-    try { if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM(); } catch(e) { console.error(e); }
+    try { if (!isHubPage && typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM(); } catch(e) { console.error(e); }
     try { if (typeof injectSquadInterfaceDOM === 'function') injectSquadInterfaceDOM(); } catch(e) { console.error(e); }
     
-    // Перестраиваем меню в зависимости от онбординга
     updateMenuOnboardingVisibility();
 
     if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
@@ -86,7 +86,6 @@ function initDispatcherModule() {
         try { setupAllGameListeners(); } catch (e) { console.error("Ошибка листенеров:", e); }
     }
 
-    // Принудительно вешаем старт музыки на абсолютно любое нажатие по экрану хаба
     document.addEventListener('click', function unlockAudio() {
         if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
         document.removeEventListener('click', unlockAudio);
