@@ -20,12 +20,8 @@
     </style>
     <script>
         function handlePlayClick() {
-            const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
-            if (tutorialDone) {
-                window.location.href = 'hub.html?t=' + Date.now();
-            } else {
-                window.location.href = 'gate.html?t=' + Date.now();
-            }
+            // ВРЕМЕННО: Напрямую выкидываем на шлюз загрузки боя
+            window.location.href = 'gate.html?t=' + Date.now();
         }
     </script>
 </head>
@@ -34,12 +30,11 @@
         <h1>КХАМАЧ</h1>
         <button class="play-btn" onclick="handlePlayClick()">ИГРАТЬ</button>
         <div class="changelog">
-            <h3>📜 ЖУРНАЛ СБОРКИ v5.7.2-STABLE:</h3>
-            • Ликвидирована критическая синтаксическая ошибка SyntaxError пустого присвоения в match3.js.<br>
-            • Восстановлены массивы конструкторов доски рун и контрактов поручений.<br>
-            • Полностью разблокирован запуск пошагового боевого поля Match-3.
+            <h3>📜 ЖУРНАЛ СБОРКИ v5.7.3-DEBUG:</h3>
+            • Ликвидирована критическая синтаксическая ошибка оборванного стейта в match3-logic.js.<br>
+            • Активирован сквозной изолированный форсированный запуск боевого экрана для тестирования генерации рун.
         </div>
-        <div class="ver">ТЕКУЩАЯ СБОРКА: v5.7.2-STABLE</div>
+        <div class="ver">ТЕКУЩАЯ СБОРКА: v5.7.3-DEBUG</div>
     </div>
 </body>
 </html>
