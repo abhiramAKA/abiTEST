@@ -9,21 +9,48 @@
     <title>КХАМАЧ — Пробуждение Горнила</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v5.7.25-FIX";
+            window.GAME_VERSION = "v5.7.26-FIX";
             
-            // Если игрок уже прошел первый бой, ему не нужно видеть этот экран — сразу шлем в Хаб
+            // Если первый бой уже пройден — мгновенно перенаправляем в Хаб без лишней отрисовки
             if (localStorage.getItem('khamach_combat_tutorial_done') === 'true') {
                 window.location.href = 'hub.html?t=' + Date.now();
-                return;
+            }
+        })();
+    </script>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div id="game-interface">
+        <!-- ОБОЛОЧКА СТАРТОВОЙ КНОПКИ ВУЛКАНА -->
+        <div id="onboarding-welcome-zone" class="game-window" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 320px; text-align: center; z-index: 10;">
+            <span class="subtitle" style="border: none; margin-bottom: 25px; font-size: 13px; color: #8a7350; letter-spacing: 2px;">ГОРНИЛО СТИХИЙ ПРОБУЖДЕНО</span>
+            
+            <div style="display: flex; min-height: 160px; align-items: center; justify-content: center;">
+                <button id="fast-intro-combat-btn" class="emoji-grid-btn" style="width: 130px; height: 130px; font-size: 74px; border-radius: 50%;" onclick="executeOnboardingBattleLaunch()">🌋</button>
+            </div>
+        </div>
+        
+        <!-- ДИНАМИЧЕСКИЕ СЛОТЫ ДЛЯ ПОСЛЕДУЮЩЕЙ КОРРЕКТНОЙ СБОРКИ БОЯ -->
+        <div id="main-menu" style="display: none;"></div>
+        <div id="dynamic-combat-screen"></div>
+    </div>
+
+    <script>
+        function executeOnboardingBattleLaunch() {
+            // 1. Анимированно или мгновенно полностью уничтожаем блок приветствия с кнопкой вулкана
+            const welcomeZone = document.getElementById('onboarding-welcome-zone');
+            if (welcomeZone) {
+                welcomeZone.remove();
             }
 
+            // 2. Форсированно подгружаем стили игры, чтобы сетка Match-3 выглядела правильно
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
-            
             const link = document.createElement('link');
             link.rel = 'stylesheet';
             link.href = 'styles.css?t=' + enforceBuster;
             document.head.appendChild(link);
 
+            // 3. Массив последовательного развертывания игровых модулей боевого движка
             const scripts = [
                 'game.js', 'background.js', 'audio-engine.js', 'match3-fx.js',
                 'match3-input.js', 'match3.js', 'match3-logic.js', 'match3-data.js',
@@ -34,48 +61,27 @@
                 'combat.js', 'game-listeners.js'
             ];
 
-            function injectScript(index) {
+            function injectScriptSequentially(index) {
                 if (index >= scripts.length) {
+                    // Как только все скрипты загрузились — собираем и включаем бой напрямую
                     if (typeof initDispatcherModule === 'function') initDispatcherModule();
+                    if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
+                    if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
+                    if (typeof showScreen === 'function') showScreen('combat-screen');
+                    if (typeof startCombatSession === 'function') {
+                        startCombatSession(1); 
+                    }
                     return;
                 }
                 const script = document.createElement('script');
                 script.src = scripts[index] + '?v=' + window.GAME_VERSION + '&t=' + enforceBuster;
                 script.async = false; 
-                script.onload = function() { injectScript(index + 1); };
+                script.onload = function() { injectScriptSequentially(index + 1); };
                 document.head.appendChild(script);
             }
 
-            document.addEventListener("DOMContentLoaded", function() {
-                injectScript(0);
-            });
-        })();
-    </script>
-</head>
-<body>
-    <canvas id="bg-canvas"></canvas>
-    <div id="game-interface">
-        <div class="game-window" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 320px; text-align: center;">
-            <span class="subtitle" style="border: none; margin-bottom: 25px; font-size: 13px; color: #8a7350; letter-spacing: 2px;">ГОРНИЛО СТИХИЙ ПРОБУЖДЕНО</span>
-            
-            <div style="display: flex; min-height: 160px; align-items: center; justify-content: center;">
-                <button id="fast-intro-combat-btn" class="emoji-grid-btn" style="width: 130px; height: 130px; font-size: 74px; border-radius: 50%;" onclick="startFirstOnboardingBattle()">🌋</button>
-            </div>
-        </div>
-        
-        <!-- Скрытые технические слоты для боевого движка -->
-        <div id="main-menu" style="display: none;"></div>
-        <div id="dynamic-combat-screen"></div>
-    </div>
-
-    <script>
-        function startFirstOnboardingBattle() {
-            if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
-            if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
-            if (typeof showScreen === 'function') showScreen('combat-screen');
-            if (typeof startCombatSession === 'function') {
-                startCombatSession(1); 
-            }
+            // Запускаем инжекцию скриптов в момент клика
+            injectScriptSequentially(0);
         }
     </script>
 </body>
