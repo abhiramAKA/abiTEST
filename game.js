@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v5.7.25-FIX)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v5.7.26-FIX)
    ========================================================================== */
 
 const BOARD_ROWS = 8;
@@ -48,7 +48,6 @@ function updateMenuOnboardingVisibility() {
     const gridContainer = document.getElementById('main-menu-grid');
     if (!gridContainer) return;
 
-    // В Хабе ВСЕГДА рендерится полноценное готовое меню из 6 кнопок города
     gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
     gridContainer.innerHTML = `
         <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
