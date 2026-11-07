@@ -5,7 +5,7 @@
 let activeSessionLevel = 1;
 
 function startCombatSession(level) {
-    // ИСПРАВЛЕНО: Безопасная и синтаксически чистая проверка/создание базового стейта
+    // ИСПРАВЛЕНО: Полностью корректный синтаксис инициализации объекта стейта
     if (typeof combatData === 'undefined' || !combatData) {
         window.combatData = { currentRound: 1, squad: [] };
     }
