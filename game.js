@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v5.3.2)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (СТАБИЛИЗИРОВАН - v5.4.0)
    ========================================================================== */
 
 const BOARD_ROWS = 8;
@@ -36,13 +36,6 @@ function sanitizeAndMigrateStorage() {
     const scale = localStorage.getItem('khamach_res_scale') || '0';
     const tears = localStorage.getItem('khamach_res_tears') || '0';
 
-    const toxicKeys = [
-        'GAME_TEXTS', 'town_dom_backup', 'main_menu_html_v2', 
-        'khamach_menu_backup', 'town_dom_html', 'town_dom_backup_html',
-        'khamach_html_backup', 'cached_menu_dom'
-    ];
-    toxicKeys.forEach(k => localStorage.removeItem(k));
-
     localStorage.setItem('khamach_gold', currentGold);
     localStorage.setItem('khamach_max_tier', currentMaxTier);
     localStorage.setItem('khamach_res_plasma', plasma);
@@ -52,22 +45,23 @@ function sanitizeAndMigrateStorage() {
 }
 
 function initDispatcherModule() {
-    // ВАЖНО: Сначала инжектим всю разметку в DOM, чтобы элементы гарантированно существовали
-    if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
-    if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
-    if (typeof injectSquadInterfaceDOM === 'function') injectSquadInterfaceDOM();
-    if (typeof injectMissionsInterfaceBaseDOM === 'function') injectMissionsInterfaceBaseDOM();
-
     sanitizeAndMigrateStorage();
-    
-    const versionElement = document.getElementById('game-version');
-    if (versionElement && window.GAME_VERSION) versionElement.innerText = window.GAME_VERSION;
 
-    // Только после этого вешаем листенеры на готовые кнопки
+    // Защищенный вызов инъекций — падение одного UI-окна больше не рушит всю игру
+    try { if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM(); } catch(e) { console.error(e); }
+    try { if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM(); } catch(e) { console.error(e); }
+    try { if (typeof injectSquadInterfaceDOM === 'function') injectSquadInterfaceDOM(); } catch(e) { console.error(e); }
+    try { if (typeof injectMissionsInterfaceBaseDOM === 'function') injectMissionsInterfaceBaseDOM(); } catch(e) { console.error(e); }
+    
+    // Принудительно и сразу обновляем золото и усталость на экране
+    if (typeof updateTownGoldDisplay === 'function') {
+        updateTownGoldDisplay();
+    }
+
+    // Навешиваем клики
     if (typeof setupAllGameListeners === 'function') {
         try { setupAllGameListeners(); } catch (e) { console.error("Ошибка листенеров:", e); }
     }
-    if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
 
     setInterval(() => {
         if (typeof checkAndProcessMissionsBackground === 'function') {
