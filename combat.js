@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНОЕ ЯДРО ПОШАГОВОГО БОЯ (ИСПРАВЛЕН - v5.6.0-BETA)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНОЕ ЯДРО ПОШАГОВОГО БОЯ (ИСПРАВЛЕН - v5.7.18-FIX)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -25,7 +25,9 @@ function startCombatSession(level) {
     
     combatData.tankTaunting = shieldPerk > 0; 
     combatData.dragonBlinded = false;
-    combatData.isActionPhase = false; // Защитный флаг хода Дракона
+    combatData.isActionPhase = false; 
+    window.isBoardLocked = false;
+    isBoardLocked = false;
     
     const bossNameEl = document.getElementById('boss-name');
     if (bossNameEl) {
@@ -58,7 +60,8 @@ function startCombatSession(level) {
 
     const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
     if (!tutorialDone) {
-        if (typeof isBoardLocked !== 'undefined') isBoardLocked = true;
+        window.isBoardLocked = true;
+        isBoardLocked = true;
         const welcomeScr = document.getElementById('combat-welcome-tutorial-screen');
         if (welcomeScr) welcomeScr.style.display = 'flex';
     }
@@ -74,18 +77,19 @@ function chargeHeroSuperpowers(effects) {
 }
 
 function usePlayerActionPoint() {
-    if (combatData.isActionPhase) return; // Защита: если Дракон уже ходит, игнорируем ложные вызовы каскадов
+    if (combatData.isActionPhase || combatData.playerAP <= 0) return; 
     
     combatData.playerAP--;
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
     
     if (combatData.playerAP <= 0) {
         combatData.isActionPhase = true; 
-        if (typeof isBoardLocked !== 'undefined') isBoardLocked = true;
+        window.isBoardLocked = true;
+        isBoardLocked = true;
         
         const apDisplay = document.getElementById('combat-ap-display');
         if (apDisplay) apDisplay.innerText = "Ход Дракона...";
-        setTimeout(executeDragonTurnAI, 700);
+        setTimeout(executeDragonTurnAI, 600);
     }
 }
 
@@ -116,25 +120,24 @@ function executeDragonTurnAI() {
         if (dModel) dModel.className = 'dragon-idle';
         
         if (combatData.dragonHP <= 0) {
-            alert("Дракон повержен! Воскрешаем его для продолжения теста.");
             combatData.dragonHP = combatData.dragonMaxHP;
         }
         if (combatData.squad.every(h => h.hp <= 0)) {
-            alert("Ваш отряд пал! Восстанавливаем здоровье для продолжения теста.");
             combatData.squad.forEach(h => h.hp = h.maxHP);
         }
 
         combatData.currentRound++; 
         combatData.playerAP = combatData.playerMaxAP;
         
-        // СБРОС СТЕЙТА ПОЛЯ: Снимаем любые блокировки мыши и свайпов, обнуляем выбор ячеек
         combatData.isActionPhase = false;
-        if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
-        if (typeof selectedCell !== 'undefined') selectedCell = null;
+        window.isBoardLocked = false;
+        isBoardLocked = false;
+        window.selectedCell = null;
+        selectedCell = null;
         
         const apDisplay = document.getElementById('combat-ap-display');
         if (apDisplay) apDisplay.innerText = "Сделайте ход на поле!";
         if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
-        if (typeof renderBoardDOM === 'function') renderBoardDOM(); // Мягко перерисовываем сетку рун без эффектов intro
+        if (typeof renderBoardDOM === 'function') renderBoardDOM(false, []); 
     }, 1000);
 }
