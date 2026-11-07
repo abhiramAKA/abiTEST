@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ МОДУЛЬ ТРЕНИРОВОК И ПОТОЛКА ОТРЯДА (v4.9.5-BETA)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ МОДУЛЬ ТРЕНИРОВОК И ПОТОЛКА ОТРЯДА (v5.2.6-BETA)
    ========================================================================== */
 
 const SQUAD_HERO_LORE = {
@@ -64,7 +64,6 @@ window.updateSquadHeroesSpecScreenDOM = function() {
     if (!container) return;
     container.innerHTML = '';
     
-    // Перевод контейнера на двухколоночную компактную сетку без скролла
     container.style.display = "grid";
     container.style.gridTemplateColumns = "1fr 1fr";
     container.style.gap = "6px";
@@ -86,15 +85,7 @@ window.updateSquadHeroesSpecScreenDOM = function() {
         const currentRes = typeof window.getPlayerResource === 'function' ? window.getPlayerResource(lore.resourceKey) : 0;
         
         const card = document.createElement('div');
-        card.style.background = "rgba(25, 20, 18, 0.95)";
-        card.style.border = "1px solid #544432";
-        card.style.padding = "6px 8px";
-        card.style.borderRadius = "3px";
-        card.style.display = "flex";
-        card.style.flexDirection = "column";
-        card.style.justifyContent = "between";
-        card.style.gap = "2px";
-        card.style.boxSizing = "border-box";
+        card.style = "background: rgba(25, 20, 18, 0.95); border: 1px solid #544432; padding: 6px 8px; border-radius: 3px; display: flex; flex-direction: column; justify-content: space-between; gap: 2px; box-sizing: border-box;";
         
         let actionBtnHTML = '';
         if (!isPurchased) {
