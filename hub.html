@@ -2,103 +2,162 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v5.4.1-BETA";
+            window.GAME_VERSION = "v5.4.2-BETA";
+            
             if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
                 localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
             }
-            const buster = Date.now() + '_' + Math.floor(Math.random() * 99999);
+
+            const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
+            
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'styles.css?t=' + buster;
+            link.href = 'styles.css?t=' + enforceBuster;
             document.head.appendChild(link);
 
             const scripts = [
-                'game.js', 
-                'background.js', 
-                'audio-engine.js', 
-                'match3-data.js', 
-                'missions-pool.js',
-                'squad-history.js',
-                'town-engine.js',
-                'missions-core.js', 
-                'squad-logic.js',
-                'match3-fx.js',
-                'match3-input.js', 
-                'match3.js', 
-                'match3-logic.js',
-                'campaign.js', 
-                'town-dom.js',
-                'squad-dom.js', 
-                'combat-dom.js', 
-                'missions-board.js',
-                'squad-core.js', 
-                'combat.js', 
-                'game-listeners.js'
+                'game.js', 'background.js', 'audio-engine.js', 'match3-fx.js',
+                'match3-input.js', 'match3.js', 'match3-logic.js', 'match3-data.js',
+                'match3-progression.js', 'town-engine.js', 'town-chronicle.js',
+                'town-missions-pool.js', 'town-missions-engine.js', 'town-dom.js',
+                'squad-dom.js', 'combat-dom.js', 'town-missions-dom.js',
+                'squad-engine-logic.js', 'squad-engine.js', 'combat.js', 'game-listeners.js'
             ];
 
-            function injectScript(idx) {
-                if (idx >= scripts.length) {
-                    console.log("КХАМАЧ: Все архитектурные модули успешно инициализированы.");
+            function injectScript(index) {
+                if (index >= scripts.length) {
+                    console.log("КХАМАЧ: Модули успешно загружены.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
-                    const done = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
-                    if (!done) {
+                    
+                    const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
+                    if (!tutorialDone) {
                         ['to-squad-btn', 'to-storage-btn', 'to-chronicle-btn', 'to-clans-btn'].forEach(id => {
-                            const b = document.getElementById(id); if (b) b.classList.add('progression-locked');
+                            const btn = document.getElementById(id);
+                            if (btn) btn.classList.add('progression-locked');
                         });
                     }
                     return;
                 }
-                const s = document.createElement('script');
-                s.src = scripts[idx] + '?v=' + window.GAME_VERSION + '&t=' + buster;
-                s.async = false;
-                s.onload = function() { injectScript(idx + 1); };
-                document.head.appendChild(s);
+                
+                const script = document.createElement('script');
+                script.src = scripts[index] + '?v=' + window.GAME_VERSION + '&t=' + enforceBuster;
+                script.async = false; 
+                script.onload = function() { injectScript(index + 1); };
+                document.head.appendChild(script);
             }
-            document.addEventListener("DOMContentLoaded", function() { injectScript(0); });
+
+            document.addEventListener("DOMContentLoaded", function() {
+                injectScript(0);
+            });
         })();
     </script>
 </head>
 <body>
     <canvas id="bg-canvas"></canvas>
+
     <div id="game-interface">
+        
         <!-- ================= ГЛАВНОЕ МЕНЮ ИГРЫ ================= -->
         <div id="main-menu" class="game-window" style="display: flex;">
-            <!-- Шапка ресурсов -->
+            
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px; padding: 0 4px; background: rgba(20, 15, 12, 0.5); border-bottom: 1px double #544432; box-sizing: border-box;">
-                <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; font-size: 14px; font-weight: bold;">🪙 0</span>
+                <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0</span>
                 <h1 style="font-size: 24px; margin: 0; letter-spacing: 2px; padding: 4px 0;">КХАМАЧ</h1>
-                <span id="team-fatigue-display" style="color: #ffb3ba; cursor: pointer; font-size: 14px; font-weight: bold;">🥱 0%</span>
+                <span id="team-fatigue-display" style="color: #ffb3ba; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffb3ba'">🥱 0%</span>
             </div>
+            
             <span class="subtitle" style="font-size: 11px; margin-bottom: 10px; padding-bottom: 4px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
             
-            <!-- ОТЛАДОЧНЫЙ UX-РЯД: СТРОГАЯ ВЕРТИКАЛЬНАЯ СТРУКТУРА КНОПОК -->
-            <div style="display: flex; flex-direction: column; width: 100%; gap: 6px; box-sizing: border-box; margin-bottom: 10px;">
-                <div style="display: flex; gap: 6px; width: 100%;">
-                    <button id="to-combat-btn" class="menu-btn" style="flex: 2; padding: 12px; background: linear-gradient(to bottom, #421e1e 0%, #241010 100%); border-color: #6e3131; color: #ff8c8c;">🌋 В БОЙ!</button>
-                    <button id="to-settings-btn" class="info-btn" style="flex: 1; height: auto; font-size: 13px;">⚙️ Настройки</button>
-                    <button id="info-btn" class="info-btn" style="flex: 1; height: auto; font-size: 13px;">❓ Справка</button>
-                </div>
-                <button id="to-missions-btn" class="menu-btn" style="padding: 12px;">💰 Городские Поручения</button>
-                <button id="to-squad-btn" class="menu-btn" style="padding: 12px;">🏰 Цитадель и Здания</button>
-                <button id="to-storage-btn" class="menu-btn" style="padding: 12px;">🏋️ Военный Лагерь (Герои)</button>
-                <button id="to-chronicle-btn" class="menu-btn" style="padding: 12px;">📜 Летопись Подвигов</button>
-                <button id="to-clans-btn" class="menu-btn" style="padding: 12px;">👥 Орден Кхамача (Кланы)</button>
+            <div style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 14px; box-sizing: border-box;">
+                <button id="to-settings-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">⚙️ Настройки</button>
+                <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
+            </div>
+
+            <!-- Возвращена сетка крупных готических квадратных кнопок 2х3 -->
+            <div class="menu-emoji-grid">
+                <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
+                <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
+                <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
+                <button id="to-storage-btn" class="emoji-grid-btn">🏋️</button>
+                <button id="to-chronicle-btn" class="emoji-grid-btn">📜</button>
+                <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
+            </div>
+
+            <div id="game-version" class="version-footer">v5.4.2-BETA</div>
+        </div>
+
+        <!-- ================= ДИНАМИЧЕСКИЕ СЛОТЫ ОКОН ================= -->
+        <div id="dynamic-town-screens"></div>
+        <div id="squad-screen" class="game-window" style="display: none;"></div>
+        <div id="dynamic-combat-screen"></div>
+        
+        <!-- Добавлены недостающие слоты окон для предотвращения зависания интерфейса -->
+        <div id="dragon-select-screen" class="game-window" style="display: none;">
+            <h2 id="adventure-screen-title">Выбор Рейда</h2>
+            <span id="adventure-screen-subtitle" class="subtitle">Выберите тир дракона</span>
+            <div id="dragon-levels-grid" style="display: flex; flex-direction: column; width: 100%; max-height: 50vh; overflow-y: auto; gap: 4px;"></div>
+            <button id="from-select-to-menu-btn" class="menu-btn back-btn" style="width: 100%;">Назад в меню</button>
+        </div>
+
+        <div id="info-screen" class="game-window" style="display: none;">
+            <h2>Справка Мира</h2>
+            <div id="info-screen-text" style="text-align: left; font-size: 13px; max-height: 50vh; overflow-y: auto; margin-bottom: 15px;"></div>
+            <button id="from-info-to-menu-btn" class="menu-btn back-btn" style="width: 100%;">Закрыть</button>
+        </div>
+
+        <div id="mode-desc-screen" class="game-window" style="display: none;">
+            <h2 id="mode-desc-title">Строение</h2>
+            <div id="mode-desc-text" style="text-align: left; font-size: 13px; margin-bottom: 15px; color: #bfae96;"></div>
+            <button id="mode-buy-btn" class="menu-btn" style="width: 100%; background: linear-gradient(to bottom, #1d3a1e, #0f2110); border-color: #316e34; margin-bottom: 8px; display: none;">Действие</button>
+            <button class="menu-btn back-btn" style="width: 100%; margin-top: 0;" onclick="window.closeModeDescriptionUnified()">Назад</button>
+        </div>
+
+        <div id="storage-screen" class="game-window" style="display: none;">
+            <h2>Склад Цитадели</h2>
+            <div id="storage-resources-list" style="text-align: left; margin-bottom: 15px;"></div>
+            <button id="close-storage-btn" class="menu-btn back-btn" style="width: 100%;">Назад в меню</button>
+        </div>
+
+        <div id="squad-heroes-spec-screen" class="game-window" style="display: none;">
+            <h2>Военный Лагерь</h2>
+            <span class="subtitle">Тренировка и развитие характеристик отряда</span>
+            <div id="heroes-upgrade-list-container" style="margin-bottom: 15px;"></div>
+            <button id="close-heroes-spec-btn" class="menu-btn back-btn" style="width: 100%;">Назад в меню</button>
+        </div>
+
+        <div id="missions-screen" class="game-window" style="display: none;">
+            <h2>Поручения Города</h2>
+            <span class="subtitle">Контракты Абхирамбурга</span>
+            <div id="missions-list-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 55vh; overflow-y: auto; margin-bottom: 15px;"></div>
+            <button id="close-missions-btn" class="menu-btn back-btn" style="width: 100%;">Назад в меню</button>
+        </div>
+
+        <div id="chronicle-screen" class="game-window" style="display: none;">
+            <h2>Летопись Цитадели</h2>
+            <span class="subtitle">История ваших великих свершений</span>
+            <div id="chronicle-list-container" style="text-align: left; font-size: 11px; max-height: 50vh; overflow-y: auto; background: rgba(0,0,0,0.4); padding: 8px; border: 1px solid #3a3025; display: flex; flex-direction: column; gap: 4px; margin-bottom: 15px;"></div>
+            <div style="display: flex; gap: 8px; width: 100%;">
+                <button id="clear-chronicle-btn" class="menu-btn" style="font-size: 12px; padding: 10px; background: #421e1e; border-color: #6e3131;">Очистить</button>
+                <button id="close-chronicle-btn" class="menu-btn back-btn" style="width: 100%; margin-top: 0; padding: 10px;">Закрыть</button>
             </div>
         </div>
 
-        <!-- Контейнеры экранов -->
-        <div id="dynamic-town-screens" style="display: none;"></div>
-        <div id="squad-screen" class="game-window" style="display: none;"></div>
-        <div id="dynamic-combat-screen" style="display: none;"></div>
-    </div>
-</body>
-</html>
+        <div id="settings-screen" class="game-window" style="display: none;">
+            <h2>⚙️ Звуковой Пульт</h2>
+            <span class="subtitle">Настройка частот и громкости движка</span>
+            <div style="display: flex; flex-direction: column; gap: 12px; text-align: left; color: #cdb38c; font-size: 13px; margin-bottom: 20px;">
+                <div>
+                    <label>Громкость Эмбиента:</label>
+                    <input type="range" id="volume-music-slider" min="0" max="100" style="width: 100%; accent-color: #e6c280;">
+                </div>
+                <div>
+                    <label>Громкость Эффектов Рун:</label>
