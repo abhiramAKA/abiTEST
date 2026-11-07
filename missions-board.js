@@ -67,12 +67,9 @@ function renderMissionsDOM() {
         let actionHTML = '';
         if (isThisMissionActive) {
             const startTimestamp = parseInt(localStorage.getItem(`khamach_mission_start_${mission.id}`) || '0');
-            const elapsed = Date.now() - startTimestamp;
-            const remaining = Math.max(0, mission.durationMs - elapsed);
+            const remaining = Math.max(0, mission.durationMs - (Date.now() - startTimestamp));
             if (remaining > 0) {
-                const min = Math.floor(remaining / 60000);
-                const sec = Math.floor((remaining % 60000) / 1000);
-                actionHTML = `<div style="color:#ff4500; font-weight:bold; font-size:11px; text-align:center; padding:4px; border:1px dashed #ff4500;">⏱️ В пути: ${min.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}</div>`;
+                actionHTML = `<div style="color:#ff4500; font-weight:bold; font-size:11px; text-align:center; padding:4px; border:1px dashed #ff4500;">⏱️ В пути: ${Math.floor(remaining / 60000).toString().padStart(2,'0')}:${Math.floor((remaining % 60000) / 1000).toString().padStart(2,'0')}</div>`;
             }
         } else if (globalMissionActive) {
             actionHTML = `<button class="menu-btn disabled" style="padding:4px; font-size:11px;" disabled>Очередь занята</button>`;
@@ -88,7 +85,7 @@ function renderMissionsDOM() {
                 <span style="color: #ffd700;">🪙 ${calculatedReward}</span>
             </div>
             <div style="font-size: 11px; color: #bfae96; line-height: 1.2;">${mission.text}</div>
-            <div style="font-size: 10px; color: #ffb3ba;">Усталость: ${currentFatigue}% (Доход: ${Math.round(reductionMultiplier * 100)}%)</div>
+            <div style="font-size: 10px; color: #ffb3ba;">Усталость: ${currentFatigue}%</div>
             <div style="margin-top: 2px;">${actionHTML}</div>
         `;
         container.appendChild(card);
@@ -98,21 +95,21 @@ function renderMissionsDOM() {
 function triggerBoardRerollByLoot() {
     const costData = getCurrentResetResourceCost();
     const currentResCount = typeof getPlayerResource === 'function' ? getPlayerResource(costData.key) : 0;
-    if (currentResCount < 1) {
-        alert(`Недостаточно трофеев! Требуется 1 шт. ${costData.icon} ${costData.name}.`); return;
-    }
+    if (currentResCount < 1) { alert(`Недостаточно трофеев!`); return; }
+    
     let activeMissionsJSON = localStorage.getItem('khamach_active_triad_ids');
     if (activeMissionsJSON) {
         try {
             let triad = JSON.parse(activeMissionsJSON);
-            let hasActive = triad.some(mId => localStorage.getItem(`khamach_mission_active_${mId}`) === 'true');
-            if (hasActive) { alert("Нельзя сбросить доску, пока идет выполнение контракта!"); return; }
+            if (triad.some(mId => localStorage.getItem(`khamach_mission_active_${mId}`) === 'true')) {
+                alert("Нельзя сбросить доску, пока идет выполнение контракта!"); return;
+            }
         } catch(e) {}
     }
-    if (confirm(`Потратить 1 шт. ${costData.icon} ${costData.name} для смены списка поручений?`)) {
+    if (confirm(`Сменить список поручений за 1 шт. ${costData.icon}?`)) {
         if (typeof addPlayerResource === 'function') addPlayerResource(costData.key, -1);
         localStorage.removeItem('khamach_active_triad_ids');
-        if (typeof addChronicleLog === 'function') addChronicleLog(`РЕРOЛЛ: Смена доски за 1 шт. ${costData.name}.`);
+        if (typeof addChronicleLog === 'function') addChronicleLog(`РЕРOЛЛ: Смена доски.`);
         renderMissionsDOM();
     }
 }
