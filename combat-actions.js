@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УЛЬТИМЕЙТОВ И ИСХОДОВ БИТВЫ (ИСПРАВЛЕН - v5.7.37-FIX)
+   КХАМАЧ — МОДУЛЬ УЛЬТИМЕЙТОВ И ИСХОДОВ БИТВЫ (ИСПРАВЛЕН - v5.7.38-FIX)
    ========================================================================== */
 
 function activateHeroSuperpower(heroId) {
@@ -52,20 +52,25 @@ function checkBattleResolution() {
             addChronicleLog(`ПОБЕДА: Ликвидирован дракон Тира ${activeSessionLevel}. На склад зачислена 1 шт. материала: ${lootName}`);
         }
         
-        localStorage.setItem('khamach_combat_tutorial_done', 'true');
-        if (typeof saveCompletedTier === 'function') saveCompletedTier(activeSessionLevel);
-        if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
-        
-        // КРИТИЧЕСКИЙ ФИКС: alert() полностью удален для бесшовного перехода на Спортзал!
-        window.location.href = 'gate.html?t=' + Date.now();
+        const firstBattleDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
+        const missionsDone = localStorage.getItem('khamach_missions_tutorial_done') === 'true';
+
+        if (!firstBattleDone) {
+            localStorage.setItem('khamach_combat_tutorial_done', 'true');
+            window.location.href = 'gate.html?t=' + Date.now();
+        } else if (!missionsDone) {
+            window.location.href = 'gate.html?t=' + Date.now();
+        } else {
+            // Если и первый бой выигран, и боец уже отправлен на Поручение (Этап 4) — открываем полный Хаб!
+            localStorage.setItem('khamach_full_onboarding_complete', 'true');
+            window.location.href = 'hub.html?t=' + Date.now();
+        }
     } else if (combatData.squad.every(hero => hero.hp <= 0)) {
         let id = window.setTimeout(function() {}, 0);
         while (id--) {
             window.clearTimeout(id);
         }
-
         alert("ОТРЯД ПАЛ В БИТВЕ! Попробуйте еще раз.");
-        if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
         window.location.href = 'gate.html?t=' + Date.now();
     }
 }
