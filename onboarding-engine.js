@@ -1,10 +1,9 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫДЕЛЕННЫЙ ДВИЖОК ПОЭТАПНОГО ОБУЧЕНИЯ (ОБНОВЛЕН - v5.7.37-FIX)
+   КХАМАЧ — ВЫДЕЛЕННЫЙ ДВИЖОК ПОЭТАПНОГО ОБУЧЕНИЯ (ОБНОВЛЕН - v5.7.38-FIX)
    ========================================================================== */
 
-window.GAME_VERSION = "v5.7.37-FIX";
+window.GAME_VERSION = "v5.7.38-FIX";
 
-// Встроенный автономный пул для гарантированной отрисовки карточек во время онбординга
 const ONBOARDING_MISSIONS_LOCAL_POOL = [
     { id: "m_t1", allowedHero: "tank", heroName: "Защитник", heroIcon: "🛡️", reward: 133, text: "Кузнец просит придержать тяжелую наковальню и разгрузить слитки стали.", title: "Помощь в кузнице" },
     { id: "m_d1", allowedHero: "damage", heroName: "Воин", heroIcon: "🔥", reward: 133, text: "Дровосеки боятся идти на вырубку из-за расплодившихся диких волков.", title: "Очистка лесопилки" },
@@ -65,7 +64,17 @@ function launchMissions() {
     const container = document.getElementById('missions-list-container');
     if (container) {
         container.innerHTML = '';
-        ONBOARDING_MISSIONS_LOCAL_POOL.forEach(mission => {
+        
+        // ВЫБОР ДВУХ СЛУЧАЙНЫХ ПОРУЧЕНИЙ ИЗ ПУЛА
+        let selectedMissions = [];
+        let tempPool = [...ONBOARDING_MISSIONS_LOCAL_POOL];
+        for (let i = 0; i < 2; i++) {
+            const randIdx = Math.floor(Math.random() * tempPool.length);
+            selectedMissions.push(tempPool[randIdx]);
+            tempPool.splice(randIdx, 1);
+        }
+
+        selectedMissions.forEach(mission => {
             const currentFatigue = Math.min(100, Math.max(0, parseInt(localStorage.getItem('khamach_fatigue_' + mission.allowedHero) || '0')));
             const calculatedReward = Math.max(0, Math.round(mission.reward * (1 - (currentFatigue / 100))));
             
@@ -95,13 +104,17 @@ function executeOnboardingMission(missionId, heroId, finalExpectedReward) {
     const currentFatigue = Math.min(100, Math.max(0, parseFloat(localStorage.getItem(`khamach_fatigue_${heroId}`) || '0')));
     localStorage.setItem(`khamach_fatigue_${heroId}`, Math.min(100, Math.round(currentFatigue + 15)));
     
+    // Переводим обучение на финальный ЭТАП 4 (Новый бой усечённым составом)
     localStorage.setItem('khamach_missions_tutorial_done', 'true');
-    window.location.href = 'hub.html?t=' + Date.now();
+    
+    document.getElementById('missions-screen').style.display = 'none';
+    window.location.href = 'gate.html?t=' + Date.now();
 }
 
 document.addEventListener("DOMContentLoaded", function() {
     const isVictory = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
     const isTrained = localStorage.getItem('khamach_training_tutorial_done') === 'true';
+    const isMissionsDone = localStorage.getItem('khamach_missions_tutorial_done') === 'true';
     const btnZone = document.getElementById('onboarding-buttons-zone');
     
     if (!isVictory) {
@@ -111,10 +124,16 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('onboarding-subtitle').innerText = "Управление Прогрессом";
         document.getElementById('onboarding-description').innerText = "Дракон повержен! На склад доставлены первые трофеи. Отправляйтесь прямиком в Спортзал, чтобы развить навыки и поднять уровень того героя, на прокачку которого у вас хватает добытых материалов.";
         btnZone.innerHTML = `<button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Спортзал" onclick="loadGameModulesAndExecute('camp')">🏋️</button>`;
-    } else {
+    } else if (!isMissionsDone) {
         document.getElementById('onboarding-title').innerText = "РАТУША";
         document.getElementById('onboarding-subtitle').innerText = "Городские Контракты";
-        document.getElementById('onboarding-description').innerText = "Герой успешно развил свои навыки! Теперь Цитадели нужно золото для полноценного восстановления инфраструктуры. Загляните на Доску Поручений и отправьте свободного бойца на его первое оплачиваемое задание.";
+        document.getElementById('onboarding-description').innerText = "Герой успешно развил свои навыки! Теперь Цитадели нужно золото для восстановления инфраструктуры. Загляните на Доску Поручений и отправьте свободного бойца на его первое оплачиваемое задание.";
         btnZone.innerHTML = `<button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Поручения" onclick="loadGameModulesAndExecute('missions')">💰</button>`;
+    } else {
+        // ЭТАП 4: Возврат вулкана, боец ушёл, команда в меньшинстве
+        document.getElementById('onboarding-title').innerText = "В ПУТИ";
+        document.getElementById('onboarding-subtitle').innerText = "Горнило Ждёт";
+        document.getElementById('onboarding-description').innerText = "Твой герой ушёл выполнять поручение, он вернётся через час с золотом. Пока ты можешь дальше отправить свою команду сражаться с драконом, но имей в виду, что у тебя стало на одного бойца меньше!";
+        btnZone.innerHTML = `<button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="В бой!" onclick="loadGameModulesAndExecute('battle')">🌋</button>`;
     }
 });
