@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УЛЬТИМЕЙТОВ И ИСХОДОВ БИТВЫ (ВЫНЕСЕННЫЙ БЛОК - v5.7.0-STABLE)
+   КХАМАЧ — МОДУЛЬ УЛЬТИМЕЙТОВ И ИСХОДОВ БИТВЫ (ИСПРАВЛЕН - v5.7.21-FIX)
    ========================================================================== */
 
 function activateHeroSuperpower(heroId) {
@@ -8,7 +8,7 @@ function activateHeroSuperpower(heroId) {
     
     hero.sp = 0;
     if (typeof playMatch3Sound === 'function') playMatch3Sound(hero.icon);
-    
+
     const damageLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('damage') : 0;
     const archerLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('archer') : 0;
     const mageLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('mage') : 0;
@@ -32,6 +32,12 @@ function activateHeroSuperpower(heroId) {
 
 function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
+        // КРИТИЧЕСКИЙ ФИКС: Принудительно убиваем все фоновые таймауты боя, чтобы интерфейс дракона не вылезал в меню
+        let id = window.setTimeout(function() {}, 0);
+        while (id--) {
+            window.clearTimeout(id);
+        }
+
         const lootTypes = ['plasma', 'blood', 'scale', 'tears']; 
         const lootNames = ['🛡️ Плазма', '🔥 Кровь', '🪶 Чешуя', '💚 Слезы'];
         const randIndex = Math.floor(Math.random() * lootTypes.length);
@@ -47,16 +53,20 @@ function checkBattleResolution() {
             addChronicleLog(`ПОБЕДА: Ликвидирован дракон Тира ${activeSessionLevel}. На склад зачислена 1 шт. материала: ${lootName}`);
         }
         
-        // Закрываем обучение первого боя навсегда
         localStorage.setItem('khamach_combat_tutorial_done', 'true');
         if (typeof saveCompletedTier === 'function') saveCompletedTier(activeSessionLevel);
         if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
         
         alert(`ВЕЛИКАЯ ПОБЕДА! Дракон повержен!\n📦 На склад Цитадели доставлено: ${lootName} (1 шт).\n\nПоздравляем! Вам открыт полный доступ в Цитадель Абхирамбурга!`);
         
-        // Физический жесткий переход на полноценную страницу хаба с автосбросом кэша
         window.location.href = 'hub.html?t=' + Date.now();
     } else if (combatData.squad.every(hero => hero.hp <= 0)) {
+        // То же самое делаем при поражении во избежание багов залипания экрана дракона
+        let id = window.setTimeout(function() {}, 0);
+        while (id--) {
+            window.clearTimeout(id);
+        }
+
         alert("ОТРЯД ПАЛ В БИТВЕ! Попробуйте еще раз.");
         if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
         window.location.href = 'gate.html?t=' + Date.now();
