@@ -35,14 +35,9 @@
     </div>
 
     <script>
-        window.GAME_VERSION = "v5.7.29-FIX";
+        window.GAME_VERSION = "v5.7.30-FIX";
 
         function loadGameModulesAndExecute(callback) {
-            const windowEl = document.getElementById('onboarding-gothic-window');
-            if (windowEl && callback.name === 'launchBattle') {
-                windowEl.style.display = 'none';
-            }
-
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
             const scripts = [
                 'game.js', 'background.js', 'audio-engine.js', 'match3-fx.js',
@@ -70,6 +65,7 @@
         }
 
         function launchBattle() {
+            document.getElementById('onboarding-gothic-window').style.display = 'none';
             if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
             if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
             if (typeof showScreen === 'function') showScreen('combat-screen');
@@ -77,16 +73,14 @@
         }
 
         function launchCamp() {
-            if (typeof updateSquadHeroesSpecScreenDOM === 'function') updateSquadHeroesSpecScreenDOM();
-            if (typeof showScreen === 'function') showScreen('squad-heroes-spec-screen');
+            // Скрываем стартовую рамку, уступая место Спортзалу
+            document.getElementById('onboarding-gothic-window').style.display = 'none';
             
-            const closeBtn = document.getElementById('close-heroes-spec-btn');
-            if (closeBtn) {
-                closeBtn.onclick = function() {
-                    document.getElementById('squad-heroes-spec-screen').style.display = 'none';
-                    document.getElementById('onboarding-gothic-window').style.display = 'flex';
-                };
-            }
+            // Лениво собираем DOM спортзала, если он еще не создан
+            if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
+            
+            if (typeof updateSquadHeroesSpecScreenDOM === 'function') updateSquadHeroesSpecScreenDOM();
+            document.getElementById('squad-heroes-spec-screen').style.display = 'flex';
         }
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -100,12 +94,10 @@
             const btnZone = document.getElementById('onboarding-buttons-zone');
             
             if (!isVictory) {
-                // ЭТАП 1: Строго одна квадратная кнопка вулкана
                 btnZone.innerHTML = `
                     <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" onclick="loadGameModulesAndExecute(launchBattle)">🌋</button>
                 `;
             } else {
-                // ЭТАП 2: Убран вулкан, оставлен ТОЛЬКО ОДИН квадратик Спортзала
                 document.getElementById('onboarding-title').innerText = "ЦИТАДЕЛЬ";
                 document.getElementById('onboarding-subtitle').innerText = "Управление Прогрессом";
                 document.getElementById('onboarding-description').innerText = "Дракон повержен! На склад доставлены первые трофеи. Отправляйтесь прямиком в Спортзал, чтобы развить навыки и поднять уровень кого-то из ваших героев перед следующими походами.";
