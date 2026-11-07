@@ -5,7 +5,6 @@
 let activeSessionLevel = 1;
 
 function startCombatSession(level) {
-    // ИСПРАВЛЕНО: Полностью корректный синтаксис инициализации объекта стейта
     if (typeof combatData === 'undefined' || !combatData) {
         window.combatData = { currentRound: 1, squad: [] };
     }
@@ -107,12 +106,28 @@ function executeDragonTurnAI() {
     }
 
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
+    
     setTimeout(() => {
         if (dModel) dModel.className = 'dragon-idle';
-        combatData.currentRound++; combatData.playerAP = combatData.playerMaxAP;
-        if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
+        
+        // РЕЖИМ ОТЛАДКИ: Если босс или отряд мертвы, просто воскрешаем их ради бесконечного геймплея
+        if (combatData.dragonHP <= 0) {
+            alert("Дракон повержен! Воскрешаем его для продолжения теста.");
+            combatData.dragonHP = combatData.dragonMaxHP;
+        }
+        if (combatData.squad.every(h => h.hp <= 0)) {
+            alert("Ваш отряд пал! Восстанавливаем здоровье для продолжения теста.");
+            combatData.squad.forEach(h => h.hp = h.maxHP);
+        }
+
+        combatData.currentRound++; 
+        combatData.playerAP = combatData.playerMaxAP;
+        
+        // ИСПРАВЛЕНО: Принудительно снимаем блокировку и возвращаем управление игроку
+        isBoardLocked = false;
+        
         const apDisplay = document.getElementById('combat-ap-display');
         if (apDisplay) apDisplay.innerText = "Сделайте ход на поле!";
-        if (typeof checkBattleResolution === 'function') checkBattleResolution();
+        if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
     }, 1000);
 }
