@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Режим Отладки Боя</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v5.7.4-DEBUG";
+            window.GAME_VERSION = "v5.7.5-DEBUG";
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
             
             const link = document.createElement('link');
@@ -22,19 +22,15 @@
                 'match3-input.js', 'match3.js', 'match3-logic.js', 'match3-data.js',
                 'campaign.js', 'town-engine.js', 'town-chronicle.js',
                 'missions-pool.js', 'missions-engine.js', 'town-dom.js',
-                'squad-dom.js', 'combat-dom.js', 'missions-board.js',
+                'squad-dom.js', 'combat-popups.js', 'combat-dom.js', 'missions-board.js',
                 'squad-logic.js', 'squad-core.js', 'combat-actions.js', 
                 'combat.js', 'game-listeners.js'
             ];
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    // Создаем базовый контейнер состояния заранее
-                    window.combatData = { currentRound: 1, squad: [] };
-
+                    window.combatData = { currentRound: 1, squad: };
                     if (typeof initDispatcherModule === 'function') initDispatcherModule();
-                    
-                    // Жесткий принудительный вывод на экран боевого поля
                     if (typeof showScreen === 'function' && typeof startCombatSession === 'function') {
                         showScreen('combat-screen');
                         startCombatSession(1); 
@@ -56,14 +52,10 @@
 </head>
 <body>
     <canvas id="bg-canvas"></canvas>
-
     <div id="game-interface">
         <div id="main-menu" class="game-window" style="display: none; max-width: 380px;"></div>
         <div id="dragon-select-screen" class="game-window" style="display: none;"></div>
-        
-        <!-- Основной контейнер рендеринга боя -->
         <div id="dynamic-combat-screen"></div>
-        
         <div id="info-screen" class="game-window" style="display: none;"></div>
         <div id="mode-desc-screen" class="game-window" style="display: none;"></div>
     </div>
