@@ -4,11 +4,11 @@
 
 function injectCombatInterfaceBaseDOM() {
     const container = document.getElementById('dynamic-combat-screen');
-    if (!container) return;
+    if (!container || container.innerHTML.trim() !== '') return; // Защита от дублирования
 
     container.innerHTML = `
         <!-- ================= БОЕВОЙ ЭКРАН ================= -->
-        <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 8px 12px;">
+        <div id="combat-screen" class="game-window" style="display: flex; max-width: 460px; padding: 8px 12px;">
             <div id="dragon-raid-zone" style="position: relative;"></div>
 
             <!-- ПАНЕЛЬ БОССА С ВЕРХНИМ УПРАВЛЕНИЕМ -->
@@ -47,32 +47,31 @@ function injectCombatInterfaceBaseDOM() {
             <div class="combat-help-content">
                 <h2>ГОРНИЛО РУН</h2>
                 <span class="subtitle">Справочник Сил</span>
-                <div id="combat-help-text-container"></div>
+                <div id="combat-help-text-container">
+                    <div style="text-align: left; font-size: 13px; line-height: 1.4; display: flex; flex-direction: column; gap: 8px; color: #cdb38c;">
+                        <div>🛡️ <strong>Защитник:</strong> Блокирует урон Дракона.</div>
+                        <div>🔥 <strong>Воин:</strong> Наносит чистый урон.</div>
+                        <div>⚡ <strong>Стрелок:</strong> Ослепляет змея молнией.</div>
+                        <div>💚 <strong>Маг:</strong> Массовое исцеление.</div>
+                    </div>
+                </div>
                 <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в бой</button>
             </div>
         </div>
-
-        <!-- ================= ОКНО ОБУЧЕНИЯ ПЕРВОГО БОЯ ================= -->
-        <div id="combat-welcome-tutorial-screen" class="game-window combat-help-popup" style="display: none;">
-            <div class="combat-help-content" style="max-width: 380px; padding: 20px; text-align: center;">
-                <div style="font-size: 13px; color: #cdb38c; line-height: 1.5; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.5); padding: 14px; border: 1px solid #544432; border-radius: 4px; margin-bottom: 15px; text-align: left;">
-                    <div>⚡ <strong>1. Собирайте руны:</strong> Триады камней копят энергию SP для героев своего цвета (🔥 🛡️ ⚡ 💚). Ходы тратить на свайпы.</div>
-                    <div>👑 <strong>2. Бейте ультой:</strong> Когда шкала SP героя дойдет до 100%, <strong>НАЖМИТЕ НА КАРТОЧКУ БОЙЦА</strong> для сокрушительного удара!</div>
-                </div>
-                <button id="close-combat-tutorial-btn" class="menu-btn" style="width:100%; background: linear-gradient(to bottom, #1d3a1e, #0f2110); border-color: #316e34; padding: 10px;">В Бой!</button>
-            </div>
-        </div>
-
-        <!-- ================= ОКНО ОСОБЫХ КОМБИНАЦИЙ ================= -->
-        <div id="combat-combo-tutorial-screen" class="game-window combat-help-popup" style="display: none;">
-            <div class="combat-help-content" style="max-width: 380px; padding: 20px; text-align: center;">
-                <div style="font-size: 13px; color: #ffb3ba; line-height: 1.4; background: rgba(40,10,10,0.5); padding: 14px; border: 1px solid #6e3131; border-radius: 4px; margin-bottom: 15px; text-align: left;">
-                    Вы собрали усиленный ряд из 4 или 5 рун! В данный момент эти продвинутые комбинации <strong>неактивны</strong>. Чтобы разблокировать их истинную разрушительную силу, улучшайте и прокачивайте своих бойцов в Военном Лагере!
-                </div>
-                <button id="close-combat-combo-tutorial-btn" class="menu-btn" style="width:100%; background: linear-gradient(to bottom, #2d2621, #171311); padding: 10px;">Понятно</button>
-            </div>
-        </div>
     `;
+
+    // ЖЕСТКАЯ ПРИВЯЗКА КНОПОК ДЛЯ БЕЗБОЛЕЗНЕННОЙ ОТЛАДКИ
+    document.getElementById('combat-help-btn').onclick = function() {
+        document.getElementById('combat-help-screen').style.display = 'flex';
+    };
+    document.getElementById('close-combat-help-btn').onclick = function() {
+        document.getElementById('combat-help-screen').style.display = 'none';
+    };
+    document.getElementById('combat-escape-top-btn').onclick = function() {
+        if (confirm("Вы уверены, что хотите выйти в главное меню?")) {
+            window.location.reload();
+        }
+    };
 }
 
 function buildDragonDOM() {
@@ -92,34 +91,29 @@ function buildDragonDOM() {
     model.style.alignItems = 'center';
     model.style.justifyContent = 'center';
 
-    const fireFx = document.createElement('div');
-    fireFx.id = 'dragon-fire-fx';
-    fireFx.className = 'fire-breath-fx';
-
     container.appendChild(model);
-    container.appendChild(fireFx);
     raidZone.appendChild(container);
 }
 
 function updateCombatInterfaceDOM() {
     const hpBar = document.getElementById('boss-hp-bar');
     const hpText = document.getElementById('boss-hp-text');
-    if (hpBar && hpText) {
+    if (hpBar && hpText && combatData) {
         let pct = (combatData.dragonHP / combatData.dragonMaxHP) * 100;
         hpBar.style.width = pct + '%';
         hpText.innerText = `${combatData.dragonHP} / ${combatData.dragonMaxHP}`;
     }
     
     const roundDisp = document.getElementById('combat-round-display');
-    if (roundDisp) roundDisp.innerText = `Раунд: ${combatData.currentRound}`;
+    if (roundDisp && combatData) roundDisp.innerText = `Раунд: ${combatData.currentRound}`;
     
     const shieldDisp = document.getElementById('combat-shield-display');
-    if (shieldDisp) {
+    if (shieldDisp && combatData) {
         shieldDisp.style.display = combatData.tankTaunting ? 'block' : 'none';
     }
     
     const squadMatrix = document.getElementById('squad-matrix');
-    if (!squadMatrix) return;
+    if (!squadMatrix || !combatData || !combatData.squad) return;
     
     squadMatrix.innerHTML = '';
     combatData.squad.forEach(hero => {
@@ -136,8 +130,9 @@ function updateCombatInterfaceDOM() {
         let hpPct = (hero.hp / hero.maxHP) * 100;
         let spPct = (hero.sp / hero.maxSP) * 100;
         
-        const heroLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(hero.id) : 0;
-        const currentFatigue = Math.min(100, Math.max(0, parseInt(localStorage.getItem(`khamach_fatigue_${hero.id}`) || '0')));
+        const heroLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(hero.id) : 1;
+        const rawFatigue = localStorage.getItem(`khamach_fatigue_${hero.id}`) || '0';
+        const currentFatigue = Math.min(100, Math.max(0, parseInt(rawFatigue)));
         
         card.innerHTML = `
             <div class="hero-card-avatar" style="color: ${hero.color};">${hero.icon}</div>
@@ -163,6 +158,4 @@ function updateCombatInterfaceDOM() {
         });
         squadMatrix.appendChild(card);
     });
-    
-    if (typeof setupCombatHelpListeners === 'function') setupCombatHelpListeners();
 }
