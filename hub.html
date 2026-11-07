@@ -2,14 +2,14 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v5.5.0-BETA";
+            window.GAME_VERSION = "v5.7.25-FIX";
             
             if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
                 localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
@@ -38,20 +38,16 @@
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
-                    
-                    const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
-                    if (!tutorialDone) {
-                        ['to-squad-btn', 'to-storage-btn', 'to-chronicle-btn', 'to-clans-btn'].forEach(id => {
-                            const btn = document.getElementById(id);
-                            if (btn) btn.classList.add('progression-locked');
-                        });
-                    }
                     return;
                 }
                 
                 const script = document.createElement('script');
                 script.src = scripts[index] + '?v=' + window.GAME_VERSION + '&t=' + enforceBuster;
                 script.async = false; 
+                script.onerror = function() {
+                    console.warn("Пропущен опциональный модуль:", scripts[index]);
+                    injectScript(index + 1);
+                };
                 script.onload = function() { injectScript(index + 1); };
                 document.head.appendChild(script);
             }
@@ -70,9 +66,9 @@
         <!-- ================= ГЛАВНОЕ МЕНЮ ИГРЫ ================= -->
         <div id="main-menu" class="game-window" style="display: flex;">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px; padding: 0 4px; background: rgba(20, 15, 12, 0.5); border-bottom: 1px double #544432; box-sizing: border-box;">
-                <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0</span>
+                <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;">🪙 0</span>
                 <h1 style="font-size: 24px; margin: 0; letter-spacing: 2px; padding: 4px 0;">КХАМАЧ</h1>
-                <span id="team-fatigue-display" style="color: #ffb3ba; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffb3ba'">🥱 0%</span>
+                <span id="team-fatigue-display" style="color: #ffb3ba; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;">🥱 0%</span>
             </div>
             
             <span class="subtitle" style="font-size: 11px; margin-bottom: 10px; padding-bottom: 4px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
@@ -82,16 +78,11 @@
                 <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
             </div>
 
-            <div class="menu-emoji-grid">
-                <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
-                <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
-                <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
-                <button id="to-storage-btn" class="emoji-grid-btn">🏋️</button>
-                <button id="to-chronicle-btn" class="emoji-grid-btn">📜</button>
-                <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
+            <div id="main-menu-grid" class="menu-emoji-grid">
+                <!-- Сетка из 6 кнопок города всегда рендерится здесь по умолчанию -->
             </div>
 
-            <div id="game-version" class="version-footer">v5.5.0-BETA</div>
+            <div id="game-version" class="version-footer">v5.7.25-FIX</div>
         </div>
 
         <!-- ================= АВТОНОМНЫЕ СЛОТЫ ОКОН ================= -->
