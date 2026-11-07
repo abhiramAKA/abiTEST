@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИНТЕРФЕЙСА ДОСКИ ПОРУЧЕНИЙ (DOM) (v5.6.0-BETA)
+   КХАМАЧ — МОДУЛЬ ИНТЕРФЕЙСА ДОСКИ ПОРУЧЕНИЙ (DOM) (ИСПРАВЛЕННЫЙ СИНТАКСИС)
    ========================================================================== */
 
 function renderMissionsDOM() {
@@ -21,7 +21,7 @@ function renderMissionsDOM() {
     }
     
     let activeMissionsJSON = localStorage.getItem('khamach_active_triad_ids');
-    let currentTriad = []; // Исправлено: синтаксический маркер восстановлен
+    let currentTriad = [];
     if (activeMissionsJSON) {
         try { currentTriad = JSON.parse(activeMissionsJSON); } catch(e) { currentTriad = []; }
     }
