@@ -1,47 +1,24 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.9.17-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v5.4.0)
    ========================================================================== */
 
 const TOWN_BUILDING_PRICES = {
-    1: 100,
-    2: 300,
-    3: 900,
-    4: 2700,
-    5: 11000,
-    6: 30000,
-    7: 75000,
-    8: 125000,
-    9: 200000,
-    10: 310000,
-    11: 540000,
-    12: 850000,
-    13: 1385000,
-    14: 2300000,
-    15: 3590500
+    1: 100, 2: 300, 3: 900, 4: 2700, 5: 11000, 6: 30000, 7: 75000,
+    8: 125000, 9: 200000, 10: 310000, 11: 540000, 12: 850000,
+    13: 1385000, 14: 2300000, 15: 3590500
 };
 
 const INLINE_TOWN_TEXTS = {
     mainInfo: `<p><strong>«КХАМАЧ: Восхождение Рейдов»</strong></p><p>В недрах древних подземелий Абхирамбурга пробудился великий закон змея. Соберите свой верный отряд, заряжайте шкалы суперсил через камни стихий и сокрушите огнедышащих тварей в пошаговых тактических битвах Горнила!</p>`,
-    combatHelp: `
-        <div style="text-align: left; font-size: 13px; line-height: 1.4; display: flex; flex-direction: column; gap: 8px; color: #cdb38c;">
-            <div>🛡️ <strong>Защитник (Синие руны):</strong> Принимает весь урон Дракона на себя, закрывая союзников.</div>
-            <div>🔥 <strong>Воин (Красные руны):</strong> Наносит Дракону чистый разрушительный урон.</div>
-            <div>⚡ <strong>Стрелок (Желтые руны):</strong> Ослепляет Дракона молнией, снижая его атаку в два раза.</div>
-            <div>💚 <strong>Маг (Зеленые руны):</strong> Накладывает мощное массовое исцеление на весь отряду.</div>
-        </div>
-    `
+    combatHelp: `<div style="text-align: left; font-size: 13px; line-height: 1.4; display: flex; flex-direction: column; gap: 8px; color: #cdb38c;"><div>🛡️ <strong>Защитник:</strong> Блокирует урон Дракона.</div><div>🔥 <strong>Воин:</strong> Наносит чистый урон.</div><div>⚡ <strong>Стрелок:</strong> Ослепляет змея молнией.</div><div>💚 <strong>Маг:</strong> Массовое исцеление.</div></div>`
 };
 
 const INLINE_MODE_DESCRIPTIONS = {
-    clans: { 
-        title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", 
-        reqText: "Знамена великих гильдий замерли под сводами залов безмолвия. Нас ждут Хроники Разломов и великие клановые приключения!<br><br>🛡️ <strong>Что дадут Кланы:</strong><br>• 🌌 <strong>Врата Разломов:</strong> Строительство порталов для совместных рейдов в другие измерения.<br>• ⚔️ <strong>Битвы с Боссами:</strong> Глобальные сражения с великими змеями и тиранами ради мифических наград.<br>• 🔨 <strong>Древний Кузнец:</strong> Перенесенный мастер кузни выкует неразрушимые доспехи и разящее оружие из костей чудовищ.<br>• ⚖️ <strong>Торговый Шлюз и Купцы:</strong> Появление бродячих торговцев и возможность обмениваться редкими товарами и ресурсами с соклановцами.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Клановый шлюз открывается на 12-м уровне развития отряда!</strong>", 
-        isLocked: true 
-    },
-    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", isLocked: false, isHero: false, heroId: "alchemy", lore: "Полки уставлены древними фолиантами и склянками со светящимися эссенциями. Необходима для будущей дистилляции и переплавки драконьих ресурсов." },
+    clans: { title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", reqText: "⚠️ Доступ заблокирован. Клановый шлюз открывается на 12-м уровне развития отряда!", isLocked: true },
+    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", isLocked: false, isHero: false, heroId: "alchemy", lore: "Полки уставлены древними фолиантами. Необходима для будущей дистилляции ресурсов." },
     tank: { title: "🛡️ ГАРНИЗОН", isLocked: false, isHero: true, heroId: "tank" },
     damage: { title: "🔥 КАЗАРМЫ", isLocked: false, isHero: true, heroId: "damage" },
-    archer: { title: "⚡ СТРЕЛЬБИЩЕ", isLocked: false, isHero: true, heroId: "archer" },
+    archer: { title: "⚡ СТРУКТУРА СТРЕЛЬБИЩА", isLocked: false, isHero: true, heroId: "archer" },
     mage: { title: "💚 ОБИТЕЛЬ", isLocked: false, isHero: true, heroId: "mage" }
 };
 
@@ -51,54 +28,14 @@ window.addPlayerGold = function(amount) { localStorage.setItem('khamach_gold', w
 window.getPlayerResource = function(key) { return parseInt(localStorage.getItem(`khamach_res_${key}`) || '0'); };
 window.addPlayerResource = function(key, amount) { localStorage.setItem(`khamach_res_${key}`, window.getPlayerResource(key) + amount); if (typeof window.updateTownGoldDisplay === 'function') window.updateTownGoldDisplay(); };
 
-window.openModeDescription = function(id) {
-    window.currentOpenedModeKey = id;
-    const config = INLINE_MODE_DESCRIPTIONS[id];
-    if (!config) return;
-
-    const titleEl = document.getElementById('mode-desc-title');
-    const textEl = document.getElementById('mode-desc-text');
-    const buyBtn = document.getElementById('mode-buy-btn');
-
-    if (titleEl) titleEl.innerText = config.title;
-
-    if (textEl) {
-        if (config.isLocked) {
-            textEl.innerHTML = config.reqText;
-            if (buyBtn) buyBtn.style.display = 'none';
-            showScreen('mode-desc-screen');
-            return;
-        }
-
-        const bldId = config.heroId || id;
-        const bldLvl = parseInt(localStorage.getItem(`khamach_build_${bldId}`) || '0');
-        const data = typeof SQUAD_HERO_LORE !== 'undefined' ? SQUAD_HERO_LORE[bldId === 'mage' ? 'damage_mage' : bldId] : null;
-        
-        let loreText = config.lore || (data ? data.lore : "Оборонительное или тренировочное сооружение Цитадели.");
-        let bonusText = data ? `<br><br><span style='color:#ffb3ba;'>Прогресс бойца: ${data.statBonus}</span>` : "";
-        let instructionText = config.heroId !== "alchemy" ? "<br><br><span style='color:#cdb38c;'>⚠️ Данное здание необходимо для снятия ограничений и расширения текущего потолка прокачки бойца внутри Военного Лагеря.</span>" : "";
-
-        if (bldLvl === 0) {
-            let price = TOWN_BUILDING_PRICES[1];
-            textEl.innerHTML = `${loreText}${instructionText}${bonusText}`;
-            if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ ПОСТРОИТЬ (🪙 ${price})`; }
-        } else if (bldLvl >= 15) {
-            textEl.innerHTML = `${loreText}<br><br><span style='color:#2ecc71;'>Максимальный 15 уровень модернизации здания достигнут! Лимиты расширены до предела.</span>`;
-            if (buyBtn) buyBtn.style.display = 'none';
-        } else {
-            let nextPrice = TOWN_BUILDING_PRICES[bldLvl + 1];
-            textEl.innerHTML = `${loreText}${instructionText}<br><br><span style='color:#ffd700;'>Текущий уровень строения: ${bldLvl}</span>${bonusText}`;
-            if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ УЛУЧШИТЬ ДО УР. ${bldLvl + 1} (🪙 ${nextPrice.toLocaleString('ru-RU')})`; }
-        }
-    }
-    showScreen('mode-desc-screen');
-};
-
 window.updateTownGoldDisplay = function() {
+    // 1. Обновляем счетчики золота по всему DOM
+    const goldVal = window.getPlayerGold();
     document.querySelectorAll('.gold-counter-display').forEach(el => { 
-        el.innerText = `🪙 ${window.getPlayerGold().toLocaleString('ru-RU')}`; 
+        el.innerText = `🪙 ${goldVal.toLocaleString('ru-RU')}`; 
     });
     
+    // 2. Считываем усталость
     const tFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_tank') || '0'));
     const dFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_damage') || '0'));
     const aFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_archer') || '0'));
@@ -119,5 +56,44 @@ window.updateTownGoldDisplay = function() {
             <div style="display:flex; justify-content:space-between;"><span>💚 Maг:</span><strong>${mFat}%</strong></div>
         `;
     }
-    if (typeof window.updateStorageScreenDOM === 'function') window.updateStorageScreenDOM();
+    if (typeof window.updateStorageScreenDOM === 'function') {
+        try { window.updateStorageScreenDOM(); } catch(e){}
+    }
+};
+
+window.openModeDescription = function(id) {
+    window.currentOpenedModeKey = id;
+    const config = INLINE_MODE_DESCRIPTIONS[id];
+    if (!config) return;
+
+    const titleEl = document.getElementById('mode-desc-title');
+    const textEl = document.getElementById('mode-desc-text');
+    const buyBtn = document.getElementById('mode-buy-btn');
+
+    if (titleEl) titleEl.innerText = config.title;
+    if (textEl) {
+        if (config.isLocked) {
+            textEl.innerHTML = config.reqText;
+            if (buyBtn) buyBtn.style.display = 'none';
+            showScreen('mode-desc-screen');
+            return;
+        }
+        const bldId = config.heroId || id;
+        const bldLvl = parseInt(localStorage.getItem(`khamach_build_${bldId}`) || '0');
+        let loreText = config.lore || "Оборонительное сооружение Цитадели.";
+
+        if (bldLvl === 0) {
+            let price = TOWN_BUILDING_PRICES[1];
+            textEl.innerHTML = `${loreText}`;
+            if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ ПОСТРОИТЬ (🪙 ${price})`; }
+        } else if (bldLvl >= 15) {
+            textEl.innerHTML = `${loreText}<br><br>Максимальный уровень строения достигнут!`;
+            if (buyBtn) buyBtn.style.display = 'none';
+        } else {
+            let nextPrice = TOWN_BUILDING_PRICES[bldLvl + 1];
+            textEl.innerHTML = `${loreText}<br><br>Текущий уровень: ${bldLvl}`;
+            if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ УЛУЧШИТЬ ДО УР. ${bldLvl + 1} (🪙 ${nextPrice.toLocaleString('ru-RU')})`; }
+        }
+    }
+    showScreen('mode-desc-screen');
 };
