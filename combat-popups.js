@@ -28,8 +28,8 @@ function injectCombatPopupsDOM() {
                 <h2>ОБУЧЕНИЕ БОЯ</h2>
                 <span class="subtitle">Первый Вход в Горнило</span>
                 <div style="font-size: 13px; color: #cdb38c; line-height: 1.5; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.5); padding: 14px; border: 1px solid #544432; border-radius: 4px; margin-bottom: 15px; text-align: left;">
-                    <div>⚡ <strong>1. Собирайте руны:</strong> Триады камней копят энергию SP для героев своего цвета (🔥 🛡️ ⚡ 💚). Тратьте Очки Действия на свайпы.</div>
-                    <div>👑 <strong>2. Бейте ультой:</strong> Когда шкала SP героя дойдет до 100%, <strong>НАЖМИТЕ НА КАРТОЧКУ БОЙЦА</strong> для сокрушительного удара!</div>
+                    <div><strong>1. Собирайте одинаковые триады рун.</strong> Это не наносит урона, но копит энергию для соответсвующих героев твоего боевого отряда (🔥 🛡️ ⚡ 💚).</div>
+                    <div><strong>2. Нажимайте на карточку героя, когда она засияет!</strong> Значит шкала энергии дошла до 100%, и можно применить способность героя.</div>
                 </div>
                 <button id="close-combat-tutorial-btn" class="menu-btn" style="width:100%; background: linear-gradient(to bottom, #1d3a1e, #0f2110); border-color: #316e34; padding: 10px;">В Бой!</button>
             </div>
