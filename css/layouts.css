@@ -1,5 +1,5 @@
 /* ==========================================================================
-   2. СТРУКТУРА ОКОН, ВЫРАВНИВАНИЕ И ЖИВОЙ ФОН (ОБНОВЛЕН - v5.5.3-BETA)
+   2. СТРУКТУРА ОКОН, ВЫРАВНИВАНИЕ И ЖИВОЙ ФОН (ОБНОВЛЕН - v5.5.4-BETA)
    ========================================================================== */
 
 #bg-canvas {
@@ -110,7 +110,7 @@
     pointer-events: none !important;
 }
 
-/* КАРТОЧКИ ХУДОЖЕСТВЕННЫХ ГЛАВ ДЛЯ ПРИКЛЮЧЕНИЙ С ВНУТРЕННИМ СКРОЛЛОМ */
+/* КАРТОЧКИ ХУДОЖЕСТВЕННЫХ ГЛАВ С СОХРАНЕНИЕМ КРУПНОГО ШРИФТА 12PX */
 .chapter-gothic-card {
     background: linear-gradient(to bottom, #241d19, #0d0a08);
     border: 1px solid #4a3f2c;
@@ -118,7 +118,7 @@
     padding: 12px;
     margin-bottom: 8px;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
     cursor: pointer;
     text-align: left;
