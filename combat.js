@@ -138,6 +138,7 @@ function executeDragonTurnAI() {
         const apDisplay = document.getElementById('combat-ap-display');
         if (apDisplay) apDisplay.innerText = "Сделайте ход на поле!";
         if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
-        if (typeof renderBoardDOM === 'function') renderBoardDOM(false, []); 
+        if (typeof renderBoardDOM === 'function') renderBoardDOM(false,); 
     }, 1000);
 }
+
