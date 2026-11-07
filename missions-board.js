@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ГРАФИЧЕСКИЙ МОДУЛЬ ИНТЕРФЕЙСА ПОРУЧЕНИЙ (ОБНОВЛЕН - v1.2.0-BETA)
+   КХАМАЧ — МОДУЛЬ ИНТЕРФЕЙСА ДОСКИ ПОРУЧЕНИЙ (DOM) (v5.2.4-BETA)
    ========================================================================== */
 
 function renderMissionsDOM() {
@@ -7,14 +7,13 @@ function renderMissionsDOM() {
     if (!container) return;
     container.innerHTML = '';
     
-    // Блокировка поручений до первого боя с драконом
     if (!localStorage.getItem('khamach_combat_tutorial_done')) {
         container.innerHTML = `
-            <div style="padding: 20px 10px; text-align: center; color: #ff6666; font-family: 'Georgia', serif;">
+            <div style="padding: 20px 10px; text-align: center; color: #ff6666;">
                 <div style="font-size: 32px; margin-bottom: 10px;">📜</div>
-                <div style="font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; color: #e6c280;">Доска пуста</div>
+                <div style="font-size: 14px; font-weight: bold; text-transform: uppercase; color: #e6c280;">Доска пуста</div>
                 <p style="font-size: 12px; line-height: 1.5; color: #bfae96; margin: 0;">
-                    Горожане Абхирамбурга еще не знают вашего имени. Проявите отвагу и совершите свой <strong>первый боевой рейд против Дракона</strong>, чтобы открыть доступ к городским поручениям!
+                    Совершите свой <strong>первый боевой рейд против Дракона</strong>, чтобы открыть доступ к городским поручениям!
                 </p>
             </div>
         `;
@@ -23,7 +22,6 @@ function renderMissionsDOM() {
     
     let activeMissionsJSON = localStorage.getItem('khamach_active_triad_ids');
     let currentTriad = [];
-    
     if (activeMissionsJSON) {
         try { currentTriad = JSON.parse(activeMissionsJSON); } catch(e) { currentTriad = []; }
     }
@@ -41,7 +39,6 @@ function renderMissionsDOM() {
     }
     
     let globalMissionActive = currentTriad.some(mId => localStorage.getItem(`khamach_mission_active_${mId}`) === 'true');
-    
     const costData = getCurrentResetResourceCost();
     const currentResCount = typeof getPlayerResource === 'function' ? getPlayerResource(costData.key) : 0;
     
@@ -60,26 +57,18 @@ function renderMissionsDOM() {
         
         const isThisMissionActive = localStorage.getItem(`khamach_mission_active_${mission.id}`) === 'true';
         const isHeroBusy = localStorage.getItem(`khamach_hero_busy_${mission.allowedHero}`) === 'true';
-        
         const currentFatigue = Math.round(getHeroFatigue(mission.allowedHero));
         const reductionMultiplier = 1 - (currentFatigue / 100);
         const calculatedReward = Math.max(0, Math.round(mission.reward * reductionMultiplier));
         
         const card = document.createElement('div');
-        card.style.background = "rgba(25, 20, 18, 0.9)";
-        card.style.border = "1px solid #544432";
-        card.style.padding = "8px 10px";
-        card.style.borderRadius = "3px";
-        card.style.display = "flex";
-        card.style.flexDirection = "column";
-        card.style.gap = "4px";
+        card.style = "background: rgba(25, 20, 18, 0.9); border: 1px solid #544432; padding: 8px 10px; border-radius: 3px; display: flex; flex-direction: column; gap: 4px;";
         
         let actionHTML = '';
         if (isThisMissionActive) {
             const startTimestamp = parseInt(localStorage.getItem(`khamach_mission_start_${mission.id}`) || '0');
             const elapsed = Date.now() - startTimestamp;
             const remaining = Math.max(0, mission.durationMs - elapsed);
-            
             if (remaining > 0) {
                 const min = Math.floor(remaining / 60000);
                 const sec = Math.floor((remaining % 60000) / 1000);
@@ -96,7 +85,7 @@ function renderMissionsDOM() {
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; font-weight: bold; color: #e6c280; font-size: 12px;">
                 <span>${mission.title}</span>
-                <span style="color: #ffd700;">🪙 ${calculatedReward} <span style="font-size:9px; color:#8a7350; font-weight:normal;">(база: ${mission.reward})</span></span>
+                <span style="color: #ffd700;">🪙 ${calculatedReward}</span>
             </div>
             <div style="font-size: 11px; color: #bfae96; line-height: 1.2;">${mission.text}</div>
             <div style="font-size: 10px; color: #ffb3ba;">Усталость: ${currentFatigue}% (Доход: ${Math.round(reductionMultiplier * 100)}%)</div>
@@ -109,24 +98,17 @@ function renderMissionsDOM() {
 function triggerBoardRerollByLoot() {
     const costData = getCurrentResetResourceCost();
     const currentResCount = typeof getPlayerResource === 'function' ? getPlayerResource(costData.key) : 0;
-    
     if (currentResCount < 1) {
-        alert(`Недостаточно трофеев! Требуется 1 шт. ${costData.icon} ${costData.name}.`);
-        return;
+        alert(`Недостаточно трофеев! Требуется 1 шт. ${costData.icon} ${costData.name}.`); return;
     }
-    
     let activeMissionsJSON = localStorage.getItem('khamach_active_triad_ids');
     if (activeMissionsJSON) {
         try {
             let triad = JSON.parse(activeMissionsJSON);
             let hasActive = triad.some(mId => localStorage.getItem(`khamach_mission_active_${mId}`) === 'true');
-            if (hasActive) {
-                alert("Нельзя сбросить доску, пока идет выполнение контракта!");
-                return;
-            }
+            if (hasActive) { alert("Нельзя сбросить доску, пока идет выполнение контракта!"); return; }
         } catch(e) {}
     }
-    
     if (confirm(`Потратить 1 шт. ${costData.icon} ${costData.name} для смены списка поручений?`)) {
         if (typeof addPlayerResource === 'function') addPlayerResource(costData.key, -1);
         localStorage.removeItem('khamach_active_triad_ids');
