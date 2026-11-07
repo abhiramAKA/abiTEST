@@ -103,6 +103,11 @@ function checkMatchesAndExecute() {
                     if (typeof usePlayerActionPoint === 'function') {
                         usePlayerActionPoint(); 
                     }
+                    // АВТО-ПРОВЕРКА НА ТУПИК ПОСЛЕ ВСЕХ КАСКАДОВ
+                    if (!hasAvailableMoves()) {
+                        alert("Нет доступных ходов! Магия Кхамача перемешивает руны...");
+                        shuffleBoardSecure();
+                    }
                 }
             }, 350);
         };
@@ -115,9 +120,56 @@ function checkMatchesAndExecute() {
             }
         }
         
-        setTimeout(() => {
-            window.executePostComboGravity();
-        }, 220);
+        setTimeout(() => { window.executePostComboGravity(); }, 220);
     }
     return found;
+}
+
+// Новая отладочная функция: проверка наличия хотя бы одного хода три в ряд
+function hasAvailableMoves() {
+    for (let r = 0; r < BOARD_ROWS; r++) {
+        for (let c = 0; c < BOARD_COLS; c++) {
+            let directions = [{dr:0, dc:1}, {dr:1, dc:0}];
+            for (let d of directions) {
+                let r2 = r + d.dr, c2 = c + d.dc;
+                if (r2 < BOARD_ROWS && c2 < BOARD_COLS) {
+                    let temp = match3BoardData[r][c];
+                    match3BoardData[r][c] = match3BoardData[r2][c2];
+                    match3BoardData[r2][c2] = temp;
+                    
+                    let hasMatch = false;
+                    // Сканируем на горизонтальные триады
+                    for (let i = 0; i < BOARD_ROWS; i++) {
+                        for (let j = 0; j < BOARD_COLS - 2; j++) {
+                            if (match3BoardData[i][j] && match3BoardData[i][j] === match3BoardData[i][j+1] && match3BoardData[i][j] === match3BoardData[i][j+2]) hasMatch = true;
+                        }
+                    }
+                    // Сканируем на вертикальные триады
+                    for (let i = 0; i < BOARD_ROWS - 2; i++) {
+                        for (let j = 0; j < BOARD_COLS; j++) {
+                            if (match3BoardData[i][j] && match3BoardData[i][j] === match3BoardData[i+1][j] && match3BoardData[i][j] === match3BoardData[i+2][j]) hasMatch = true;
+                        }
+                    }
+                    
+                    match3BoardData[r2][c2] = match3BoardData[r][c];
+                    match3BoardData[r][c] = temp;
+                    if (hasMatch) return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+// Новая функция: безопасное автоматическое перетряхивание поля
+function shuffleBoardSecure() {
+    isBoardLocked = true;
+    let boardContainer = document.getElementById('match3-board-container');
+    if (boardContainer) boardContainer.style.filter = "blur(4px) brightness(1.5)";
+    
+    setTimeout(() => {
+        if (typeof initMatch3Board === 'function') initMatch3Board();
+        if (boardContainer) boardContainer.style.filter = "";
+        isBoardLocked = false;
+    }, 400);
 }
