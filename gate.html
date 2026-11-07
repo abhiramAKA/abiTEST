@@ -28,15 +28,16 @@
             </div>
         </div>
         
-        <!-- ТЕХНИЧЕСКИЕ СЛОТЫ ДЛЯ СБОРКИ БОЕВОГО ДВИЖКА И ВОЕННОГО ЛАГЕРЯ -->
+        <!-- ТЕХНИЧЕСКИЕ СЛОТЫ ДЛЯ СБОРКИ ИГРОВЫХ МОДУЛЕЙ -->
         <div id="main-menu" style="display: none;"></div>
         <div id="dynamic-combat-screen"></div>
         <div id="squad-heroes-spec-screen" class="game-window" style="display: none; z-index: 100;"></div>
+        <div id="missions-screen" class="game-window" style="display: none; z-index: 100;"></div>
         <div id="dynamic-town-screens" style="display: none;"></div>
     </div>
 
     <script>
-        window.GAME_VERSION = "v5.7.32-FIX";
+        window.GAME_VERSION = "v5.7.33-FIX";
 
         function loadGameModulesAndExecute(modeType) {
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
@@ -56,11 +57,9 @@
                         initDispatcherModule();
                     }
                     
-                    if (modeType === 'battle') {
-                        launchBattle();
-                    } else if (modeType === 'camp') {
-                        launchCamp();
-                    }
+                    if (modeType === 'battle') { launchBattle(); } 
+                    else if (modeType === 'camp') { launchCamp(); }
+                    else if (modeType === 'missions') { launchMissions(); }
                     return;
                 }
                 const script = document.createElement('script');
@@ -87,22 +86,41 @@
             document.getElementById('squad-heroes-spec-screen').style.display = 'flex';
         }
 
+        function launchMissions() {
+            document.getElementById('onboarding-gothic-window').style.display = 'none';
+            if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
+            if (typeof renderMissionsDOM === 'function') renderMissionsDOM();
+            document.getElementById('missions-screen').style.display = 'flex';
+        }
+
         // Отрисовка кнопок в зависимости от прогресса при загрузке страницы
         (function() {
             const isVictory = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
+            const isTrained = localStorage.getItem('khamach_training_tutorial_done') === 'true';
             const btnZone = document.getElementById('onboarding-buttons-zone');
             
             if (!isVictory) {
+                // ЭТАП 1: Только вулкан
                 btnZone.innerHTML = `
                     <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" onclick="loadGameModulesAndExecute('battle')">🌋</button>
                 `;
-            } else {
+            } else if (!isTrained) {
+                // ЭТАП 2: Только Спортзал
                 document.getElementById('onboarding-title').innerText = "ЦИТАДЕЛЬ";
                 document.getElementById('onboarding-subtitle').innerText = "Управление Прогрессом";
-                document.getElementById('onboarding-description').innerText = "Дракон повержен! На склад доставлены первые трофеи. Отправляйтесь прямиком в Спортзал, чтобы развить навыки и поднять уровень кого-то из ваших героев перед следующими походами.";
+                document.getElementById('onboarding-description').innerText = "Дракон повержен! На склад доставлены первые трофеи. Отправляйтесь прямиком в Спортзал, чтобы развить навыки и поднять уровень того героя, на прокачку которого у вас хватает добытых материалов.";
                 
                 btnZone.innerHTML = `
                     <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Спортзал" onclick="loadGameModulesAndExecute('camp')">🏋️</button>
+                `;
+            } else {
+                // ЭТАП 3: Только Поручения (мешочек с деньгами)
+                document.getElementById('onboarding-title').innerText = "РАТУША";
+                document.getElementById('onboarding-subtitle').innerText = "Городские Контракты";
+                document.getElementById('onboarding-description').innerText = "Герой успешно развил свои навыки! Теперь Цитадели нужно золото для полноценного восстановления инфраструктуры. Загляните на Доску Поручений и отправьте свободного бойца на его первое оплачиваемое задание.";
+                
+                btnZone.innerHTML = `
+                    <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Поручения" onclick="loadGameModulesAndExecute('missions')">💰</button>
                 `;
             }
         })();
