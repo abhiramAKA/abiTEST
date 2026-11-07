@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Режим Отладки Боя</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v5.7.5-DEBUG";
+            window.GAME_VERSION = "v5.7.6-DEBUG";
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
             
             const link = document.createElement('link');
@@ -29,8 +29,9 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    window.combatData = { currentRound: 1, squad: };
                     if (typeof initDispatcherModule === 'function') initDispatcherModule();
+                    
+                    // Безопасный форсированный запуск боевой сессии
                     if (typeof showScreen === 'function' && typeof startCombatSession === 'function') {
                         showScreen('combat-screen');
                         startCombatSession(1); 
