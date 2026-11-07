@@ -1,5 +1,5 @@
 /* ==========================================================================
-   2. СТРУКТУРА ОКОН, ВЫРАВНИВАНИЕ И ЖИВОЙ ФОН (ОБНОВЛЕН - v5.5.1-BETA)
+   2. СТРУКТУРА ОКОН, ВЫРАВНИВАНИЕ И ЖИВОЙ ФОН (ОБНОВЛЕН - v4.9.28-BETA)
    ========================================================================== */
 
 #bg-canvas {
@@ -21,7 +21,6 @@
     align-items: center;
     background: rgba(0, 0, 0, 0.4);
     box-sizing: border-box;
-    overflow: hidden; /* Жесткий запрет скролла на уровне всего интерфейса */
 }
 
 .game-window {
@@ -36,20 +35,19 @@
         inset 0 0 30px rgba(0, 0, 0, 0.8),
         0 0 20px rgba(138, 115, 80, 0.2);
     border-radius: 2px;
-    padding: 12px 10px; /* Слегка уменьшен верхний паттерн для экономии места */
+    padding: 16px 10px;
     text-align: center;
     position: relative;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Исключает появление полос прокрутки у окон */
 }
 
 .menu-row {
     display: flex;
     width: 100%;
     gap: 8px;
-    margin: 4px 0;
+    margin: 6px 0;
     box-sizing: border-box;
     align-items: center;
 }
@@ -58,16 +56,16 @@
 .menu-emoji-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 12px;
     width: 100%;
     box-sizing: border-box;
     margin: 2px 0;
 }
 
-/* УЛЬТРА-РАЗМЕР ЗНАЧКОВ */
+/* УЛЬТРА-РАЗМЕР ЗНАЧКОВ (74PX) */
 .emoji-grid-btn {
     aspect-ratio: 1 / 1;
-    font-size: 70px; /* Стабилизирован чистый читаемый размер */
+    font-size: 74px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -78,7 +76,7 @@
         inset 0 1px 3px rgba(255,255,255,0.1),
         0 5px 10px rgba(0,0,0,0.6);
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.15s ease-out;
     box-sizing: border-box;
     border-radius: 4px;
     padding: 0;
@@ -86,7 +84,6 @@
     overflow: hidden;
 }
 
-/* Безопасный ховер без изменения геометрии и размеров */
 .emoji-grid-btn:hover {
     color: #fff;
     background: linear-gradient(to bottom, #3d332c 0%, #211b18 100%);
@@ -94,10 +91,12 @@
     box-shadow: 
         0 0 20px rgba(203, 178, 129, 0.6),
         inset 0 0 8px rgba(203, 178, 129, 0.4);
+    transform: scale(1.02);
+    font-size: 80px;
 }
 
 .emoji-grid-btn:active {
-    background: #110d0b;
+    transform: scale(0.96);
 }
 
 /* СТИЛИЗАЦИЯ ЗАБЛОКИРОВАННЫХ КНОПОК ДО ПЕРВОГО БОЯ */
@@ -107,7 +106,7 @@
     cursor: not-allowed !important;
     border-color: #2b221a !important;
     box-shadow: none !important;
-    pointer-events: none !important;
+    pointer-events: none !important; /* Полное физическое отключение кликов */
 }
 
 /* КАРТОЧКИ ХУДОЖЕСТВЕННЫХ ГЛАВ ДЛЯ ПРИКЛЮЧЕНИЙ */
@@ -147,8 +146,8 @@
 /* СЛУЖЕБНЫЕ КНОПКИ */
 .info-btn {
     width: auto;
-    height: 36px; /* Оптимизирована высота служебных кнопок */
-    font-size: 13px;
+    height: 44px;
+    font-size: 14px;
     font-weight: bold;
     color: #e6c280;
     background: linear-gradient(to bottom, #241d19 0%, #14100e 100%);
@@ -176,10 +175,9 @@
     left: 0;
     width: 100%;
     font-size: 11px;
-    color: #5a5047; /* Шрифт версии стал более контрастным */
+    color: #4a453f;
     text-align: center;
     pointer-events: none;
-    font-weight: bold;
 }
 
 /* ОВЕРЛЕИ И ПОП-АПЫ */
