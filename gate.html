@@ -32,12 +32,20 @@
         <div id="main-menu" style="display: none;"></div>
         <div id="dynamic-combat-screen"></div>
         <div id="squad-heroes-spec-screen" class="game-window" style="display: none; z-index: 100;"></div>
-        <div id="missions-screen" class="game-window" style="display: none; z-index: 100;"></div>
+        
+        <!-- НАСТОЯЩИЙ СЛОТ ДЛЯ ИНЪЕКЦИИ ДОСКИ ПОРУЧЕНИЙ -->
+        <div id="missions-screen" class="game-window" style="display: none; z-index: 100; flex-direction: column;">
+            <h2>Доска Поручений</h2>
+            <span class="subtitle">Городские Контракты</span>
+            <div id="missions-list-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 55vh; overflow-y: auto; margin-bottom: 10px;"></div>
+            <button id="close-missions-btn" class="menu-btn back-btn" style="width: 100%; display: none;">Назад в меню</button>
+        </div>
+
         <div id="dynamic-town-screens" style="display: none;"></div>
     </div>
 
     <script>
-        window.GAME_VERSION = "v5.7.33-FIX";
+        window.GAME_VERSION = "v5.7.34-FIX";
 
         function loadGameModulesAndExecute(modeType) {
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
@@ -88,9 +96,42 @@
 
         function launchMissions() {
             document.getElementById('onboarding-gothic-window').style.display = 'none';
+            
+            // Включаем базовые интерфейсы города для корректной генерации доски
             if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
-            if (typeof renderMissionsDOM === 'function') renderMissionsDOM();
+            
+            // Генерируем карточки контрактов Доски Поручений в DOM
+            if (typeof renderMissionsDOM === 'function') {
+                renderMissionsDOM();
+            }
+            
+            // Жестко прячем кнопку закрытия Поручений во время онбординга
+            const closeMissionsBtn = document.getElementById('close-missions-btn');
+            if (closeMissionsBtn) {
+                closeMissionsBtn.style.display = 'none';
+            }
+
             document.getElementById('missions-screen').style.display = 'flex';
+
+            // Переопределяем логику отправки бойца: при клике на контракт обучение завершается и шлёт в Хаб
+            window.startMission = function(missionId, heroId, finalExpectedReward) {
+                localStorage.setItem(`khamach_hero_busy_${heroId}`, 'true');
+                localStorage.setItem(`khamach_mission_active_${missionId}`, 'true');
+                localStorage.setItem(`khamach_mission_start_${missionId}`, Date.now().toString());
+                localStorage.setItem(`khamach_mission_reward_frozen_${missionId}`, finalExpectedReward.toString());
+                
+                if (typeof setHeroFatigue === 'function') {
+                    const currentFatigue = Math.min(100, Math.max(0, parseFloat(localStorage.getItem(`khamach_fatigue_${heroId}`) || '0')));
+                    setHeroFatigue(heroId, currentFatigue + 15);
+                }
+                
+                // Фиксируем полное завершение всех этапов стартового обучения
+                localStorage.setItem('khamach_missions_tutorial_done', 'true');
+                alert("Боец успешно отправлен на контракт! Обучение завершено. Добро пожаловать в Цитадель Абхирамбурга!");
+                
+                // Перенаправляем на полноценную страницу со всеми разблокированными кнопками
+                window.location.href = 'hub.html?t=' + Date.now();
+            };
         }
 
         // Отрисовка кнопок в зависимости от прогресса при загрузке страницы
@@ -100,12 +141,10 @@
             const btnZone = document.getElementById('onboarding-buttons-zone');
             
             if (!isVictory) {
-                // ЭТАП 1: Только вулкан
                 btnZone.innerHTML = `
                     <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" onclick="loadGameModulesAndExecute('battle')">🌋</button>
                 `;
             } else if (!isTrained) {
-                // ЭТАП 2: Только Спортзал
                 document.getElementById('onboarding-title').innerText = "ЦИТАДЕЛЬ";
                 document.getElementById('onboarding-subtitle').innerText = "Управление Прогрессом";
                 document.getElementById('onboarding-description').innerText = "Дракон повержен! На склад доставлены первые трофеи. Отправляйтесь прямиком в Спортзал, чтобы развить навыки и поднять уровень того героя, на прокачку которого у вас хватает добытых материалов.";
@@ -114,7 +153,6 @@
                     <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Спортзал" onclick="loadGameModulesAndExecute('camp')">🏋️</button>
                 `;
             } else {
-                // ЭТАП 3: Только Поручения (мешочек с деньгами)
                 document.getElementById('onboarding-title').innerText = "РАТУША";
                 document.getElementById('onboarding-subtitle').innerText = "Городские Контракты";
                 document.getElementById('onboarding-description').innerText = "Герой успешно развил свои навыки! Теперь Цитадели нужно золото для полноценного восстановления инфраструктуры. Загляните на Доску Поручений и отправьте свободного бойца на его первое оплачиваемое задание.";
