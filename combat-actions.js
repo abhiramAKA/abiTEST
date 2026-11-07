@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УЛЬТИМЕЙТОВ И ИСХОДОВ БИТВЫ (ВЫНЕСЕННЫЙ БЛОК - v5.5.0-BETA)
+   КХАМАЧ — МОДУЛЬ УЛЬТИМЕЙТОВ И ИСХОДОВ БИТВЫ (ВЫНЕСЕННЫЙ БЛОК - v5.7.0-STABLE)
    ========================================================================== */
 
 function activateHeroSuperpower(heroId) {
@@ -47,14 +47,18 @@ function checkBattleResolution() {
             addChronicleLog(`ПОБЕДА: Ликвидирован дракон Тира ${activeSessionLevel}. На склад зачислена 1 шт. материала: ${lootName}`);
         }
         
-        alert(`ВЕЛИКАЯ ПОБЕДА! Дракон Тира ${activeSessionLevel} повержен!\n📦 На склад Цитадели доставлено: ${lootName} (1 шт). Монеты за боссов более не выплачиваются!`);
-        
+        // Закрываем обучение первого боя навсегда
+        localStorage.setItem('khamach_combat_tutorial_done', 'true');
         if (typeof saveCompletedTier === 'function') saveCompletedTier(activeSessionLevel);
         if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
-        showScreen('main-menu');
+        
+        alert(`ВЕЛИКАЯ ПОБЕДА! Дракон повержен!\n📦 На склад Цитадели доставлено: ${lootName} (1 шт).\n\nПоздравляем! Вам открыт полный доступ в Цитадель Абхирамбурга!`);
+        
+        // Физический жесткий переход на полноценную страницу хаба с автосбросом кэша
+        window.location.href = 'hub.html?t=' + Date.now();
     } else if (combatData.squad.every(hero => hero.hp <= 0)) {
-        alert("ОТРЯД ПАЛ В БИТВЕ!");
+        alert("ОТРЯД ПАЛ В БИТВЕ! Попробуйте еще раз.");
         if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
-        showScreen('main-menu');
+        window.location.href = 'gate.html?t=' + Date.now();
     }
 }
