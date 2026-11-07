@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И ОТРИСОВКИ РЕЖИМА ПРИКЛЮЧЕНИЙ (v5.1.0-ALPHA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И ОТРИСОВКИ РЕЖИМА ПРИКЛЮЧЕНИЙ (v5.2.8-BETA)
    ========================================================================== */
 
 window.currentActiveChapterView = null;
@@ -24,7 +24,6 @@ function renderDragonSelectionGrid() {
     gridContainer.innerHTML = '';
     const maxUnlocked = getMaxUnlockedTier();
     
-    // ЭКРАН 1: Выбор художественной главы кампании
     if (window.currentActiveChapterView === null) {
         if (backBtn) {
             backBtn.innerText = "Назад в меню";
@@ -40,7 +39,6 @@ function renderDragonSelectionGrid() {
             const card = document.createElement('div');
             card.className = "chapter-gothic-card";
             
-            // Абсолютно безопасный расчет блокировки по первому боссу через нулевой индекс массива
             let isChapterLocked = true;
             if (ch.bosses && ch.bosses.length > 0) {
                 const firstBossTier = ch.bosses[0].tier;
@@ -76,7 +74,6 @@ function renderDragonSelectionGrid() {
         return;
     }
     
-    // ЭКРАН 2: Список конкретных боссов внутри выбранной главы
     const activeChapter = window.ADVENTURE_CHAPTERS[window.currentActiveChapterView];
     
     if (backBtn) {
@@ -112,7 +109,7 @@ function renderDragonSelectionGrid() {
             btn.innerHTML = `🔒 Тир ${boss.tier} (Заблокировано в этой главе)`;
         } else {
             const element = elements[(boss.tier - 1) % elements.length];
-            btn.innerHTML = `${boss.icon} Тир ${boss.tier}: ${boss.name} [${element}] — ${boss.baseHP} HP`;
+            btn.innerHTML = `${boss.icon} Тир ${boss.tier} : ${boss.name} [${element}] — ${boss.baseHP} HP`;
             btn.dataset.level = boss.tier;
             
             if (element === "Огонь") {
