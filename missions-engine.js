@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ ДВИЖОК ТАЙМЕРОВ И УСТАЛОСТИ (v1.0.0-BETA)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ ДВИЖОК ТАЙМЕРОВ И УСТАЛОСТИ (v5.2.5-BETA)
    ========================================================================== */
 
 function getHeroFatigue(heroId) {
@@ -40,7 +40,7 @@ function checkAndProcessMissionsBackground() {
     let activeMissionsJSON = localStorage.getItem('khamach_active_triad_ids');
     if (!activeMissionsJSON) return;
     
-    let currentTriad = [];
+    let currentTriad =;
     try { currentTriad = JSON.parse(activeMissionsJSON); } catch(e) { return; }
     
     let stateChanged = false;
