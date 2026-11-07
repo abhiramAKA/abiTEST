@@ -1,12 +1,18 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (РЕДАКЦИЯ - v4.8.7-BETA)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (РЕДАКЦИЯ - v5.5.5-BETA)
    ========================================================================== */
 
 let isBoardLocked = false;
 
 function initMatch3Board() {
     if (typeof initAudioContext === 'function') initAudioContext();
-    const boardContainer = document.getElementById('match3-board-container');
+    
+    // Проверяем наличие контейнера поля. Если боевое окно еще не инжектировалось — вызываем инъекцию
+    let boardContainer = document.getElementById('match3-board-container');
+    if (!boardContainer) {
+        if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
+        boardContainer = document.getElementById('match3-board-container');
+    }
     if (!boardContainer) return;
     
     boardContainer.innerHTML = '';
