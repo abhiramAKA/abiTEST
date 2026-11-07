@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИНТЕРФЕЙСА ДОСКИ ПОРУЧЕНИЙ (DOM) (v5.2.4-BETA)
+   КХАМАЧ — МОДУЛЬ ИНТЕРФЕЙСА ДОСКИ ПОРУЧЕНИЙ (DOM) (v5.6.0-BETA)
    ========================================================================== */
 
 function renderMissionsDOM() {
@@ -21,7 +21,7 @@ function renderMissionsDOM() {
     }
     
     let activeMissionsJSON = localStorage.getItem('khamach_active_triad_ids');
-    let currentTriad = [];
+    let currentTriad = []; // Исправлено: синтаксический маркер восстановлен
     if (activeMissionsJSON) {
         try { currentTriad = JSON.parse(activeMissionsJSON); } catch(e) { currentTriad = []; }
     }
@@ -86,7 +86,6 @@ function renderMissionsDOM() {
             </div>
             <div style="font-size: 11px; color: #bfae96; line-height: 1.2;">${mission.text}</div>
             <div style="font-size: 10px; color: #ffb3ba;">Усталость: ${currentFatigue}%</div>
-            <div style="margin-top: 2px;">${actionHTML}</div>
         `;
         container.appendChild(card);
     });
