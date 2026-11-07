@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (РЕДАКЦИЯ - v5.5.5-BETA)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ИСПРАВЛЕННЫЙ СИНТАКСИС - v5.7.2)
    ========================================================================== */
 
 let isBoardLocked = false;
@@ -7,7 +7,6 @@ let isBoardLocked = false;
 function initMatch3Board() {
     if (typeof initAudioContext === 'function') initAudioContext();
     
-    // Проверяем наличие контейнера поля. Если боевое окно еще не инжектировалось — вызываем инъекцию
     let boardContainer = document.getElementById('match3-board-container');
     if (!boardContainer) {
         if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
