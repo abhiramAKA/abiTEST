@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫДЕЛЕННЫЙ ДВИЖОК ПОЭТАПНОГО ОБУЧЕНИЯ (ОБНОВЛЕН - v5.7.38-FIX)
+   КХАМАЧ — ВЫДЕЛЕННЫЙ ДВИЖОК ПОЭТАПНОГО ОБУЧЕНИЯ (ОБНОВЛЕН - v5.7.40-FIX)
    ========================================================================== */
 
-window.GAME_VERSION = "v5.7.38-FIX";
+window.GAME_VERSION = "v5.7.40-FIX";
 
 const ONBOARDING_MISSIONS_LOCAL_POOL = [
     { id: "m_t1", allowedHero: "tank", heroName: "Защитник", heroIcon: "🛡️", reward: 133, text: "Кузнец просит придержать тяжелую наковальню и разгрузить слитки стали.", title: "Помощь в кузнице" },
@@ -25,7 +25,7 @@ function loadGameModulesAndExecute(modeType) {
 
     function injectScriptSequentially(index) {
         if (index >= scripts.length) {
-            if (modeType === 'battle' && typeof initDispatcherModule === 'function') {
+            if (typeof initDispatcherModule === 'function') {
                 initDispatcherModule();
             }
             if (modeType === 'battle') { launchBattle(); } 
@@ -44,10 +44,22 @@ function loadGameModulesAndExecute(modeType) {
 
 function launchBattle() {
     document.getElementById('onboarding-gothic-window').style.display = 'none';
-    if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
-    if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
-    if (typeof showScreen === 'function') showScreen('combat-screen');
-    if (typeof startCombatSession === 'function') startCombatSession(1); 
+    
+    // ИСПРАВЛЕННЫЙ ОНБОРДИНГ: Проверяем, это самый первый бой или уже финальный выбор глав?
+    const isMissionsDone = localStorage.getItem('khamach_missions_tutorial_done') === 'true';
+    
+    if (!isMissionsDone) {
+        // Первый шаг: запускаем бой 1-го уровня напрямую
+        if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
+        if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
+        if (typeof showScreen === 'function') showScreen('combat-screen');
+        if (typeof startCombatSession === 'function') startCombatSession(1); 
+    } else {
+        // Финальный шаг: открываем карту Кампании с выбором глав и боссов
+        if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
+        if (typeof showScreen === 'function') showScreen('dragon-select-screen');
+        if (typeof renderDragonSelectionGrid === 'function') renderDragonSelectionGrid();
+    }
 }
 
 function launchCamp() {
@@ -64,8 +76,6 @@ function launchMissions() {
     const container = document.getElementById('missions-list-container');
     if (container) {
         container.innerHTML = '';
-        
-        // ВЫБОР ДВУХ СЛУЧАЙНЫХ ПОРУЧЕНИЙ ИЗ ПУЛА
         let selectedMissions = [];
         let tempPool = [...ONBOARDING_MISSIONS_LOCAL_POOL];
         for (let i = 0; i < 2; i++) {
@@ -104,9 +114,7 @@ function executeOnboardingMission(missionId, heroId, finalExpectedReward) {
     const currentFatigue = Math.min(100, Math.max(0, parseFloat(localStorage.getItem(`khamach_fatigue_${heroId}`) || '0')));
     localStorage.setItem(`khamach_fatigue_${heroId}`, Math.min(100, Math.round(currentFatigue + 15)));
     
-    // Переводим обучение на финальный ЭТАП 4 (Новый бой усечённым составом)
     localStorage.setItem('khamach_missions_tutorial_done', 'true');
-    
     document.getElementById('missions-screen').style.display = 'none';
     window.location.href = 'gate.html?t=' + Date.now();
 }
@@ -130,10 +138,9 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('onboarding-description').innerText = "Герой успешно развил свои навыки! Теперь Цитадели нужно золото для восстановления инфраструктуры. Загляните на Доску Поручений и отправьте свободного бойца на его первое оплачиваемое задание.";
         btnZone.innerHTML = `<button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Поручения" onclick="loadGameModulesAndExecute('missions')">💰</button>`;
     } else {
-        // ЭТАП 4: Возврат вулкана, боец ушёл, команда в меньшинстве
         document.getElementById('onboarding-title').innerText = "В ПУТИ";
-        document.getElementById('onboarding-subtitle').innerText = "Горнило Ждёт";
-        document.getElementById('onboarding-description').innerText = "Твой герой ушёл выполнять поручение, он вернётся через час с золотом. Пока ты можешь дальше отправить свою команду сражаться с драконом, но имей в виду, что у тебя стало на одного бойца меньше!";
-        btnZone.innerHTML = `<button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="В бой!" onclick="loadGameModulesAndExecute('battle')">🌋</button>`;
+        document.getElementById('onboarding-subtitle').innerText = "Выбор Бестиария";
+        document.getElementById('onboarding-description').innerText = "Твой герой ушёл выполнять поручение, он вернётся через час с золотом. Пока ты можешь отправить оставшуюся команду в новый рейд. Открой карту Кампании и выбери главу и тир дракона, но помни — отряд будет сражаться в меньшинстве!";
+        btnZone.innerHTML = `<button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Открыть карту" onclick="loadGameModulesAndExecute('battle')">🌋</button>`;
     }
 });
