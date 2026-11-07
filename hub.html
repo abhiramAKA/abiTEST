@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v5.2.8-BETA";
+            window.GAME_VERSION = "v5.2.9-BETA";
             if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
                 localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
             }
@@ -19,18 +19,37 @@
             link.href = 'styles.css?t=' + buster;
             document.head.appendChild(link);
 
+            // СТРОГО ВЫВЕРЕННЫЙ ПОРЯДОК ЗАГРУЗКИ (Сначала базы данных -> ядра -> рендеринг -> листенеры)
             const scripts = [
-                'game.js', 'background.js', 'audio-engine.js', 'match3-fx.js',
-                'match3-input.js', 'match3.js', 'match3-logic.js', 'match3-data.js',
-                'campaign.js', 'town-engine.js', 'squad-history.js',
-                'missions-pool.js', 'missions-core.js', 'town-dom.js',
-                'squad-dom.js', 'combat-dom.js', 'missions-board.js',
-                'squad-logic.js', 'squad-core.js', 'combat.js', 'game-listeners.js'
+                'game.js', 
+                'background.js', 
+                'audio-engine.js', 
+                'match3-data.js', 
+                'missions-pool.js',
+                'squad-history.js',
+                'town-engine.js',
+                'missions-core.js', 
+                'squad-logic.js',
+                'match3-fx.js',
+                'match3-input.js', 
+                'match3.js', 
+                'match3-logic.js',
+                'campaign.js', 
+                'town-dom.js',
+                'squad-dom.js', 
+                'combat-dom.js', 
+                'missions-board.js',
+                'squad-core.js', 
+                'combat.js', 
+                'game-listeners.js'
             ];
 
             function injectScript(idx) {
                 if (idx >= scripts.length) {
-                    if (typeof initDispatcherModule === 'function') initDispatcherModule();
+                    console.log("КХАМАЧ: Все архитектурные модули успешно инициализированы.");
+                    if (typeof initDispatcherModule === 'function') {
+                        initDispatcherModule();
+                    }
                     const done = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
                     if (!done) {
                         ['to-squad-btn', 'to-storage-btn', 'to-chronicle-btn', 'to-clans-btn'].forEach(id => {
@@ -43,6 +62,7 @@
                 s.src = scripts[idx] + '?v=' + window.GAME_VERSION + '&t=' + buster;
                 s.async = false;
                 s.onload = function() { injectScript(idx + 1); };
+                s.onerror = function() { console.error("КРИТИЧЕСКАЯ ОШИБКА: Не удалось загрузить модуль " + scripts[idx]); };
                 document.head.appendChild(s);
             }
             document.addEventListener("DOMContentLoaded", function() { injectScript(0); });
@@ -72,7 +92,7 @@
                 <button id="to-chronicle-btn" class="emoji-grid-btn">📜</button>
                 <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
             </div>
-            <div id="game-version" class="version-footer">v5.2.8-BETA</div>
+            <div id="game-version" class="version-footer">v5.2.9-BETA</div>
         </div>
 
         <!-- ДИНАМИЧЕСКИЕ СЛОТЫ ДЛЯ ИНЪЕКЦИЙ ЭКРАНОВ -->
