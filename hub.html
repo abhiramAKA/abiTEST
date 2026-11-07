@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v5.3.1-BETA";
+            window.GAME_VERSION = "v5.4.1-BETA";
             if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
                 localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
             }
@@ -45,7 +45,7 @@
 
             function injectScript(idx) {
                 if (idx >= scripts.length) {
-                    console.log("КХАМАЧ: Модули успешно инжектированы.");
+                    console.log("КХАМАЧ: Все архитектурные модули успешно инициализированы.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -72,27 +72,30 @@
     <div id="game-interface">
         <!-- ================= ГЛАВНОЕ МЕНЮ ИГРЫ ================= -->
         <div id="main-menu" class="game-window" style="display: flex;">
+            <!-- Шапка ресурсов -->
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px; padding: 0 4px; background: rgba(20, 15, 12, 0.5); border-bottom: 1px double #544432; box-sizing: border-box;">
                 <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; font-size: 14px; font-weight: bold;">🪙 0</span>
                 <h1 style="font-size: 24px; margin: 0; letter-spacing: 2px; padding: 4px 0;">КХАМАЧ</h1>
                 <span id="team-fatigue-display" style="color: #ffb3ba; cursor: pointer; font-size: 14px; font-weight: bold;">🥱 0%</span>
             </div>
             <span class="subtitle" style="font-size: 11px; margin-bottom: 10px; padding-bottom: 4px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
-            <div style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 14px; box-sizing: border-box;">
-                <button id="to-settings-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">⚙️ Настройки</button>
-                <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
-            </div>
-            <div class="menu-emoji-grid">
-                <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
-                <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
-                <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
-                <button id="to-storage-btn" class="emoji-grid-btn">🏋️</button>
-                <button id="to-chronicle-btn" class="emoji-grid-btn">📜</button>
-                <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
+            
+            <!-- ОТЛАДОЧНЫЙ UX-РЯД: СТРОГАЯ ВЕРТИКАЛЬНАЯ СТРУКТУРА КНОПОК -->
+            <div style="display: flex; flex-direction: column; width: 100%; gap: 6px; box-sizing: border-box; margin-bottom: 10px;">
+                <div style="display: flex; gap: 6px; width: 100%;">
+                    <button id="to-combat-btn" class="menu-btn" style="flex: 2; padding: 12px; background: linear-gradient(to bottom, #421e1e 0%, #241010 100%); border-color: #6e3131; color: #ff8c8c;">🌋 В БОЙ!</button>
+                    <button id="to-settings-btn" class="info-btn" style="flex: 1; height: auto; font-size: 13px;">⚙️ Настройки</button>
+                    <button id="info-btn" class="info-btn" style="flex: 1; height: auto; font-size: 13px;">❓ Справка</button>
+                </div>
+                <button id="to-missions-btn" class="menu-btn" style="padding: 12px;">💰 Городские Поручения</button>
+                <button id="to-squad-btn" class="menu-btn" style="padding: 12px;">🏰 Цитадель и Здания</button>
+                <button id="to-storage-btn" class="menu-btn" style="padding: 12px;">🏋️ Военный Лагерь (Герои)</button>
+                <button id="to-chronicle-btn" class="menu-btn" style="padding: 12px;">📜 Летопись Подвигов</button>
+                <button id="to-clans-btn" class="menu-btn" style="padding: 12px;">👥 Орден Кхамача (Кланы)</button>
             </div>
         </div>
 
-        <!-- ЖЕСТКОЕ СКРЫТИЕ СЛОТОВ ПРИ СТАРТЕ ПРОТИВ НАЛОЖЕНИЯ СЛОЕВ -->
+        <!-- Контейнеры экранов -->
         <div id="dynamic-town-screens" style="display: none;"></div>
         <div id="squad-screen" class="game-window" style="display: none;"></div>
         <div id="dynamic-combat-screen" style="display: none;"></div>
