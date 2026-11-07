@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ МОДУЛЬ ТРЕНИРОВОК И ПОТОЛКА ОТРЯДА (ИСПРАВЛЕН - v5.7.33-FIX)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ МОДУЛЬ ТРЕНИРОВОК И ПОТОЛКА ОТРЯДА (ИСПРАВЛЕН - v5.7.34-FIX)
    ========================================================================== */
 
 const SQUAD_HERO_LORE = {
@@ -53,10 +53,8 @@ window.updateSquadHeroesSpecScreenDOM = function() {
         if (heroLvl >= 15) {
             actionBtnHTML = `<button class="menu-btn disabled" style="padding:2px; font-size:10px;" disabled>МАКС УР</button>`;
         } else if (currentRes < 1) {
-            // ЖЕСТКАЯ БЛОКИРОВКА: Если у игрока 0 штук нужного ресурса, кнопка выключается даже на 1 уровне!
             actionBtnHTML = `<button class="menu-btn disabled" style="padding:2px; font-size:10px; background:#221111; border-color:#441111;" disabled>Нет трофеев</button>`;
         } else if (heroLvl >= 1 && heroLvl < 2) {
-            // Здание не нужно на 1 уровне, но кнопка активна только если трофей есть (проверено строчкой выше)
             actionBtnHTML = `<button class="menu-btn" style="padding:2px; font-size:10px; background:#1d3a1e; height:22px; line-height:1;" onclick="window.triggerHeroLevelUpgrade('${h.id}')">Прокачать</button>`;
         } else if (heroLvl >= buildLvl) {
             actionBtnHTML = `<button class="menu-btn disabled" style="padding:2px; font-size:9px; background:#421e1e; border-color:#6e3131; line-height:1.1;" disabled>Нужен ${buildLvl + 1} ур. здания</button>`;
@@ -101,15 +99,12 @@ window.triggerHeroLevelUpgrade = function(heroId) {
     if (typeof addChronicleLog === 'function') {
         addChronicleLog(`ТРЕНИРОВКА: Боец повысил уровень до ${heroLvl + 1}-го.`);
     }
-
-    alert(`Боец успешно развил навыки до ${heroLvl + 1} уровня!`);
     
     const isTrainingPhase = localStorage.getItem('khamach_training_tutorial_done') !== 'true';
     if (isTrainingPhase) {
         localStorage.setItem('khamach_training_tutorial_done', 'true');
-        alert("Навыки развиты! Следующий шаг — заработок золота для Цитадели.");
         
-        // РЕДИРЕКТ НА ЭТАП 3: возвращаем в gate.html для переключения на мешочек с деньгами
+        // ФИКС: Убрали alert()! Сразу переключаем стейт страницы и отправляем на 3 шаг
         document.getElementById('squad-heroes-spec-screen').style.display = 'none';
         window.location.href = 'gate.html?t=' + Date.now();
         return;
