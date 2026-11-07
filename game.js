@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v5.7.22-FIX)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ОНБОРДИНГ - v5.7.23-FIX)
    ========================================================================== */
 
 const BOARD_ROWS = 8;
@@ -50,12 +50,13 @@ function updateMenuOnboardingVisibility() {
     if (!gridContainer) return;
 
     if (!tutorialDone) {
-        gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
+        // НАЧАЛЬНОЕ ОКНО: Отображается ТОЛЬКО ОДНА кнопка с Вулканом 🌋
+        gridContainer.style.gridTemplateColumns = "1fr";
         gridContainer.innerHTML = `
-            <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
-            <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
+            <button id="to-combat-btn" class="emoji-grid-btn" style="grid-column: span 2; height: 100px; font-size: 54px;">🌋</button>
         `;
     } else {
+        // ПОСЛЕ ПОБЕДЫ: Полноценная открытая сетка меню со всеми кнопками
         gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
         gridContainer.innerHTML = `
             <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
@@ -71,7 +72,6 @@ function updateMenuOnboardingVisibility() {
 function initDispatcherModule() {
     sanitizeAndMigrateStorage();
 
-    // ЖЕСТКАЯ ПРОВЕРКА: Если мы на странице hub.html, боевой интерфейс генерировать ЗАПРЕЩЕНО
     const isHubPage = window.location.pathname.includes('hub.html');
 
     try { if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM(); } catch(e) { console.error(e); }
