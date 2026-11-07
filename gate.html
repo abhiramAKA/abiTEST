@@ -6,107 +6,35 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>КХАМАЧ — Чертоги Испытаний</title>
+    <title>КХАМАЧ — Вход в Чертоги</title>
+    <style>
+        body, html { margin:0; padding:0; width:100%; height:100%; background:#050508; display:flex; justify-content:center; align-items:center; font-family:'Georgia', serif; }
+        .gate-window { width:90vw; max-width:400px; background:radial-gradient(circle, #1a1512 0%, #0d0a08 100%); border:4px solid #1a1613; outline:2px solid #8a7350; outline-offset:-3px; padding:30px 20px; text-align:center; box-sizing:border-box; }
+        h1 { font-size:36px; color:#e6c280; letter-spacing:5px; margin:0 0 15px 0; text-shadow:0 2px 4px #000; }
+        .play-btn { width:100%; padding:16px; font-size:18px; font-family:'Georgia', serif; font-weight:bold; letter-spacing:2px; color:#cdb38c; background:linear-gradient(to bottom, #2d2621 0%, #171311 100%); border:1px solid #544432; box-shadow:0 5px 10px rgba(0,0,0,0.6); cursor:pointer; transition:all 0.2s ease; border-radius:4px; }
+        .play-btn:hover { color:#fff; border-color:#cbb281; box-shadow:0 0 15px rgba(203,178,129,0.5); letter-spacing:3px; }
+        .play-btn:active { transform:scale(0.98); }
+        .changelog { margin-top:20px; text-align:left; background:rgba(0,0,0,0.4); border:1px solid #3a3025; padding:10px; max-height:140px; overflow-y:auto; font-size:11px; color:#bfae96; line-height:1.4; }
+        .changelog h3 { margin:0 0 5px 0; color:#e6c280; font-size:12px; }
+        .ver { margin-top:20px; font-size:11px; color:#4a453f; letter-spacing:1px; font-weight:bold; }
+    </style>
+    <script>
+        function handlePlayClick() {
+            window.location.href = 'gate.html?t=' + Date.now();
+        }
+    </script>
 </head>
 <body>
-    <canvas id="bg-canvas"></canvas>
-    <div id="game-interface">
-        
-        <!-- ГОТИЧЕСКОЕ ОКНО С КОРИЧНЕВОЙ РАМКОЙ -->
-        <div id="onboarding-gothic-window" class="game-window" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; box-sizing: border-box;">
-            <h1 id="onboarding-title" style="font-size: 28px; margin-bottom: 5px;">ПРИКЛЮЧЕНИЕ</h1>
-            <span id="onboarding-subtitle" class="subtitle" style="margin-bottom: 20px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Первый шаг в Горнило</span>
-            
-            <p id="onboarding-description" style="font-size: 13px; line-height: 1.6; color: #bfae96; margin-bottom: 25px; padding: 0 10px;">
-                Древние подземелья Абхирамбурга пробудились. Соберите волю в кулак, управляйте камнями стихий и сокрушите огнедышащих тварей в тактических битвах!
-            </p>
-
-            <!-- ДИНАМИЧЕСКИЙ КОНТЕЙНЕР ДЛЯ КВАДРАТНЫХ КНОПОК -->
-            <div id="onboarding-buttons-zone" class="menu-emoji-grid" style="display: flex; justify-content: center; align-items: center; gap: 16px; min-height: 140px; width: 100%; box-sizing: border-box; padding: 0 20px;">
-                <!-- Кнопки создаются автоматически скриптом ниже -->
-            </div>
+    <div class="gate-window">
+        <h1>КХАМАЧ</h1>
+        <button class="play-btn" onclick="handlePlayClick()">ИГРАТЬ</button>
+        <div class="changelog">
+            <h3>📜 ЖУРНАЛ СБОРКИ v5.7.31-FIX:</h3>
+            • Ликвидирован ложный вызов боевого диспетчера при переходе в Спортзал из интерфейса gate.html.<br>
+            • Функция `initDispatcherModule` изолирована и теперь запускается строго внутри обработчика `launchBattle`.<br>
+            • Устранена ошибка повторного наложения пустого макета дракона Некросмута поверх матрицы прокачки героев.
         </div>
-        
-        <!-- ТЕХНИЧЕСКИЕ СЛОТЫ ДЛЯ СБОРКИ БОЕВОГО ДВИЖКА И ВОЕННОГО ЛАГЕРЯ -->
-        <div id="main-menu" style="display: none;"></div>
-        <div id="dynamic-combat-screen"></div>
-        <div id="squad-heroes-spec-screen" class="game-window" style="display: none; z-index: 100;"></div>
-        <div id="dynamic-town-screens" style="display: none;"></div>
+        <div class="ver">ТЕКУЩАЯ СБОРКА: v5.7.31-FIX</div>
     </div>
-
-    <script>
-        window.GAME_VERSION = "v5.7.30-FIX";
-
-        function loadGameModulesAndExecute(callback) {
-            const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
-            const scripts = [
-                'game.js', 'background.js', 'audio-engine.js', 'match3-fx.js',
-                'match3-input.js', 'match3.js', 'match3-logic.js', 'match3-data.js',
-                'campaign.js', 'town-engine.js', 'town-chronicle.js',
-                'missions-pool.js', 'missions-engine.js', 'town-dom.js',
-                'squad-dom.js', 'combat-popups.js', 'combat-dom.js', 'missions-board.js',
-                'squad-logic.js', 'squad-core.js', 'combat-actions.js', 
-                'combat.js', 'game-listeners.js'
-            ];
-
-            function injectScriptSequentially(index) {
-                if (index >= scripts.length) {
-                    if (typeof initDispatcherModule === 'function') initDispatcherModule();
-                    callback();
-                    return;
-                }
-                const script = document.createElement('script');
-                script.src = scripts[index] + '?v=' + window.GAME_VERSION + '&t=' + enforceBuster;
-                script.async = false; 
-                script.onload = function() { injectScriptSequentially(index + 1); };
-                document.head.appendChild(script);
-            }
-            injectScriptSequentially(0);
-        }
-
-        function launchBattle() {
-            document.getElementById('onboarding-gothic-window').style.display = 'none';
-            if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
-            if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
-            if (typeof showScreen === 'function') showScreen('combat-screen');
-            if (typeof startCombatSession === 'function') startCombatSession(1); 
-        }
-
-        function launchCamp() {
-            // Скрываем стартовую рамку, уступая место Спортзалу
-            document.getElementById('onboarding-gothic-window').style.display = 'none';
-            
-            // Лениво собираем DOM спортзала, если он еще не создан
-            if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
-            
-            if (typeof updateSquadHeroesSpecScreenDOM === 'function') updateSquadHeroesSpecScreenDOM();
-            document.getElementById('squad-heroes-spec-screen').style.display = 'flex';
-        }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'styles.css?t=' + enforceBuster;
-            document.head.appendChild(link);
-
-            const isVictory = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
-            const btnZone = document.getElementById('onboarding-buttons-zone');
-            
-            if (!isVictory) {
-                btnZone.innerHTML = `
-                    <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" onclick="loadGameModulesAndExecute(launchBattle)">🌋</button>
-                `;
-            } else {
-                document.getElementById('onboarding-title').innerText = "ЦИТАДЕЛЬ";
-                document.getElementById('onboarding-subtitle').innerText = "Управление Прогрессом";
-                document.getElementById('onboarding-description').innerText = "Дракон повержен! На склад доставлены первые трофеи. Отправляйтесь прямиком в Спортзал, чтобы развить навыки и поднять уровень кого-то из ваших героев перед следующими походами.";
-                
-                btnZone.innerHTML = `
-                    <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Спортзал" onclick="loadGameModulesAndExecute(launchCamp)">🏋️</button>
-                `;
-            }
-        });
-    </script>
 </body>
 </html>
