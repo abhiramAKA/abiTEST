@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v5.2.5-BETA";
+            window.GAME_VERSION = "v5.2.6-BETA";
             if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
                 localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
             }
@@ -25,7 +25,7 @@
                 'match3-progression.js', 'town-engine.js', 'town-chronicle.js',
                 'missions-pool.js', 'missions-core.js', 'town-dom.js',
                 'squad-dom.js', 'combat-dom.js', 'missions-board.js',
-                'squad-engine-logic.js', 'squad-engine.js', 'combat.js', 'game-listeners.js'
+                'squad-logic.js', 'squad-core.js', 'combat.js', 'game-listeners.js'
             ];
 
             function injectScript(idx) {
@@ -72,7 +72,7 @@
                 <button id="to-chronicle-btn" class="emoji-grid-btn">📜</button>
                 <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
             </div>
-            <div id="game-version" class="version-footer">v5.2.5-BETA</div>
+            <div id="game-version" class="version-footer">v5.2.6-BETA</div>
         </div>
 
         <!-- ДИНАМИЧЕСКИЕ СЛОТЫ ДЛЯ ИНЪЕКЦИЙ ЭКРАНОВ -->
@@ -82,3 +82,4 @@
     </div>
 </body>
 </html>
+
