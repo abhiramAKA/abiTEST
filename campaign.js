@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И ОТРИСОВКИ РЕЖИМА ПРИКЛЮЧЕНИЙ (v5.5.3-BETA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И ОТРИСОВКИ РЕЖИМА ПРИКЛЮЧЕНИЙ (v5.7.1-STABLE)
    ========================================================================== */
 
 window.currentActiveChapterView = null;
@@ -34,7 +34,7 @@ function renderDragonSelectionGrid() {
         const scrTitle = document.getElementById('adventure-screen-title');
         const scrSubtitle = document.getElementById('adventure-screen-subtitle');
         if (scrTitle) scrTitle.innerText = "РЕЖИМ ПРИКЛЮЧЕНИЯ";
-        if (scrSubtitle) scrSubtitle.innerText = "Выберите Пространство или Бестиарий";
+        if (scrSubtitle) scrSubtitle.innerText = "Выберите Пространство или Бестиアрий";
 
         window.ADVENTURE_CHAPTERS.forEach((ch, idx) => {
             const card = document.createElement('div');
@@ -42,6 +42,7 @@ function renderDragonSelectionGrid() {
             
             let isChapterLocked = true;
             if (ch.bosses && ch.bosses.length > 0) {
+                // ИСПРАВЛЕНО: Безопасное чтение первого тира из массива боссов главы
                 const firstBossTier = ch.bosses[0].tier;
                 isChapterLocked = firstBossTier > maxUnlocked;
             }
