@@ -1,112 +1,40 @@
-/* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ МОДУЛЬ ТРЕНИРОВОК И ПОТОЛКА ОТРЯДА (ИСПРАВЛЕН - v5.7.36-FIX)
-   ========================================================================== */
-
-const SQUAD_HERO_LORE = {
-    tank: { name: "🛡️ Гарнизон", title: "🛡️ ЗАЩИТНИК", resourceKey: "plasma", resourceIcon: "🌋", resourceName: "Плазма", statBonus: "+20 Max HP", lore: "Латные рукавицы намертво сжимают ростовой щит из костей." },
-    damage: { name: "🔥 Казармы", title: "🔥 ВОИН", resourceKey: "blood", resourceIcon: "🩸", resourceName: "Кровь", statBonus: "+15 урон ульты", lore: "Одержимый первобытным гневом рун Кхамача, жаждет лишь крови." },
-    archer: { name: "⚡ Стрельбище", title: "⚡ СТРЕЛОК", resourceKey: "scale", resourceIcon: "🪶", resourceName: "Чешуя", statBonus: "+10 урон молнии", lore: "Его стрелы оперены чешуей драконов света." },
-    damage_mage: { name: "💚 Обитель", title: "💚 МАГ", resourceKey: "tears", resourceIcon: "💧", resourceName: "Слезы", statBonus: "+5 к масс-хилу", lore: "Тайные эссенции жизни текут по его венам." }
-};
-
-window.getHeroLevel = function(id) { return parseInt(localStorage.getItem(`khamach_hero_lvl_${id}`) || '1'); };
-window.getBuildingLevel = function(id) { return parseInt(localStorage.getItem(`khamach_build_${id}`) || '0'); };
-
-window.updateStorageScreenDOM = function() {
-    const listContainer = document.getElementById('storage-resources-list');
-    if (!listContainer) return;
-    listContainer.innerHTML = `
-        <div style="color: #e6c280; font-weight: bold; border-bottom: 1px solid #544432; padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; font-size: 12px;">📜 Материалы Хранилища:</div>
-        <div style="display: grid; grid-template-columns: 1fr; gap: 6px; font-size: 13px; color: #cdb38c;">
-            <div>🌋 Плазма дракона: <strong style="color:#fff; float: right;">${window.getPlayerResource('plasma')} шт.</strong></div>
-            <div>🩸 Кровь дракона: <strong style="color:#fff; float: right;">${window.getPlayerResource('blood')} шт.</strong></div>
-            <div>🪶 Чешуя дракона: <strong style="color:#fff; float: right;">${window.getPlayerResource('scale')} шт.</strong></div>
-            <div>💧 Слезы дракона: <strong style="color:#fff; float: right;">${window.getPlayerResource('tears')} шт.</strong></div>
-        </div>
-    `;
-};
-
-window.updateSquadHeroesSpecScreenDOM = function() {
-    const container = document.getElementById('heroes-upgrade-list-container');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    container.style.display = "grid";
-    container.style.gridTemplateColumns = "1fr 1fr";
-    container.style.gap = "6px";
-    
-    const heroesData = [{ id: "tank" }, { id: "damage" }, { id: "archer" }, { id: "mage" }];
-    const isTrainingPhase = localStorage.getItem('khamach_training_tutorial_done') !== 'true';
-    
-    const closeBtn = document.getElementById('close-heroes-spec-btn');
-    if (closeBtn) closeBtn.style.display = isTrainingPhase ? 'none' : 'block';
-    
-    heroesData.forEach(h => {
-        const lore = SQUAD_HERO_LORE[h.id === 'mage' ? 'damage_mage' : h.id];
-        if (!lore) return;
-        
-        const heroLvl = window.getHeroLevel(h.id);
-        const buildLvl = window.getBuildingLevel(h.id);
-        const currentRes = typeof window.getPlayerResource === 'function' ? window.getPlayerResource(lore.resourceKey) : 0;
-        
-        let actionBtnHTML = '';
-        if (heroLvl >= 15) {
-            actionBtnHTML = `<button class="menu-btn disabled" style="padding:2px; font-size:10px;" disabled>МАКС УР</button>`;
-        } else if (currentRes < 1) {
-            actionBtnHTML = `<button class="menu-btn disabled" style="padding:2px; font-size:10px; background:#221111; border-color:#441111;" disabled>Нет трофеев</button>`;
-        } else if (heroLvl >= 1 && heroLvl < 2) {
-            actionBtnHTML = `<button class="menu-btn" style="padding:2px; font-size:10px; background:#1d3a1e; height:22px; line-height:1;" onclick="window.triggerHeroLevelUpgrade('${h.id}')">Прокачать</button>`;
-        } else if (heroLvl >= buildLvl) {
-            actionBtnHTML = `<button class="menu-btn disabled" style="padding:2px; font-size:9px; background:#421e1e; border-color:#6e3131; line-height:1.1;" disabled>Нужен ${buildLvl + 1} ур. здания</button>`;
-        } else {
-            actionBtnHTML = `<button class="menu-btn" style="padding:2px; font-size:10px; background:#1d3a1e; height:22px; line-height:1;" onclick="window.triggerHeroLevelUpgrade('${h.id}')">Прокачать</button>`;
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>КХАМАЧ — Вход в Чертоги</title>
+    <style>
+        body, html { margin:0; padding:0; width:100%; height:100%; background:#050508; display:flex; justify-content:center; align-items:center; font-family:'Georgia', serif; }
+        .gate-window { width:90vw; max-width:400px; background:radial-gradient(circle, #1a1512 0%, #0d0a08 100%); border:4px solid #1a1613; outline:2px solid #8a7350; outline-offset:-3px; padding:30px 20px; text-align:center; box-sizing:border-box; }
+        h1 { font-size:36px; color:#e6c280; letter-spacing:5px; margin:0 0 15px 0; text-shadow:0 2px 4px #000; }
+        .play-btn { width:100%; padding:16px; font-size:18px; font-family:'Georgia', serif; font-weight:bold; letter-spacing:2px; color:#cdb38c; background:linear-gradient(to bottom, #2d2621 0%, #171311 100%); border:1px solid #544432; box-shadow:0 5px 10px rgba(0,0,0,0.6); cursor:pointer; transition:all 0.2s ease; border-radius:4px; }
+        .play-btn:hover { color:#fff; border-color:#cbb281; box-shadow:0 0 15px rgba(203,178,129,0.5); letter-spacing:3px; }
+        .play-btn:active { transform:scale(0.98); }
+        .changelog { margin-top:20px; text-align:left; background:rgba(0,0,0,0.4); border:1px solid #3a3025; padding:10px; max-height:140px; overflow-y:auto; font-size:11px; color:#bfae96; line-height:1.4; }
+        .changelog h3 { margin:0 0 5px 0; color:#e6c280; font-size:12px; }
+        .ver { margin-top:20px; font-size:11px; color:#4a453f; letter-spacing:1px; font-weight:bold; }
+    </style>
+    <script>
+        function handlePlayClick() {
+            window.location.href = 'gate.html?t=' + Date.now();
         }
-        
-        cardInner = `
-            <div style="display:flex; justify-content:space-between; font-weight:bold; color:#e6c280; font-size:11px;">
-                <span>${lore.title}</span>
-                <span style="color:#ffd700;">Ур. ${heroLvl}</span>
-            </div>
-            <div style="font-size:9px; color:#8a7350; margin-top:-2px; margin-bottom:2px;">Лимит: ${heroLvl < 2 ? 'Без лимита' : buildLvl}</div>
-            <div style="font-size:10px; color:#2ecc71; line-height:1.1;">Бонус: ${lore.statBonus}</div>
-            <div style="font-size:10px; color:#cdb38c; margin-bottom:3px;">Доступно: ${lore.resourceIcon} ${currentRes}</div>
-            <div style="margin-top:auto;">${actionBtnHTML}</div>
-        `;
-        
-        const card = document.createElement('div');
-        card.style = "background: rgba(25, 20, 18, 0.95); border: 1px solid #544432; padding: 6px 8px; border-radius: 3px; display: flex; flex-direction: column; justify-content: space-between; gap: 2px; box-sizing: border-box;";
-        card.innerHTML = cardInner;
-        container.appendChild(card);
-    });
-};
-
-window.triggerHeroLevelUpgrade = function(heroId) {
-    const heroesData = { tank: { resKey: "plasma" }, damage: { resKey: "blood" }, archer: { resKey: "scale" }, mage: { resKey: "tears" } };
-    const target = heroesData[heroId];
-    if (!target) return;
-
-    const currentRes = typeof window.getPlayerResource === 'function' ? window.getPlayerResource(target.resKey) : 0;
-    const heroLvl = window.getHeroLevel(heroId);
-
-    if (currentRes < 1) {
-        alert(`Недостаточно трофеев!`);
-        return;
-    }
-
-    if (typeof addPlayerResource === 'function') addPlayerResource(target.resKey, -1);
-    localStorage.setItem(`khamach_hero_lvl_${heroId}`, heroLvl + 1);
-
-    if (typeof addChronicleLog === 'function') {
-        addChronicleLog(`ТРЕНИРОВКА: Боец повысил уровень до ${heroLvl + 1}-го.`);
-    }
-    
-    const isTrainingPhase = localStorage.getItem('khamach_training_tutorial_done') !== 'true';
-    if (isTrainingPhase) {
-        localStorage.setItem('khamach_training_tutorial_done', 'true');
-        document.getElementById('squad-heroes-spec-screen').style.display = 'none';
-        window.location.href = 'gate.html?t=' + Date.now();
-        return;
-    }
-
-    window.updateSquadHeroesSpecScreenDOM();
-};
+    </script>
+</head>
+<body>
+    <div class="gate-window">
+        <h1>КХАМАЧ</h1>
+        <button class="play-btn" onclick="handlePlayClick()">ИГРАТЬ</button>
+        <div class="changelog">
+            <h3>📜 ЖУРНАЛ СБОРКИ v5.7.36-FIX:</h3>
+            • Проведена глобальная модульная разгрузка: весь тяжёлый код обучения вынесен в файл onboarding-engine.js.<br>
+            • Объем gate.html сокращен до безопасных 2700 символов, что исключает сбои и гарантирует стабильную загрузку.<br>
+            • Упорядочены шаги обучения: жесткий контроль ресурсов при прокачке и бесшовная активация Доски Поручений.
+        </div>
+        <div class="ver">ТЕКУЩАЯ СБОРКА: v5.7.36-FIX</div>
+    </div>
+</body>
+</html>
