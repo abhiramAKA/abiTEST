@@ -1,8 +1,16 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫДЕЛЕННЫЙ ДВИЖОК ПОЭТАПНОГО ОБУЧЕНИЯ (НОВЫЙ МОДУЛЬ - v5.7.36-FIX)
+   КХАМАЧ — ВЫДЕЛЕННЫЙ ДВИЖОК ПОЭТАПНОГО ОБУЧЕНИЯ (ОБНОВЛЕН - v5.7.37-FIX)
    ========================================================================== */
 
-window.GAME_VERSION = "v5.7.36-FIX";
+window.GAME_VERSION = "v5.7.37-FIX";
+
+// Встроенный автономный пул для гарантированной отрисовки карточек во время онбординга
+const ONBOARDING_MISSIONS_LOCAL_POOL = [
+    { id: "m_t1", allowedHero: "tank", heroName: "Защитник", heroIcon: "🛡️", reward: 133, text: "Кузнец просит придержать тяжелую наковальню и разгрузить слитки стали.", title: "Помощь в кузнице" },
+    { id: "m_d1", allowedHero: "damage", heroName: "Воин", heroIcon: "🔥", reward: 133, text: "Дровосеки боятся идти на вырубку из-за расплодившихся диких волков.", title: "Очистка лесопилки" },
+    { id: "m_a1", allowedHero: "archer", heroName: "Стрелок", heroIcon: "⚡", reward: 133, text: "Старый мельник просит перестрелять стаю кровожадных летучих мышей.", title: "Отстрел вредителей" },
+    { id: "m_m1", allowedHero: "mage", heroName: "Маг", heroIcon: "💚", reward: 133, text: "В лазарете вспыхнула хворь. Лекари просят подпитать людей магией жизни.", title: "Полевое исцеление" }
+];
 
 function loadGameModulesAndExecute(modeType) {
     const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
@@ -55,9 +63,9 @@ function launchMissions() {
     if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
     
     const container = document.getElementById('missions-list-container');
-    if (container && window.CITY_MISSIONS_POOL) {
+    if (container) {
         container.innerHTML = '';
-        window.CITY_MISSIONS_POOL.forEach(mission => {
+        ONBOARDING_MISSIONS_LOCAL_POOL.forEach(mission => {
             const currentFatigue = Math.min(100, Math.max(0, parseInt(localStorage.getItem('khamach_fatigue_' + mission.allowedHero) || '0')));
             const calculatedReward = Math.max(0, Math.round(mission.reward * (1 - (currentFatigue / 100))));
             
