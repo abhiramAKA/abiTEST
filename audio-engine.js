@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПРОЦЕДУРНЫЙ АУДИО-ДВИЖОК С ЭКВАЛАЙЗЕРОМ И МИКШЕРОМ (v4.8.4-BETA)
+   КХАМАЧ — ПРОЦЕДУРНЫЙ АУДИО-ДВИЖОК С ЭКВАЛАЙЗЕРОМ И МИКШЕРОМ (v5.7.1-STABLE)
    ========================================================================== */
 
 let audioCtx = null;
@@ -18,7 +18,9 @@ function initAudioContext() {
         setupEqualizerBands();
     }
     if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
+        audioCtx.resume().then(() => {
+            if (isMusicPlaying) playAmbientNode();
+        });
     }
 }
 
@@ -117,10 +119,11 @@ function playAmbientNode() {
 }
 
 function startBackgroundMusic() {
-    if (isMusicPlaying) return; 
     isMusicPlaying = true;
     initAudioContext();
-    playAmbientNode();
+    if (audioCtx && audioCtx.state !== 'suspended') {
+        playAmbientNode();
+    }
 }
 
 function stopBackgroundMusic() {
@@ -156,11 +159,10 @@ function playMatch3Sound(type) {
             osc.start(now);
             osc.stop(now + 0.15);
         } else if (type === 'combo') {
-            // Эффект триумфального перезвона для комбо 4+
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(523.25, now); // До 5
-            osc.frequency.setValueAtTime(659.25, now + 0.06); // Ми 5
-            osc.frequency.setValueAtTime(783.99, now + 0.12); // Соль 5
+            osc.frequency.setValueAtTime(523.25, now); 
+            osc.frequency.setValueAtTime(659.25, now + 0.06); 
+            osc.frequency.setValueAtTime(783.99, now + 0.12); 
             osc.frequency.exponentialRampToValueAtTime(1567.98, now + 0.3);
             gain.gain.setValueAtTime(0.35 * audioVolumeFX, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
