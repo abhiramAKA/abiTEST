@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ МОДУЛЬ ТРЕНИРОВОК И ПОТОЛКА ОТРЯДА (v5.2.6-BETA)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ МОДУЛЬ ТРЕНИРОВОК И ПОТОЛКА ОТРЯДА (ИСПРАВЛЕН - v5.7.30-FIX)
    ========================================================================== */
 
 const SQUAD_HERO_LORE = {
@@ -75,39 +75,49 @@ window.updateSquadHeroesSpecScreenDOM = function() {
         { id: "mage" }
     ];
     
+    const isTrainingPhase = localStorage.getItem('khamach_training_tutorial_done') !== 'true';
+    
+    // Скрываем или показываем кнопку «Назад в меню» в зависимости от того, пройдено ли обучение Спортзала
+    const closeBtn = document.getElementById('close-heroes-spec-btn');
+    if (closeBtn) {
+        closeBtn.style.display = isTrainingPhase ? 'none' : 'block';
+    }
+    
     heroesData.forEach(h => {
         const lore = SQUAD_HERO_LORE[h.id === 'mage' ? 'damage_mage' : h.id];
         if (!lore) return;
         
         const heroLvl = window.getHeroLevel(h.id);
         const buildLvl = window.getBuildingLevel(h.id);
-        const isPurchased = localStorage.getItem(`khamach_squad_build_${h.id}`) === 'true';
         const currentRes = typeof window.getPlayerResource === 'function' ? window.getPlayerResource(lore.resourceKey) : 0;
         
-        const card = document.createElement('div');
-        card.style = "background: rgba(25, 20, 18, 0.95); border: 1px solid #544432; padding: 6px 8px; border-radius: 3px; display: flex; flex-direction: column; justify-content: space-between; gap: 2px; box-sizing: border-box;";
-        
         let actionBtnHTML = '';
-        if (!isPurchased) {
-            actionBtnHTML = `<button class="menu-btn disabled" style="padding:2px; font-size:10px;" disabled>Нет здания</button>`;
-        } else if (heroLvl >= 15) {
+        if (heroLvl >= 15) {
             actionBtnHTML = `<button class="menu-btn disabled" style="padding:2px; font-size:10px;" disabled>МАКС УР</button>`;
+        } else if (heroLvl >= 1 && heroLvl < 2) {
+            // ФИКС: Первый апгрейд всегда доступен БЕЗ проверки построек и наличия здания!
+            actionBtnHTML = `<button class="menu-btn" style="padding:2px; font-size:10px; background:#1d3a1e; height:22px; line-height:1;" onclick="window.triggerHeroLevelUpgrade('${h.id}')">Прокачать</button>`;
         } else if (heroLvl >= buildLvl) {
+            // Для всех последующих уровней (3-й и выше) проверяем лимиты построек Цитадели
             actionBtnHTML = `<button class="menu-btn disabled" style="padding:2px; font-size:9px; background:#421e1e; border-color:#6e3131; line-height:1.1;" disabled>Нужен ${buildLvl + 1} ур. здания</button>`;
         } else {
             actionBtnHTML = `<button class="menu-btn" style="padding:2px; font-size:10px; background:#1d3a1e; height:22px; line-height:1;" onclick="window.triggerHeroLevelUpgrade('${h.id}')">Прокачать</button>`;
         }
         
-        card.innerHTML = `
+        cardInner = `
             <div style="display:flex; justify-content:space-between; font-weight:bold; color:#e6c280; font-size:11px;">
                 <span>${lore.title}</span>
                 <span style="color:#ffd700;">Ур. ${heroLvl}</span>
             </div>
-            <div style="font-size:9px; color:#8a7350; margin-top:-2px; margin-bottom:2px;">Лимит: ${buildLvl}</div>
+            <div style="font-size:9px; color:#8a7350; margin-top:-2px; margin-bottom:2px;">Лимит: ${heroLvl < 2 ? 'Без лимита' : buildLvl}</div>
             <div style="font-size:10px; color:#2ecc71; line-height:1.1;">Бонус: ${lore.statBonus}</div>
             <div style="font-size:10px; color:#cdb38c; margin-bottom:3px;">Доступно: ${lore.resourceIcon} ${currentRes}</div>
             <div style="margin-top:auto;">${actionBtnHTML}</div>
         `;
+        
+        const card = document.createElement('div');
+        card.style = "background: rgba(25, 20, 18, 0.95); border: 1px solid #544432; padding: 6px 8px; border-radius: 3px; display: flex; flex-direction: column; justify-content: space-between; gap: 2px; box-sizing: border-box;";
+        card.innerHTML = cardInner;
         container.appendChild(card);
     });
 };
@@ -125,12 +135,15 @@ window.triggerHeroLevelUpgrade = function(heroId) {
     const currentRes = typeof window.getPlayerResource === 'function' ? window.getPlayerResource(target.resKey) : 0;
     const heroLvl = window.getHeroLevel(heroId);
 
-    if (currentRes < 1) {
+    // Во время обучения даем прокачать, даже если у игрока случайно не оказалось трофея
+    const isTrainingPhase = localStorage.getItem('khamach_training_tutorial_done') !== 'true';
+
+    if (currentRes < 1 && !isTrainingPhase) {
         alert(`Недостаточно трофеев! Требуется 1 шт.`);
         return;
     }
 
-    if (typeof addPlayerResource === 'function') addPlayerResource(target.resKey, -1);
+    if (typeof addPlayerResource === 'function' && currentRes > 0) addPlayerResource(target.resKey, -1);
     localStorage.setItem(`khamach_hero_lvl_${heroId}`, heroLvl + 1);
 
     if (typeof addChronicleLog === 'function') {
@@ -138,5 +151,14 @@ window.triggerHeroLevelUpgrade = function(heroId) {
     }
 
     alert(`Боец успешно развил навыки до ${heroLvl + 1} уровня!`);
+    
+    // ПРОВЕРКА ЗАВЕРШЕНИЯ ОБУЧЕНИЯ
+    if (isTrainingPhase) {
+        localStorage.setItem('khamach_training_tutorial_done', 'true');
+        alert("Обучение завершено! Цитадель полностью восстановлена. Добро пожаловать в Абхирамбург!");
+        window.location.href = 'hub.html?t=' + Date.now();
+        return;
+    }
+
     window.updateSquadHeroesSpecScreenDOM();
 };
