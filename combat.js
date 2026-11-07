@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНОЕ ЯДРО ПОШАГОВОГО БОЯ (ИСПРАВЛЕН - v5.5.0-BETA)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНОЕ ЯДРО ПОШАГОВОГО БОЯ (ИСПРАВЛЕН - v5.6.0-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -30,14 +30,17 @@ function startCombatSession(level) {
     }
     
     const tankHpBonus = (typeof getBuildingLevel === 'function' ? getBuildingLevel('tank') : 0) * 20;
+    
+    // Жесткая защита: очищаем busy-кэш, чтобы камни гарантированно упали и было кому сражаться
+    const heroIds = ['tank', 'damage', 'archer', 'mage'];
+    heroIds.forEach(id => localStorage.removeItem(`khamach_hero_busy_${id}`));
+
     combatData.squad = [
         { id: "tank", name: "Защитник", hp: 150, maxHP: 150, sp: 0, maxSP: 100, icon: "🛡️", color: "#4a90e2" },
         { id: "damage", name: "Воин", hp: 90, maxHP: 90, sp: 0, maxSP: 100, icon: "🔥", color: "#ff4500" },
         { id: "archer", name: "Стрелок", hp: 100, maxHP: 100, sp: 0, maxSP: 100, icon: "⚡", color: "#f1c40f" },
         { id: "mage", name: "Маг", hp: 80, maxHP: 80, sp: 0, maxSP: 100, icon: "💚", color: "#2ecc71" }
-    ].filter(hero => localStorage.getItem(`khamach_hero_busy_${hero.id}`) !== 'true');
-
-    if (combatData.squad.length === 0) { alert("Все бойцы заняты!"); showScreen('main-menu'); return; }
+    ];
     
     combatData.squad.forEach(hero => {
         let base = (hero.id === "tank" ? 150 : hero.id === "damage" ? 90 : hero.id === "archer" ? 100 : 80);
