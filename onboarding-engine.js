@@ -1,14 +1,14 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫДЕЛЕННЫЙ ДВИЖОК ПОЭТАПНОГО ОБУЧЕНИЯ (ОБНОВЛЕН - v5.7.42-FIX)
+   КХАМАЧ — ВЫДЕЛЕННЫЙ ДВИЖОК ПОЭТАПНОГО ОБУЧЕНИЯ (ОБНОВЛЕН - v5.7.44-FIX)
    ========================================================================== */
 
-window.GAME_VERSION = "v5.7.42-FIX";
+window.GAME_VERSION = "v5.7.44-FIX";
 
 const ONBOARDING_MISSIONS_LOCAL_POOL = [
-    { id: "m_t1", allowedHero: "tank", heroName: "Защитник", heroIcon: "🛡️", reward: 133, text: "Кузнец просит придержать тяжелую наковальню и разгрузить слитки стали.", title: "Помощь в кузнице" },
-    { id: "m_d1", allowedHero: "damage", heroName: "Воин", heroIcon: "🔥", reward: 133, text: "Дровосеки боятся идти на вырубку из-за расплодившихся диких волков.", title: "Очистка лесопилки" },
-    { id: "m_a1", allowedHero: "archer", heroName: "Стрелок", heroIcon: "⚡", reward: 133, text: "Старый мельник просит перестрелять стаю кровожадных летучих мышей.", title: "Отстрел вредителей" },
-    { id: "m_m1", allowedHero: "mage", heroName: "Маг", heroIcon: "💚", reward: 133, text: "В лазарете вспыхнула хворь. Лекари просят подпитать людей магией жизни.", title: "Полевое исцеление" }
+    { id: "m_t1", allowedHero: "tank", heroName: "Защитник", heroIcon: "🛡️", reward: 133, text: "Кузнец просит придержать тяжелую наковальню.", title: "Помощь в кузнице" },
+    { id: "m_d1", allowedHero: "damage", heroName: "Воин", heroIcon: "🔥", reward: 133, text: "Дровосеки боятся идти на вырубку из-за волков.", title: "Очистка лесопилки" },
+    { id: "m_a1", allowedHero: "archer", heroName: "Стрелок", heroIcon: "⚡", reward: 133, text: "Старый мельник просит перестрелять летучих мышей.", title: "Отстрел вредителей" },
+    { id: "m_m1", allowedHero: "mage", heroName: "Маг", heroIcon: "💚", reward: 133, text: "В лазарете вспыхнула хворь. Нужна магия жизни.", title: "Полевое исцеление" }
 ];
 
 function loadGameModulesAndExecute(modeType) {
@@ -25,12 +25,7 @@ function loadGameModulesAndExecute(modeType) {
 
     function injectScriptSequentially(index) {
         if (index >= scripts.length) {
-            // КРИТИЧЕСКИЙ ФИКС: initDispatcherModule запускается СТРОГО во время боя!
-            // Для Спортзала и Ратуши вызывать его запрещено, чтобы не инжектировался экран дракона.
-            if (modeType === 'battle' && typeof initDispatcherModule === 'function') {
-                initDispatcherModule();
-            }
-            
+            if (typeof initDispatcherModule === 'function') initDispatcherModule();
             if (modeType === 'battle') { launchBattle(); } 
             else if (modeType === 'camp') { launchCamp(); }
             else if (modeType === 'missions') { launchMissions(); }
@@ -48,7 +43,6 @@ function loadGameModulesAndExecute(modeType) {
 function launchBattle() {
     document.getElementById('onboarding-gothic-window').style.display = 'none';
     const isMissionsDone = localStorage.getItem('khamach_missions_tutorial_done') === 'true';
-    
     if (!isMissionsDone) {
         if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
         if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
@@ -95,8 +89,7 @@ function launchMissions() {
                     <span style="color: #ffd700;">🪙 ${calculatedReward}</span>
                 </div>
                 <div style="font-size: 11px; color: #bfae96; line-height: 1.2;">${mission.text}</div>
-                <div style="font-size: 10px; color: #ffb3ba; margin-bottom: 4px;">Усталость: ${currentFatigue}%</div>
-                <button class="menu-btn" style="padding:4px; font-size:13px; background:#1d3a1e; height:28px;" onclick="executeOnboardingMission('${mission.id}', '${mission.allowedHero}', ${calculatedReward})">Отправить ${mission.heroIcon}</button>
+                <button class="menu-btn" style="padding:4px; font-size:13px; background:#1d3a1e; height:28px;" onclick="executeOnboardingMission('${mission.id}', '${mission.allowedHero}', ${calculatedReward}, '${mission.title}', '${mission.heroName}')">Отправить ${mission.heroIcon}</button>
             `;
             container.appendChild(card);
         });
@@ -104,7 +97,7 @@ function launchMissions() {
     document.getElementById('missions-screen').style.display = 'flex';
 }
 
-function executeOnboardingMission(missionId, heroId, finalExpectedReward) {
+function executeOnboardingMission(missionId, heroId, finalExpectedReward, missionTitle, heroName) {
     localStorage.setItem(`khamach_hero_busy_${heroId}`, 'true');
     localStorage.setItem(`khamach_mission_active_${missionId}`, 'true');
     localStorage.setItem(`khamach_mission_start_${missionId}`, Date.now().toString());
@@ -113,6 +106,13 @@ function executeOnboardingMission(missionId, heroId, finalExpectedReward) {
     const currentFatigue = Math.min(100, Math.max(0, parseFloat(localStorage.getItem(`khamach_fatigue_${heroId}`) || '0')));
     localStorage.setItem(`khamach_fatigue_${heroId}`, Math.min(100, Math.round(currentFatigue + 15)));
     
+    // КНОПКА СРАБОТАЛА: Генерируем запись отправки напрямую в локальные логи Летописи Цитадели
+    let logs = [];
+    try { logs = JSON.parse(localStorage.getItem('khamach_chronicle_logs') || '[]'); } catch(e) { logs = []; }
+    const timeStr = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    logs.unshift(`[${timeStr}] ОПОВЕЩЕНИЕ: Боец [${heroName}] ушел на поручение "${missionTitle}" на 1 час.`);
+    localStorage.setItem('khamach_chronicle_logs', JSON.stringify(logs.slice(0, 50)));
+
     localStorage.setItem('khamach_missions_tutorial_done', 'true');
     document.getElementById('missions-screen').style.display = 'none';
     window.location.href = 'gate.html?t=' + Date.now();
@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function() {
     } else {
         document.getElementById('onboarding-title').innerText = "В ПУТИ";
         document.getElementById('onboarding-subtitle').innerText = "Выбор Бестиария";
-        document.getElementById('onboarding-description').innerText = "Твой герой ушёл выполнять поручение, он вернётся через час с золотом. Пока ты можешь отправить оставшуюся команду в новый рейд. Открой карту Кампании и выбери главу и тир дракона, но помни — отряд будет сражаться в меньшинстве!";
+        document.getElementById('onboarding-description').innerText = "Твой герой ушёл выполнять поручение, запись об этом занесена в Летопись. Пока он добывает золото, ты можешь отправить оставшуюся команду в новый рейд. Открой карту Кампании и выбери главу, но помни — отряд будет сражаться в меньшинстве!";
         btnZone.innerHTML = `<button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Открыть карту" onclick="loadGameModulesAndExecute('battle')">🌋</button>`;
     }
 });
