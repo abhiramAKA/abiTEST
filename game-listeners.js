@@ -18,71 +18,85 @@ window.closeModeDescriptionUnified = function() {
 };
 
 function setupAllGameListeners() {
+    // Полностью очищаем старые глобальные перехватчики
     document.onclick = null;
     document.body.onclick = null;
 
-    const mainMenuEl = document.getElementById('main-menu');
-    if (mainMenuEl) {
-        mainMenuEl.onclick = function(e) {
-            const clansBtn = e.target.closest('#to-clans-btn');
-            const combatBtn = e.target.closest('#to-combat-btn');
-            const settingsBtn = e.target.closest('#to-settings-btn');
-            const infoBtn = e.target.closest('#info-btn');
-            const squadBtn = e.target.closest('#to-squad-btn');
-            const storageBtn = e.target.closest('#to-storage-btn');
-            const missionsBtn = e.target.closest('#to-missions-btn');
-            const chronicleBtn = e.target.closest('#to-chronicle-btn');
-
-            if (e.target.closest('.progression-locked')) {
-                e.preventDefault(); e.stopPropagation();
+    function bind(id, callback, checkLock = false) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (checkLock && el.classList.contains('progression-locked')) {
                 return false;
             }
-
-            if (clansBtn) {
-                e.preventDefault(); e.stopPropagation();
-                if (typeof window.openModeDescription === 'function') {
-                    window.openModeDescription('clans');
-                }
-            } else if (combatBtn) {
-                e.preventDefault(); e.stopPropagation();
-                showScreen('dragon-select-screen');
-            } else if (settingsBtn) {
-                e.preventDefault(); e.stopPropagation();
-                document.getElementById('volume-music-slider').value = (parseFloat(localStorage.getItem('khamach_vol_music') || '0.5') * 100);
-                document.getElementById('volume-fx-slider').value = (parseFloat(localStorage.getItem('khamach_vol_fx') || '0.7') * 100);
-                if (typeof initAudioContext === 'function') initAudioContext();
-                document.getElementById('main-menu').style.display = 'none';
-                document.getElementById('settings-screen').style.display = 'flex';
-            } else if (infoBtn) {
-                e.preventDefault(); e.stopPropagation();
-                const textContainer = document.getElementById('info-screen-text');
-                if (textContainer) textContainer.innerHTML = typeof getTownText === 'function' ? getTownText('mainInfo') : '';
-                showScreen('info-screen');
-            } else if (squadBtn) {
-                e.preventDefault(); e.stopPropagation();
-                showScreen('squad-screen');
-            } else if (storageBtn) {
-                e.preventDefault(); e.stopPropagation();
-                if (typeof window.updateSquadHeroesSpecScreenDOM === 'function') {
-                    window.updateSquadHeroesSpecScreenDOM();
-                }
-                showScreen('squad-heroes-spec-screen');
-            } else if (missionsBtn) {
-                e.preventDefault(); e.stopPropagation();
-                showScreen('missions-screen');
-            } else if (chronicleBtn) {
-                e.preventDefault(); e.stopPropagation();
-                showScreen('chronicle-screen');
-            }
+            callback();
         };
     }
 
-    const fromSelectBtn = document.getElementById('from-select-to-menu-btn');
-    if (fromSelectBtn) fromSelectBtn.onclick = function() { showScreen('main-menu'); };
-    
-    const fromInfoBtn = document.getElementById('from-info-to-menu-btn');
-    if (fromInfoBtn) fromInfoBtn.onclick = function() { showScreen('main-menu'); };
+    // НАДЕЖНОЕ ПРЯМОЕ НАЗНАЧЕНИЕ КЛИКОВ ДЛЯ КАЖДОЙ КНОПКИ ГЛАВНОГО МЕНЮ
+    bind('to-settings-btn', function() {
+        const musicSlider = document.getElementById('volume-music-slider');
+        const fxSlider = document.getElementById('volume-fx-slider');
+        if (musicSlider) musicSlider.value = (parseFloat(localStorage.getItem('khamach_vol_music') || '0.5') * 100);
+        if (fxSlider) fxSlider.value = (parseFloat(localStorage.getItem('khamach_vol_fx') || '0.7') * 100);
+        if (typeof initAudioContext === 'function') initAudioContext();
+        
+        document.getElementById('main-menu').style.display = 'none';
+        document.getElementById('settings-screen').style.display = 'flex';
+    });
 
+    bind('info-btn', function() {
+        const textContainer = document.getElementById('info-screen-text');
+        if (textContainer) textContainer.innerHTML = typeof getTownText === 'function' ? getTownText('mainInfo') : '';
+        showScreen('info-screen');
+    });
+
+    bind('to-combat-btn', function() {
+        showScreen('dragon-select-screen');
+    });
+
+    bind('to-missions-btn', function() {
+        showScreen('missions-screen');
+    }, true);
+
+    bind('to-squad-btn', function() {
+        showScreen('squad-screen');
+    }, true);
+
+    bind('to-storage-btn', function() {
+        if (typeof window.updateSquadHeroesSpecScreenDOM === 'function') {
+            window.updateSquadHeroesSpecScreenDOM();
+        }
+        showScreen('squad-heroes-spec-screen');
+    }, true);
+
+    bind('to-chronicle-btn', function() {
+        showScreen('chronicle-screen');
+    }, true);
+
+    bind('to-clans-btn', function() {
+        if (typeof window.openModeDescription === 'function') {
+            window.openModeDescription('clans');
+        }
+    }, true);
+
+    // СЕРВИСНЫЕ КНОПКИ НАЗАД И ЗАКРЫТИЯ ОКН
+    bind('from-select-to-menu-btn', function() { showScreen('main-menu'); });
+    bind('from-info-to-menu-btn', function() { showScreen('main-menu'); });
+    bind('close-settings-btn', function() {
+        document.getElementById('settings-screen').style.display = 'none';
+        document.getElementById('main-menu').style.display = 'flex';
+        if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
+    });
+    
+    bind('close-heroes-spec-btn', function() { showScreen('main-menu'); });
+    bind('close-storage-btn', function() { showScreen('main-menu'); });
+    bind('close-missions-btn', function() { showScreen('main-menu'); });
+    bind('close-chronicle-btn', function() { showScreen('main-menu'); });
+
+    // СЛАЙДЕРЫ НАСТРОЕК ЗВУКА
     const musicSlider = document.getElementById('volume-music-slider');
     if (musicSlider) {
         musicSlider.oninput = function(e) {
@@ -100,44 +114,14 @@ function setupAllGameListeners() {
         };
     }
 
-    const closeSettingsBtn = document.getElementById('close-settings-btn');
-    if (closeSettingsBtn) {
-        closeSettingsBtn.onclick = function() {
-            document.getElementById('settings-screen').style.display = 'none';
-            document.getElementById('main-menu').style.display = 'flex';
-            if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
-        };
-    }
-    
-    const closeHeroesSpecBtn = document.getElementById('close-heroes-spec-btn');
-    if (closeHeroesSpecBtn) closeHeroesSpecBtn.onclick = function() { showScreen('main-menu'); };
+    bind('clear-chronicle-btn', function() {
+        if (confirm("Очистить все записи в Летописи Цитадели?")) {
+            localStorage.setItem('khamach_chronicle_logs', JSON.stringify(new Array()));
+            if (typeof renderChronicleDOM === 'function') renderChronicleDOM();
+        }
+    });
 
-    const closeStorageBtn = document.getElementById('close-storage-btn');
-    if (closeStorageBtn) closeStorageBtn.onclick = function() { showScreen('main-menu'); };
-
-    const closeMissionsBtn = document.getElementById('close-missions-btn');
-    if (closeMissionsBtn) closeMissionsBtn.onclick = function() { showScreen('main-menu'); };
-
-    const closeChronicleBtn = document.getElementById('close-chronicle-btn');
-    if (closeChronicleBtn) closeChronicleBtn.onclick = function() { showScreen('main-menu'); };
-
-    const leaveCombatBtn = document.getElementById('leave-combat-btn');
-    if (leaveCombatBtn) {
-        leaveCombatBtn.onclick = function() {
-            if (confirm("Вы уверены, что хотите сбежать из рейда?")) showScreen('main-menu');
-        };
-    }
-
-    const clearChronicleBtn = document.getElementById('clear-chronicle-btn');
-    if (clearChronicleBtn) {
-        clearChronicleBtn.onclick = function() {
-            if (confirm("Очистить все записи в Летописи Цитадели?")) {
-                localStorage.setItem('khamach_chronicle_logs', JSON.stringify(new Array()));
-                if (typeof renderChronicleDOM === 'function') renderChronicleDOM();
-            }
-        };
-    }
-
+    // ОСТАЛЬНЫЕ КЛИКАБЕЛЬНЫЕ КЛИЕНТСКИЕ ЭЛЕМЕНТЫ
     const goldDisplayLink = document.getElementById('main-gold-display');
     if (goldDisplayLink) {
         goldDisplayLink.onclick = function() {
@@ -155,51 +139,40 @@ function setupAllGameListeners() {
         };
     }
     
-    const closeFatigueBtn = document.getElementById('close-fatigue-screen-btn');
-    if (closeFatigueBtn) {
-        closeFatigueBtn.onclick = function() {
-            const screen = document.getElementById('squad-fatigue-screen');
-            if (screen) screen.style.display = 'none';
-        };
-    }
+    bind('close-fatigue-screen-btn', function() {
+        const screen = document.getElementById('squad-fatigue-screen');
+        if (screen) screen.style.display = 'none';
+    });
 
     setupCombatHelpListeners();
 }
 
 function setupCombatHelpListeners() {
-    const combatHelpBtn = document.getElementById('combat-help-btn');
-    if (combatHelpBtn) {
-        combatHelpBtn.onclick = function() {
-            const container = document.getElementById('combat-help-text-container');
-            if (container) container.innerHTML = typeof getTownText === 'function' ? getTownText('combatHelp') : '';
-            const screen = document.getElementById('combat-help-screen');
-            if (screen) screen.style.display = 'flex';
-        };
-    }
-    const closeCombatHelpBtn = document.getElementById('close-combat-help-btn');
-    if (closeCombatHelpBtn) {
-        closeCombatHelpBtn.onclick = function() {
-            const screen = document.getElementById('combat-help-screen');
-            if (screen) screen.style.display = 'none';
-        };
-    }
-    const escapeTopBtn = document.getElementById('combat-escape-top-btn');
-    if (escapeTopBtn) {
-        escapeTopBtn.onclick = function() {
-            if (confirm("Вы уверены, что хотите сбежать из рейда?")) showScreen('main-menu');
-        };
-    }
-    const closeTutorialBtn = document.getElementById('close-combat-tutorial-btn');
-    if (closeTutorialBtn) {
-        closeTutorialBtn.onclick = function() {
-            localStorage.setItem('khamach_combat_tutorial_done', 'true');
-            if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
-            const screen = document.getElementById('combat-welcome-tutorial-screen');
-            if (screen) screen.style.display = 'none';
-            ['to-squad-btn', 'to-storage-btn', 'to-chronicle-btn', 'to-clans-btn'].forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn) btn.classList.remove('progression-locked');
-            });
-        };
-    }
+    bind('combat-help-btn', function() {
+        const container = document.getElementById('combat-help-text-container');
+        if (container) container.innerHTML = typeof getTownText === 'function' ? getTownText('combatHelp') : '';
+        const screen = document.getElementById('combat-help-screen');
+        if (screen) screen.style.display = 'flex';
+    });
+
+    bind('close-combat-help-btn', function() {
+        const screen = document.getElementById('combat-help-screen');
+        if (screen) screen.style.display = 'none';
+    });
+
+    bind('combat-escape-top-btn', function() {
+        if (confirm("Вы уверены, что хотите сбежать из рейда?")) showScreen('main-menu');
+    });
+
+    bind('close-combat-tutorial-btn', function() {
+        localStorage.setItem('khamach_combat_tutorial_done', 'true');
+        if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
+        const screen = document.getElementById('combat-welcome-tutorial-screen');
+        if (screen) screen.style.display = 'none';
+        
+        ['to-squad-btn', 'to-storage-btn', 'to-chronicle-btn', 'to-clans-btn'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.classList.remove('progression-locked');
+        });
+    });
 }
