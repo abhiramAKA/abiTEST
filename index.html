@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>КХАМАЧ — Вход в Чертоги</title>
+    <style>
+        body, html { margin:0; padding:0; width:100%; height:100%; background:#050508; display:flex; justify-content:center; align-items:center; font-family:'Georgia', serif; }
+        .gate-window { width:90vw; max-width:400px; background:radial-gradient(circle, #1a1512 0%, #0d0a08 100%); border:4px solid #1a1613; outline:2px solid #8a7350; outline-offset:-3px; padding:40px 20px; text-align:center; box-sizing:border-box; }
+        h1 { font-size:36px; color:#e6c280; letter-spacing:5px; margin:0 0 20px 0; text-shadow:0 2px 4px #000; }
+        .play-btn { width:100%; padding:20px; font-size:18px; font-family:'Georgia', serif; font-weight:bold; letter-spacing:2px; color:#cdb38c; background:linear-gradient(to bottom, #2d2621 0%, #171311 100%); border:1px solid #544432; box-shadow:0 5px 10px rgba(0,0,0,0.6); cursor:pointer; transition:all 0.2s ease; border-radius:4px; }
+        .play-btn:hover { color:#fff; border-color:#cbb281; box-shadow:0 0 15px rgba(203,178,129,0.5); letter-spacing:3px; }
+        .play-btn:active { transform:scale(0.98); }
+        .ver { margin-top:30px; font-size:11px; color:#4a453f; letter-spacing:1px; }
+    </style>
+</head>
+<body>
+    <div class="gate-window">
+        <h1>КХАМАЧ</h1>
+        <!-- При клике дописываем случайный buster к имени файла, намертво убивая кэш на сервере -->
+        <button class="play-btn" onclick="window.location.href='hub.html?t=' + Date.now()">ИГРАТЬ</button>
+        <div class="ver">СБОРКА: v5.2.0-ALPHA</div>
+    </div>
+</body>
+</html>
