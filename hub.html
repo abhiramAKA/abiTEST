@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v5.4.2-BETA";
+            window.GAME_VERSION = "v5.5.0-BETA";
             
             if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
                 localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
@@ -28,7 +28,8 @@
                 'match3-progression.js', 'town-engine.js', 'town-chronicle.js',
                 'town-missions-pool.js', 'town-missions-engine.js', 'town-dom.js',
                 'squad-dom.js', 'combat-dom.js', 'town-missions-dom.js',
-                'squad-engine-logic.js', 'squad-engine.js', 'combat.js', 'game-listeners.js'
+                'squad-engine-logic.js', 'squad-engine.js', 'combat-actions.js', 
+                'combat.js', 'game-listeners.js'
             ];
 
             function injectScript(index) {
@@ -68,7 +69,6 @@
         
         <!-- ================= ГЛАВНОЕ МЕНЮ ИГРЫ ================= -->
         <div id="main-menu" class="game-window" style="display: flex;">
-            
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px; padding: 0 4px; background: rgba(20, 15, 12, 0.5); border-bottom: 1px double #544432; box-sizing: border-box;">
                 <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0</span>
                 <h1 style="font-size: 24px; margin: 0; letter-spacing: 2px; padding: 4px 0;">КХАМАЧ</h1>
@@ -91,14 +91,13 @@
                 <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
             </div>
 
-            <div id="game-version" class="version-footer">v5.4.2-BETA</div>
+            <div id="game-version" class="version-footer">v5.5.0-BETA</div>
         </div>
 
-        <!-- ================= ПУСТЫЕ СЛОТЫ-КОНТЕЙНЕРЫ ДЛЯ ИНЪЕКЦИЙ БЛОКОВ ================= -->
+        <!-- ================= АВТОНОМНЫЕ СЛОТЫ ДИНАМИЧЕСКИХ ОКОН ================= -->
         <div id="dynamic-town-screens"></div>
         <div id="squad-screen" class="game-window" style="display: none;"></div>
         <div id="dynamic-combat-screen"></div>
-        
         <div id="dragon-select-screen" class="game-window" style="display: none;"></div>
         <div id="info-screen" class="game-window" style="display: none;"></div>
         <div id="mode-desc-screen" class="game-window" style="display: none;"></div>
