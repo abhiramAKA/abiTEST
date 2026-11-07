@@ -18,18 +18,28 @@
         .changelog h3 { margin:0 0 5px 0; color:#e6c280; font-size:12px; }
         .ver { margin-top:20px; font-size:11px; color:#4a453f; letter-spacing:1px; font-weight:bold; }
     </style>
+    <script>
+        function handlePlayClick() {
+            const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
+            if (tutorialDone) {
+                window.location.href = 'hub.html?t=' + Date.now();
+            } else {
+                window.location.href = 'gate.html?t=' + Date.now();
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="gate-window">
         <h1>КХАМАЧ</h1>
-        <button class="play-btn" onclick="window.location.href='hub.html?t=' + Date.now()">ИГРАТЬ</button>
+        <button class="play-btn" onclick="handlePlayClick()">ИГРАТЬ</button>
         <div class="changelog">
-            <h3>📜 ЖУРНАЛ СБОРКИ v5.6.0-BETA:</h3>
-            • Интегрировано динамическое стартовое меню онбординга: 4 закрытые кнопки физически удалены с экрана до первого боя.<br>
-            • Ликвидирована SyntaxError пустого массива в модуле доски поручений.<br>
-            • Переподключена и застрахована музыка в главном меню, исправлен баг падения рун.
+            <h3>📜 ЖУРНАЛ СБОРКИ v5.7.0-STABLE:</h3>
+            • Развернута жесткая двухфайловая архитектура онбординга через gate.html.<br>
+            • Полностью изолирован первый запуск: убраны все лишние кнопки и счетчики интерфейса.<br>
+            • Перенаправление в глобальную Цитадель хаба открывается строго после первой победы.
         </div>
-        <div class="ver">ТЕКУЩАЯ СБОРКА: v5.6.0-BETA</div>
+        <div class="ver">ТЕКУЩАЯ СБОРКА: v5.7.0-STABLE</div>
     </div>
 </body>
 </html>
