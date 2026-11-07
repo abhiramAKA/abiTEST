@@ -76,11 +76,7 @@ function checkMatchesAndExecute() {
             }
         }
         
-        if (detectedAdvancedCombo && !localStorage.getItem('khamach_combo_tut_done')) {
-            combatData.pendingComboTutorial = true;
-        }
-        
-        setTimeout(() => {
+        window.executePostComboGravity = function() {
             for (let c = 0; c < BOARD_COLS; c++) {
                 let emptyRow = BOARD_ROWS - 1;
                 for (let r = BOARD_ROWS - 1; r >= 0; r--) {
@@ -103,13 +99,24 @@ function checkMatchesAndExecute() {
             
             setTimeout(() => {
                 let chainMatched = checkMatchesAndExecute();
-                
                 if (!chainMatched) {
                     if (typeof usePlayerActionPoint === 'function') {
                         usePlayerActionPoint(); 
                     }
                 }
             }, 350);
+        };
+
+        if (detectedAdvancedCombo && !localStorage.getItem('khamach_combo_tut_done')) {
+            const comboScr = document.getElementById('combat-combo-tutorial-screen');
+            if (comboScr) {
+                setTimeout(() => { comboScr.style.display = 'flex'; }, 250);
+                return found;
+            }
+        }
+        
+        setTimeout(() => {
+            window.executePostComboGravity();
         }, 220);
     }
     return found;
