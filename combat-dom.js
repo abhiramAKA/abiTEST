@@ -1,10 +1,10 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ПОЛНОГО РЕНДЕРИНГА БОЕВОГО ИНТЕРФЕЙСА (ОБНОВЛЕН - v4.9.5-BETA)
+   КХАМАЧ — МОДУЛЬ БАЗОВОГО РЕНДЕРИНГА БОЕВОГО ИНТЕРФЕЙСА (v5.0.0-STABLE)
    ========================================================================== */
 
 function injectCombatInterfaceBaseDOM() {
     const container = document.getElementById('dynamic-combat-screen');
-    if (!container || container.innerHTML.trim() !== '') return; // Защита от дублирования
+    if (!container || container.innerHTML.trim() !== '') return;
 
     container.innerHTML = `
         <!-- ================= БОЕВОЙ ЭКРАН ================= -->
@@ -17,7 +17,7 @@ function injectCombatInterfaceBaseDOM() {
                     <div id="boss-name" style="font-size: 12px; margin: 0;">ДРАКОН НЕКРОСМУТ</div>
                     <div style="display: flex; gap: 4px;">
                         <button id="combat-help-btn" class="info-btn" style="width: 26px; height: 26px; font-size: 12px; box-shadow: none; border-radius: 4px; padding: 0;">❓</button>
-                        <button id="combat-escape-top-btn" class="info-btn back-btn" style="width: 26px; height: 26px; font-size: 11px; box-shadow: none; border-radius: 4px; margin-top: 0; padding: 0;">❌</button>
+                        <button id="combat-escape-top-btn" class="info-btn back-btn" style="width: 26px; height: 26px; font-size: 11px; box-shadow: none; border-radius: 4px; margin-top: 0; padding: 0;" title="Перегенерировать поле">❌</button>
                     </div>
                 </div>
                 <div class="hp-bar-container" style="height: 10px;">
@@ -41,47 +41,22 @@ function injectCombatInterfaceBaseDOM() {
             <!-- ИГРОВОЕ ПОЛЕ MATCH-3 -->
             <div id="match3-board-container" class="match3-board"></div>
         </div>
-
-        <!-- ================= СПРАВОЧНИК В БОЮ ================= -->
-        <div id="combat-help-screen" class="game-window combat-help-popup" style="display: none;">
-            <div class="combat-help-content">
-                <h2>ГОРНИЛО РУН</h2>
-                <span class="subtitle">Справочник Сил</span>
-                <div id="combat-help-text-container">
-                    <div style="text-align: left; font-size: 13px; line-height: 1.4; display: flex; flex-direction: column; gap: 8px; color: #cdb38c;">
-                        <div>🛡️ <strong>Защитник:</strong> Блокирует урон Дракона.</div>
-                        <div>🔥 <strong>Воин:</strong> Наносит чистый урон.</div>
-                        <div>⚡ <strong>Стрелок:</strong> Ослепляет змея молнией.</div>
-                        <div>💚 <strong>Маг:</strong> Массовое исцеление.</div>
-                    </div>
-                </div>
-                <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в бой</button>
-            </div>
-        </div>
+        <div id="dynamic-combat-popups"></div>
     `;
 
-    // ЖЕСТКАЯ ПРИВЯЗКА КНОПОК ДЛЯ БЕЗБОЛЕЗНЕННОЙ ОТЛАДКИ
-    document.getElementById('combat-help-btn').onclick = function() {
-        document.getElementById('combat-help-screen').style.display = 'flex';
-    };
-    document.getElementById('close-combat-help-btn').onclick = function() {
-        document.getElementById('combat-help-screen').style.display = 'none';
-    };
+    if (typeof injectCombatPopupsDOM === 'function') injectCombatPopupsDOM();
+
     document.getElementById('combat-escape-top-btn').onclick = function() {
-        if (confirm("Вы уверены, что хотите выйти в главное меню?")) {
-            window.location.reload();
-        }
+        if (typeof startCombatSession === 'function') startCombatSession(activeSessionLevel);
     };
 }
 
 function buildDragonDOM() {
     const raidZone = document.getElementById('dragon-raid-zone');
     if (!raidZone) return;
-
     raidZone.innerHTML = '';
     const container = document.createElement('div');
     container.className = 'dragon-container';
-
     const model = document.createElement('div');
     model.id = 'dragon-model';
     model.className = 'dragon-idle';
@@ -90,7 +65,6 @@ function buildDragonDOM() {
     model.style.display = 'flex';
     model.style.alignItems = 'center';
     model.style.justifyContent = 'center';
-
     container.appendChild(model);
     raidZone.appendChild(container);
 }
@@ -103,42 +77,26 @@ function updateCombatInterfaceDOM() {
         hpBar.style.width = pct + '%';
         hpText.innerText = `${combatData.dragonHP} / ${combatData.dragonMaxHP}`;
     }
-    
     const roundDisp = document.getElementById('combat-round-display');
     if (roundDisp && combatData) roundDisp.innerText = `Раунд: ${combatData.currentRound}`;
-    
     const shieldDisp = document.getElementById('combat-shield-display');
-    if (shieldDisp && combatData) {
-        shieldDisp.style.display = combatData.tankTaunting ? 'block' : 'none';
-    }
-    
+    if (shieldDisp && combatData) shieldDisp.style.display = combatData.tankTaunting ? 'block' : 'none';
     const squadMatrix = document.getElementById('squad-matrix');
     if (!squadMatrix || !combatData || !combatData.squad) return;
-    
     squadMatrix.innerHTML = '';
     combatData.squad.forEach(hero => {
         const card = document.createElement('div');
         card.className = 'hero-gothic-card';
-        
-        let isReady = (hero.sp >= hero.maxSP && hero.hp > 0);
-        if (isReady) card.classList.add('ready-glow');
-        if (hero.hp <= 0) {
-            card.style.opacity = '0.3';
-            card.style.filter = 'grayscale(1)';
-        }
-        
+        if (hero.sp >= hero.maxSP && hero.hp > 0) card.classList.add('ready-glow');
+        if (hero.hp <= 0) { card.style.opacity = '0.3'; card.style.filter = 'grayscale(1)'; }
         let hpPct = (hero.hp / hero.maxHP) * 100;
         let spPct = (hero.sp / hero.maxSP) * 100;
-        
         const heroLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(hero.id) : 1;
-        const rawFatigue = localStorage.getItem(`khamach_fatigue_${hero.id}`) || '0';
-        const currentFatigue = Math.min(100, Math.max(0, parseInt(rawFatigue)));
-        
+        const currentFatigue = Math.min(100, Math.max(0, parseInt(localStorage.getItem(`khamach_fatigue_${hero.id}`) || '0')));
         card.innerHTML = `
             <div class="hero-card-avatar" style="color: ${hero.color};">${hero.icon}</div>
             <div class="hero-card-name" style="font-size: 8px; line-height: 1.1;">
-                ${hero.name}<br>
-                <span style="color: #ffd700;">Ур. ${heroLvl}</span><br>
+                ${hero.name}<br><span style="color: #ffd700;">Ур. ${heroLvl}</span><br>
                 <span style="color: #ffb3ba; font-weight: normal;">🥱 ${currentFatigue}%</span>
             </div>
             <div class="hero-bar-container" style="height: 11px;">
@@ -150,11 +108,8 @@ function updateCombatInterfaceDOM() {
                 <div class="hero-bar-text" style="color: #ffd700;">SP ${Math.round(spPct)}%</div>
             </div>
         `;
-        
         card.addEventListener('click', () => {
-            if (hero.hp > 0 && hero.sp >= hero.maxSP && typeof activateHeroSuperpower === 'function') {
-                activateHeroSuperpower(hero.id);
-            }
+            if (hero.hp > 0 && hero.sp >= hero.maxSP && typeof activateHeroSuperpower === 'function') activateHeroSuperpower(hero.id);
         });
         squadMatrix.appendChild(card);
     });
