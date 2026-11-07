@@ -104,7 +104,6 @@ function checkMatchesAndExecute() {
             setTimeout(() => {
                 let chainMatched = checkMatchesAndExecute();
                 
-                // Поле полностью успокоилось — каскадов больше нет!
                 if (!chainMatched) {
                     if (typeof usePlayerActionPoint === 'function') {
                         usePlayerActionPoint(); 
