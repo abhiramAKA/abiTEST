@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>КХАМАЧ — Пробуждение</title>
+    <script>
+        (function() {
+            window.GAME_VERSION = "v5.7.0-STABLE";
+            const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
+            
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'styles.css?t=' + enforceBuster;
+            document.head.appendChild(link);
+
+            const scripts = [
+                'game.js', 'background.js', 'audio-engine.js', 'match3-fx.js',
+                'match3-input.js', 'match3.js', 'match3-logic.js', 'match3-data.js',
+                'campaign.js', 'town-engine.js', 'town-chronicle.js',
+                'missions-pool.js', 'missions-engine.js', 'town-dom.js',
+                'squad-dom.js', 'combat-dom.js', 'missions-board.js',
+                'squad-logic.js', 'squad-core.js', 'combat-actions.js', 
+                'combat.js', 'game-listeners.js'
+            ];
+
+            function injectScript(index) {
+                if (index >= scripts.length) {
+                    if (typeof initDispatcherModule === 'function') initDispatcherModule();
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = scripts[index] + '?v=' + window.GAME_VERSION + '&t=' + enforceBuster;
+                script.async = false; 
+                script.onload = function() { injectScript(index + 1); };
+                document.head.appendChild(script);
+            }
+
+            document.addEventListener("DOMContentLoaded", function() {
+                injectScript(0);
+            });
+        })();
+    </script>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="game-interface">
+        
+        <!-- ================= УЛЬТРА-МИНИМАЛИСТИЧНОЕ НАЧАЛЬНОЕ МЕНЮ ================= -->
+        <div id="main-menu" class="game-window" style="display: flex; max-width: 380px;">
+            <h1 style="font-size: 28px; margin: 0 0 2px 0; letter-spacing: 3px;">КХАМАЧ</h1>
+            <span class="subtitle" style="font-size: 12px; margin-bottom: 25px; padding-bottom: 6px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
+            
+            <p style="font-size: 13px; line-height: 1.5; color: #bfae96; margin-bottom: 25px; text-align: center; padding: 0 10px;">
+                В недрах подземелий пробудился древний змей. У вас нет времени на размышления — отряд ждет приказов у подножия пылающего Горнила.
+            </p>
+
+            <!-- Единственный доступный путь для клика -->
+            <div style="display: flex; justify-content: center; width: 100%; margin: 10px 0;">
+                <button id="to-combat-btn" class="emoji-grid-btn" style="width: 130px; height: 130px; font-size: 80px;">🌋</button>
+            </div>
+            
+            <div style="font-size: 10px; color: #4a453f; margin-top: 20px; font-weight: bold; letter-spacing: 1px;">ЖЕСТКИЙ ОНБОРДИНГ ОТРЯДА</div>
+        </div>
+
+        <!-- Скрытые слоты для боевого экрана -->
+        <div id="dragon-select-screen" class="game-window" style="display: none;"></div>
+        <div id="dynamic-combat-screen"></div>
+        <div id="info-screen" class="game-window" style="display: none;"></div>
+        <div id="mode-desc-screen" class="game-window" style="display: none;"></div>
+
+    </div>
+</body>
+</html>
+
