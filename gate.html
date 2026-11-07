@@ -16,7 +16,7 @@
         <!-- ГОТИЧЕСКОЕ ОКНО С КОРИЧНЕВОЙ РАМКОЙ -->
         <div id="onboarding-gothic-window" class="game-window" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; box-sizing: border-box;">
             <h1 id="onboarding-title" style="font-size: 28px; margin-bottom: 5px;">ПРИКЛЮЧЕНИЕ</h1>
-            <span id="onboarding-subtitle" class="subtitle" style="margin-bottom: 20px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Первый шаг в Горнило</span>
+            <span id="onboarding-subtitle" class="subtitle" style="margin-bottom: 20px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Первый шаг in Горнило</span>
             
             <p id="onboarding-description" style="font-size: 13px; line-height: 1.6; color: #bfae96; margin-bottom: 25px; padding: 0 10px;">
                 Древние подземелья Абхирамбурга пробудились. Соберите волю в кулак, управляйте камнями стихий и сокрушите огнедышащих тварей в тактических битвах!
@@ -24,7 +24,7 @@
 
             <!-- ДИНАМИЧЕСКИЙ КОНТЕЙНЕР ДЛЯ КВАДРАТНЫХ КНОПОК -->
             <div id="onboarding-buttons-zone" class="menu-emoji-grid" style="display: flex; justify-content: center; align-items: center; gap: 16px; min-height: 140px; width: 100%; box-sizing: border-box; padding: 0 20px;">
-                <!-- Кнопки создаются автоматически скриптом ниже -->
+                <!-- Кнопки создаются автоматически скриптом onboarding-engine.js -->
             </div>
         </div>
         
@@ -44,124 +44,7 @@
         <div id="dynamic-town-screens" style="display: none;"></div>
     </div>
 
-    <script>
-        window.GAME_VERSION = "v5.7.34-FIX";
-
-        function loadGameModulesAndExecute(modeType) {
-            const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
-            const scripts = [
-                'game.js', 'background.js', 'audio-engine.js', 'match3-fx.js',
-                'match3-input.js', 'match3.js', 'match3-logic.js', 'match3-data.js',
-                'campaign.js', 'town-engine.js', 'town-chronicle.js',
-                'missions-pool.js', 'missions-engine.js', 'town-dom.js',
-                'squad-dom.js', 'combat-popups.js', 'combat-dom.js', 'missions-board.js',
-                'squad-logic.js', 'squad-core.js', 'combat-actions.js', 
-                'combat.js', 'game-listeners.js'
-            ];
-
-            function injectScriptSequentially(index) {
-                if (index >= scripts.length) {
-                    if (modeType === 'battle' && typeof initDispatcherModule === 'function') {
-                        initDispatcherModule();
-                    }
-                    
-                    if (modeType === 'battle') { launchBattle(); } 
-                    else if (modeType === 'camp') { launchCamp(); }
-                    else if (modeType === 'missions') { launchMissions(); }
-                    return;
-                }
-                const script = document.createElement('script');
-                script.src = scripts[index] + '?v=' + window.GAME_VERSION + '&t=' + enforceBuster;
-                script.async = false; 
-                script.onload = function() { injectScriptSequentially(index + 1); };
-                document.head.appendChild(script);
-            }
-            injectScriptSequentially(0);
-        }
-
-        function launchBattle() {
-            document.getElementById('onboarding-gothic-window').style.display = 'none';
-            if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
-            if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
-            if (typeof showScreen === 'function') showScreen('combat-screen');
-            if (typeof startCombatSession === 'function') startCombatSession(1); 
-        }
-
-        function launchCamp() {
-            document.getElementById('onboarding-gothic-window').style.display = 'none';
-            if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
-            if (typeof updateSquadHeroesSpecScreenDOM === 'function') updateSquadHeroesSpecScreenDOM();
-            document.getElementById('squad-heroes-spec-screen').style.display = 'flex';
-        }
-
-        function launchMissions() {
-            document.getElementById('onboarding-gothic-window').style.display = 'none';
-            
-            // Включаем базовые интерфейсы города для корректной генерации доски
-            if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
-            
-            // Генерируем карточки контрактов Доски Поручений в DOM
-            if (typeof renderMissionsDOM === 'function') {
-                renderMissionsDOM();
-            }
-            
-            // Жестко прячем кнопку закрытия Поручений во время онбординга
-            const closeMissionsBtn = document.getElementById('close-missions-btn');
-            if (closeMissionsBtn) {
-                closeMissionsBtn.style.display = 'none';
-            }
-
-            document.getElementById('missions-screen').style.display = 'flex';
-
-            // Переопределяем логику отправки бойца: при клике на контракт обучение завершается и шлёт в Хаб
-            window.startMission = function(missionId, heroId, finalExpectedReward) {
-                localStorage.setItem(`khamach_hero_busy_${heroId}`, 'true');
-                localStorage.setItem(`khamach_mission_active_${missionId}`, 'true');
-                localStorage.setItem(`khamach_mission_start_${missionId}`, Date.now().toString());
-                localStorage.setItem(`khamach_mission_reward_frozen_${missionId}`, finalExpectedReward.toString());
-                
-                if (typeof setHeroFatigue === 'function') {
-                    const currentFatigue = Math.min(100, Math.max(0, parseFloat(localStorage.getItem(`khamach_fatigue_${heroId}`) || '0')));
-                    setHeroFatigue(heroId, currentFatigue + 15);
-                }
-                
-                // Фиксируем полное завершение всех этапов стартового обучения
-                localStorage.setItem('khamach_missions_tutorial_done', 'true');
-                alert("Боец успешно отправлен на контракт! Обучение завершено. Добро пожаловать в Цитадель Абхирамбурга!");
-                
-                // Перенаправляем на полноценную страницу со всеми разблокированными кнопками
-                window.location.href = 'hub.html?t=' + Date.now();
-            };
-        }
-
-        // Отрисовка кнопок в зависимости от прогресса при загрузке страницы
-        (function() {
-            const isVictory = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
-            const isTrained = localStorage.getItem('khamach_training_tutorial_done') === 'true';
-            const btnZone = document.getElementById('onboarding-buttons-zone');
-            
-            if (!isVictory) {
-                btnZone.innerHTML = `
-                    <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" onclick="loadGameModulesAndExecute('battle')">🌋</button>
-                `;
-            } else if (!isTrained) {
-                document.getElementById('onboarding-title').innerText = "ЦИТАДЕЛЬ";
-                document.getElementById('onboarding-subtitle').innerText = "Управление Прогрессом";
-                document.getElementById('onboarding-description').innerText = "Дракон повержен! На склад доставлены первые трофеи. Отправляйтесь прямиком в Спортзал, чтобы развить навыки и поднять уровень того героя, на прокачку которого у вас хватает добытых материалов.";
-                
-                btnZone.innerHTML = `
-                    <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Спортзал" onclick="loadGameModulesAndExecute('camp')">🏋️</button>
-                `;
-            } else {
-                document.getElementById('onboarding-title').innerText = "РАТУША";
-                document.getElementById('onboarding-subtitle').innerText = "Городские Контракты";
-                document.getElementById('onboarding-description').innerText = "Герой успешно развил свои навыки! Теперь Цитадели нужно золото для полноценного восстановления инфраструктуры. Загляните на Доску Поручений и отправьте свободного бойца на его первое оплачиваемое задание.";
-                
-                btnZone.innerHTML = `
-                    <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Поручения" onclick="loadGameModulesAndExecute('missions')">💰</button>
-                `;
-            }
-        })();
-    </script>
+    <!-- Подключаем выделенный вычислительный модуль онбординга -->
+    <script src="onboarding-engine.js?v=v5.7.36-FIX"></script>
 </body>
 </html>
