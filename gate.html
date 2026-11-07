@@ -2,14 +2,21 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>КХАМАЧ — Режим Отладки Боя</title>
+    <title>КХАМАЧ — Пробуждение Горнила</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v5.7.7-DEBUG";
+            window.GAME_VERSION = "v5.7.25-FIX";
+            
+            // Если игрок уже прошел первый бой, ему не нужно видеть этот экран — сразу шлем в Хаб
+            if (localStorage.getItem('khamach_combat_tutorial_done') === 'true') {
+                window.location.href = 'hub.html?t=' + Date.now();
+                return;
+            }
+
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
             
             const link = document.createElement('link');
@@ -30,12 +37,6 @@
             function injectScript(index) {
                 if (index >= scripts.length) {
                     if (typeof initDispatcherModule === 'function') initDispatcherModule();
-                    
-                    // Безопасный форсированный запуск боевой сессии
-                    if (typeof showScreen === 'function' && typeof startCombatSession === 'function') {
-                        showScreen('combat-screen');
-                        startCombatSession(1); 
-                    }
                     return;
                 }
                 const script = document.createElement('script');
@@ -54,11 +55,28 @@
 <body>
     <canvas id="bg-canvas"></canvas>
     <div id="game-interface">
-        <div id="main-menu" class="game-window" style="display: none; max-width: 380px;"></div>
-        <div id="dragon-select-screen" class="game-window" style="display: none;"></div>
+        <div class="game-window" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 320px; text-align: center;">
+            <span class="subtitle" style="border: none; margin-bottom: 25px; font-size: 13px; color: #8a7350; letter-spacing: 2px;">ГОРНИЛО СТИХИЙ ПРОБУЖДЕНО</span>
+            
+            <div style="display: flex; min-height: 160px; align-items: center; justify-content: center;">
+                <button id="fast-intro-combat-btn" class="emoji-grid-btn" style="width: 130px; height: 130px; font-size: 74px; border-radius: 50%;" onclick="startFirstOnboardingBattle()">🌋</button>
+            </div>
+        </div>
+        
+        <!-- Скрытые технические слоты для боевого движка -->
+        <div id="main-menu" style="display: none;"></div>
         <div id="dynamic-combat-screen"></div>
-        <div id="info-screen" class="game-window" style="display: none;"></div>
-        <div id="mode-desc-screen" class="game-window" style="display: none;"></div>
     </div>
+
+    <script>
+        function startFirstOnboardingBattle() {
+            if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
+            if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
+            if (typeof showScreen === 'function') showScreen('combat-screen');
+            if (typeof startCombatSession === 'function') {
+                startCombatSession(1); 
+            }
+        }
+    </script>
 </body>
 </html>
