@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УЛЬТИМЕЙТОВ И ИСХОДОВ БИТВЫ (ИСПРАВЛЕН - v5.7.21-FIX)
+   КХАМАЧ — МОДУЛЬ УЛЬТИМЕЙТОВ И ИСХОДОВ БИТВЫ (ИСПРАВЛЕН - v5.7.28-FIX)
    ========================================================================== */
 
 function activateHeroSuperpower(heroId) {
@@ -32,7 +32,6 @@ function activateHeroSuperpower(heroId) {
 
 function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
-        // КРИТИЧЕСКИЙ ФИКС: Принудительно убиваем все фоновые таймауты боя, чтобы интерфейс дракона не вылезал в меню
         let id = window.setTimeout(function() {}, 0);
         while (id--) {
             window.clearTimeout(id);
@@ -57,11 +56,11 @@ function checkBattleResolution() {
         if (typeof saveCompletedTier === 'function') saveCompletedTier(activeSessionLevel);
         if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
         
-        alert(`ВЕЛИКАЯ ПОБЕДА! Дракон повержен!\n📦 На склад Цитадели доставлено: ${lootName} (1 шт).\n\nПоздравляем! Вам открыт полный доступ в Цитадель Абхирамбурга!`);
+        alert(`ВЕЛИКАЯ ПОБЕДА! Дракон повержен!\n📦 На склад Цитадели доставлено: ${lootName} (1 шт).\n\nПоздравляем! Вам открыт доступ к Спортзалу!`);
         
-        window.location.href = 'hub.html?t=' + Date.now();
+        // РЕДИРЕКТ НА СТАРТОВЫЙ ШЛЮЗ ДЛЯ ОТОБРАЖЕНИЯ ДВУХ КНОПОК-КВАДРАТИКОВ
+        window.location.href = 'gate.html?t=' + Date.now();
     } else if (combatData.squad.every(hero => hero.hp <= 0)) {
-        // То же самое делаем при поражении во избежание багов залипания экрана дракона
         let id = window.setTimeout(function() {}, 0);
         while (id--) {
             window.clearTimeout(id);
