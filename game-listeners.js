@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (СТАБИЛИЗИРОВАН)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (СТАБИЛИЗИРОВАН - v5.5.5)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
@@ -18,9 +18,16 @@ window.closeModeDescriptionUnified = function() {
 };
 
 function setupAllGameListeners() {
-    // Полностью очищаем старые глобальные перехватчики
     document.onclick = null;
     document.body.onclick = null;
+
+    // Авторазблокировка аудиоконтекста и старт музыки при первом же взаимодействии с меню
+    document.addEventListener('click', function initAudioOnFirstClick() {
+        if (typeof startBackgroundMusic === 'function') {
+            startBackgroundMusic();
+        }
+        document.removeEventListener('click', initAudioOnFirstClick);
+    }, { once: true });
 
     function bind(id, callback, checkLock = false) {
         const el = document.getElementById(id);
@@ -35,7 +42,6 @@ function setupAllGameListeners() {
         };
     }
 
-    // НАДЕЖНОЕ ПРЯМОЕ НАЗНАЧЕНИЕ КЛИКОВ ДЛЯ КАЖДОЙ КНОПКИ ГЛАВНОГО МЕНЮ
     bind('to-settings-btn', function() {
         const musicSlider = document.getElementById('volume-music-slider');
         const fxSlider = document.getElementById('volume-fx-slider');
@@ -59,6 +65,9 @@ function setupAllGameListeners() {
 
     bind('to-missions-btn', function() {
         showScreen('missions-screen');
+        if (typeof renderMissionsDOM === 'function') {
+            renderMissionsDOM(); // Исправлено: мгновенный рендер доски поручений при входе
+        }
     }, true);
 
     bind('to-squad-btn', function() {
@@ -82,7 +91,6 @@ function setupAllGameListeners() {
         }
     }, true);
 
-    // СЕРВИСНЫЕ КНОПКИ НАЗАД И ЗАКРЫТИЯ ОКН
     bind('from-select-to-menu-btn', function() { showScreen('main-menu'); });
     bind('from-info-to-menu-btn', function() { showScreen('main-menu'); });
     bind('close-settings-btn', function() {
@@ -96,7 +104,6 @@ function setupAllGameListeners() {
     bind('close-missions-btn', function() { showScreen('main-menu'); });
     bind('close-chronicle-btn', function() { showScreen('main-menu'); });
 
-    // СЛАЙДЕРЫ НАСТРОЕК ЗВУКА
     const musicSlider = document.getElementById('volume-music-slider');
     if (musicSlider) {
         musicSlider.oninput = function(e) {
@@ -121,7 +128,6 @@ function setupAllGameListeners() {
         }
     });
 
-    // ОСТАЛЬНЫЕ КЛИКАБЕЛЬНЫЕ КЛИЕНТСКИЕ ЭЛЕМЕНТЫ
     const goldDisplayLink = document.getElementById('main-gold-display');
     if (goldDisplayLink) {
         goldDisplayLink.onclick = function() {
