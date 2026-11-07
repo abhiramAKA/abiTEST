@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v5.7.44-FIX)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v5.7.45-FIX)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
@@ -30,7 +30,7 @@ function setupAllGameListeners() {
         document.removeEventListener('click', initAudioOnFirstClick);
     }, { once: true });
 
-    // ОЖИВЛЕНИЕ КНОПОК ДИНАМИЧЕСКОЙ СЕТКИ ХАБА
+    // ПРИВЯЗКА КНОПОК ОСНОВНОЙ СЕТКИ ХАБА
     safeBindElementClick('to-combat-btn', function() {
         showScreen('dragon-select-screen');
     });
@@ -62,7 +62,7 @@ function setupAllGameListeners() {
         }
     });
 
-    // СЛУЖЕБНЫЕ КНОПКИ ВСПЛЫВАЮЩИХ ПАНЕЛЕЙ
+    // СЛУЖЕБНЫЕ КНОПКИ ПАНЕЛЕЙ ХАБА
     safeBindElementClick('to-settings-btn', function() {
         const musicSlider = document.getElementById('volume-music-slider');
         const fxSlider = document.getElementById('volume-fx-slider');
@@ -77,7 +77,7 @@ function setupAllGameListeners() {
         showScreen('info-screen');
     });
 
-    // КНОПКИ ЗАКРЫТИЯ (НАЗАД В МЕНЮ)
+    // ОБРАБОТЧИКИ НАЖАТИЙ НА КНОПКИ «НАЗАД»
     safeBindElementClick('from-select-to-menu-btn', function() { showScreen('main-menu'); });
     safeBindElementClick('from-info-to-menu-btn', function() { showScreen('main-menu'); });
     safeBindElementClick('close-settings-btn', function() { showScreen('main-menu'); });
