@@ -40,7 +40,8 @@ function checkAndProcessMissionsBackground() {
     let activeMissionsJSON = localStorage.getItem('khamach_active_triad_ids');
     if (!activeMissionsJSON) return;
     
-    let currentTriad =;
+    // ИСПРАВЛЕНО: Восстановлен корректный пустой массив на случай сбоя парсинга
+    let currentTriad = [];
     try { currentTriad = JSON.parse(activeMissionsJSON); } catch(e) { return; }
     
     let stateChanged = false;
