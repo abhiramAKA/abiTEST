@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНАЯ ЛОГИКА СОВПАДЕНИЙ И КОМБО (РЕДАКЦИЯ - v4.9.8-BETA)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНАЯ ЛОГИКА СОВПАДЕНИЙ И КОМБО (ИСПРАВЛЕН - v5.7.19-FIX)
    ========================================================================== */
 
 function checkMatchesAndExecute() {
@@ -47,6 +47,7 @@ function checkMatchesAndExecute() {
     }
     
     if (found) {
+        window.isBoardLocked = true;
         isBoardLocked = true;
         
         if (detectedAdvancedCombo && typeof playMatch3Sound === 'function') {
@@ -100,10 +101,11 @@ function checkMatchesAndExecute() {
             setTimeout(() => {
                 let chainMatched = checkMatchesAndExecute();
                 if (!chainMatched) {
+                    window.isBoardLocked = false;
+                    isBoardLocked = false;
                     if (typeof usePlayerActionPoint === 'function') {
                         usePlayerActionPoint(); 
                     }
-                    // АВТО-ПРОВЕРКА НА ТУПИК ПОСЛЕ ВСЕХ КАСКАДОВ
                     if (!hasAvailableMoves()) {
                         alert("Нет доступных ходов! Магия Кхамача перемешивает руны...");
                         shuffleBoardSecure();
@@ -121,11 +123,13 @@ function checkMatchesAndExecute() {
         }
         
         setTimeout(() => { window.executePostComboGravity(); }, 220);
+    } else {
+        window.isBoardLocked = false;
+        isBoardLocked = false;
     }
     return found;
 }
 
-// Новая отладочная функция: проверка наличия хотя бы одного хода три в ряд
 function hasAvailableMoves() {
     for (let r = 0; r < BOARD_ROWS; r++) {
         for (let c = 0; c < BOARD_COLS; c++) {
@@ -138,13 +142,11 @@ function hasAvailableMoves() {
                     match3BoardData[r2][c2] = temp;
                     
                     let hasMatch = false;
-                    // Сканируем на горизонтальные триады
                     for (let i = 0; i < BOARD_ROWS; i++) {
                         for (let j = 0; j < BOARD_COLS - 2; j++) {
                             if (match3BoardData[i][j] && match3BoardData[i][j] === match3BoardData[i][j+1] && match3BoardData[i][j] === match3BoardData[i][j+2]) hasMatch = true;
                         }
                     }
-                    // Сканируем на вертикальные триады
                     for (let i = 0; i < BOARD_ROWS - 2; i++) {
                         for (let j = 0; j < BOARD_COLS; j++) {
                             if (match3BoardData[i][j] && match3BoardData[i][j] === match3BoardData[i+1][j] && match3BoardData[i][j] === match3BoardData[i+2][j]) hasMatch = true;
@@ -161,8 +163,8 @@ function hasAvailableMoves() {
     return false;
 }
 
-// Новая функция: безопасное автоматическое перетряхивание поля
 function shuffleBoardSecure() {
+    window.isBoardLocked = true;
     isBoardLocked = true;
     let boardContainer = document.getElementById('match3-board-container');
     if (boardContainer) boardContainer.style.filter = "blur(4px) brightness(1.5)";
@@ -170,6 +172,7 @@ function shuffleBoardSecure() {
     setTimeout(() => {
         if (typeof initMatch3Board === 'function') initMatch3Board();
         if (boardContainer) boardContainer.style.filter = "";
+        window.isBoardLocked = false;
         isBoardLocked = false;
     }, 400);
 }
