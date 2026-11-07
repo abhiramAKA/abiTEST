@@ -5,9 +5,8 @@
 let activeSessionLevel = 1;
 
 function startCombatSession(level) {
-    // Автоматическая инициализация базового стейта, если его забыли создать модули цитадели
     if (typeof combatData === 'undefined') {
-        window.combatData = { currentRound: 1, squad: [] };
+        window.combatData = { currentRound: 1, squad: };
     }
 
     activeSessionLevel = level || 1;
@@ -52,11 +51,17 @@ function startCombatSession(level) {
         hero.hp = hero.maxHP; hero.sp = Math.min(hero.maxSP, spPerk * 5); 
     });
     
-    // БЕЗОПАСНЫЙ ИНЖЕКТ И ЗАПУСК ПОЛЯ
     if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
     if (typeof buildDragonDOM === 'function') buildDragonDOM();
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
     if (typeof initMatch3Board === 'function') initMatch3Board();
+
+    const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
+    if (!tutorialDone) {
+        if (typeof isBoardLocked !== 'undefined') isBoardLocked = true;
+        const welcomeScr = document.getElementById('combat-welcome-tutorial-screen');
+        if (welcomeScr) welcomeScr.style.display = 'flex';
+    }
 }
 
 function chargeHeroSuperpowers(effects) {
