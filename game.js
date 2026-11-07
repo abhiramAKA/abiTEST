@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (СТАБИЛИЗИРОВАН - v5.4.0)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (СТАБИЛИЗИРОВАН - v5.6.0)
    ========================================================================== */
 
 const BOARD_ROWS = 8;
@@ -9,8 +9,8 @@ const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
 let combatData = {
     dragonHP: 120, 
     dragonMaxHP: 120,
-    playerAP: 1, 
-    playerMaxAP: 1,
+    playerAP: 3, 
+    playerMaxAP: 3,
     currentRound: 1,
     tankTaunting: false, 
     dragonBlinded: false, 
@@ -44,24 +44,53 @@ function sanitizeAndMigrateStorage() {
     localStorage.setItem('khamach_res_tears', tears);
 }
 
+function updateMenuOnboardingVisibility() {
+    const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
+    const gridContainer = document.getElementById('main-menu-grid');
+    if (!gridContainer) return;
+
+    if (!tutorialDone) {
+        // ПЕРВЫЙ ЗАПУСК: Четырех кнопок вообще нет на экране. Меняем стили сетки.
+        gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
+        gridContainer.innerHTML = `
+            <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
+            <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
+        `;
+    } else {
+        // ПОСЛЕ ПЕРВОГО СРАЖЕНИЯ: Полноценное открытое меню 2х3
+        gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
+        gridContainer.innerHTML = `
+            <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
+            <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
+            <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
+            <button id="to-storage-btn" class="emoji-grid-btn">🏋️</button>
+            <button id="to-chronicle-btn" class="emoji-grid-btn">📜</button>
+            <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
+        `;
+    }
+}
+
 function initDispatcherModule() {
     sanitizeAndMigrateStorage();
 
-    // Защищенный вызов инъекций — падение одного UI-окна больше не рушит всю игру
     try { if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM(); } catch(e) { console.error(e); }
     try { if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM(); } catch(e) { console.error(e); }
     try { if (typeof injectSquadInterfaceDOM === 'function') injectSquadInterfaceDOM(); } catch(e) { console.error(e); }
-    try { if (typeof injectMissionsInterfaceBaseDOM === 'function') injectMissionsInterfaceBaseDOM(); } catch(e) { console.error(e); }
     
-    // Принудительно и сразу обновляем золото и усталость на экране
-    if (typeof updateTownGoldDisplay === 'function') {
-        updateTownGoldDisplay();
-    }
+    // Перестраиваем меню в зависимости от онбординга
+    updateMenuOnboardingVisibility();
 
-    // Навешиваем клики
+    if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
+
     if (typeof setupAllGameListeners === 'function') {
         try { setupAllGameListeners(); } catch (e) { console.error("Ошибка листенеров:", e); }
     }
+
+    // Принудительно вешаем старт музыки на абсолютно любое нажатие по экрану хаба
+    document.addEventListener('click', function unlockAudio() {
+        if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
+        document.removeEventListener('click', unlockAudio);
+    }, { once: true });
 
     setInterval(() => {
         if (typeof checkAndProcessMissionsBackground === 'function') {
@@ -76,6 +105,11 @@ function showScreen(screenId) {
         const screenEl = document.getElementById(id);
         if (screenEl) screenEl.style.display = (id === screenId) ? 'flex' : 'none';
     });
+    
+    if (screenId === 'main-menu') {
+        updateMenuOnboardingVisibility();
+        if (typeof setupAllGameListeners === 'function') setupAllGameListeners();
+    }
     if (screenId === 'dragon-select-screen' && typeof renderDragonSelectionGrid === 'function') {
         renderDragonSelectionGrid();
     }
