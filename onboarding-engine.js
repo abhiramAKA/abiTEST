@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫДЕЛЕННЫЙ ДВИЖОК ПОЭТАПНОГО ОБУЧЕНИЯ (ОБНОВЛЕН - v5.7.41-FIX)
+   КХАМАЧ — ВЫДЕЛЕННЫЙ ДВИЖОК ПОЭТАПНОГО ОБУЧЕНИЯ (ОБНОВЛЕН - v5.7.42-FIX)
    ========================================================================== */
 
-window.GAME_VERSION = "v5.7.41-FIX";
+window.GAME_VERSION = "v5.7.42-FIX";
 
 const ONBOARDING_MISSIONS_LOCAL_POOL = [
     { id: "m_t1", allowedHero: "tank", heroName: "Защитник", heroIcon: "🛡️", reward: 133, text: "Кузнец просит придержать тяжелую наковальню и разгрузить слитки стали.", title: "Помощь в кузнице" },
@@ -25,8 +25,9 @@ function loadGameModulesAndExecute(modeType) {
 
     function injectScriptSequentially(index) {
         if (index >= scripts.length) {
-            // ФИКС: Диспетчер запускается во всех режимах, но экраны открываются строго по типу
-            if (typeof initDispatcherModule === 'function') {
+            // КРИТИЧЕСКИЙ ФИКС: initDispatcherModule запускается СТРОГО во время боя!
+            // Для Спортзала и Ратуши вызывать его запрещено, чтобы не инжектировался экран дракона.
+            if (modeType === 'battle' && typeof initDispatcherModule === 'function') {
                 initDispatcherModule();
             }
             
