@@ -21,8 +21,8 @@
                 Древние подземелья Абхирамбурга пробудились. Соберите волю в кулак, управляйте камнями стихий и сокрушите огнедышащих тварей в тактических битвах!
             </p>
 
-            <!-- ДИНАМИЧЕСКИЙ КОНТЕЙНЕР ДЛЯ КНОПОК -->
-            <div id="onboarding-buttons-zone" style="display: flex; justify-content: center; align-items: center; gap: 20px; min-height: 140px; width: 100%;">
+            <!-- ДИНАМИЧЕСКИЙ КОНТЕЙНЕР ДЛЯ КВАДРАТНЫХ КНОПОК -->
+            <div id="onboarding-buttons-zone" class="menu-emoji-grid" style="display: flex; justify-content: center; align-items: center; gap: 16px; min-height: 140px; width: 100%; box-sizing: border-box; padding: 0 20px;">
                 <!-- Кнопки создаются автоматически скриптом ниже -->
             </div>
         </div>
@@ -35,11 +35,10 @@
     </div>
 
     <script>
-        window.GAME_VERSION = "v5.7.27-FIX";
+        window.GAME_VERSION = "v5.7.28-FIX";
 
         // Функция ленивой сборки и загрузки всех игровых модулей при первом клике
         function loadGameModulesAndExecute(callback) {
-            // Удаляем только окно приветствия, если переходим в полноценный бой
             const windowEl = document.getElementById('onboarding-gothic-window');
             if (windowEl && callback.name === 'launchBattle') {
                 windowEl.style.display = 'none';
@@ -94,7 +93,6 @@
 
         // Отрисовка кнопок в зависимости от прогресса
         document.addEventListener("DOMContentLoaded", function() {
-            // Динамически подключаем базовые стили оформления рамок Цитадели
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
             const link = document.createElement('link');
             link.rel = 'stylesheet';
@@ -105,19 +103,19 @@
             const btnZone = document.getElementById('onboarding-buttons-zone');
             
             if (!isVictory) {
-                // ЭТАП 1: Строго одна кнопка вулкана 
+                // ЭТАП 1: Строго одна квадратная кнопка вулкана
                 btnZone.innerHTML = `
-                    <button class="emoji-grid-btn" style="width: 120px; height: 120px; font-size: 64px; border-radius: 50%;" onclick="loadGameModulesAndExecute(launchBattle)">🌋</button>
+                    <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" onclick="loadGameModulesAndExecute(launchBattle)">🌋</button>
                 `;
             } else {
-                // ЭТАП 2: Две кнопки — Вулкан и Спортзал (Военный Лагерь)
+                // ЭТАП 2: Два квадратика — Вулкан и Спортзал
                 document.getElementById('onboarding-title').innerText = "ЦИТАДЕЛЬ";
                 document.getElementById('onboarding-subtitle').innerText = "Управление Прогрессом";
-                document.getElementById('onboarding-description').innerText = "Дракон отступил! Силы вашего отряда выросли. Потратьте заработанные трофеи в Военном Лагере для прокачки характеристик бойцов или отправляйтесь в новый тактический рейд.";
+                document.getElementById('onboarding-description').innerText = "Дракон повержен! На склад доставлены первые трофеи. Загляните в Спортзал, чтобы прокачать характеристики отряда, или отправляйтесь в новый рейд.";
                 
                 btnZone.innerHTML = `
                     <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="В бой" onclick="loadGameModulesAndExecute(launchBattle)">🌋</button>
-                    <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Прокачка" onclick="loadGameModulesAndExecute(launchCamp)">🏋️</button>
+                    <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Спортзал" onclick="loadGameModulesAndExecute(launchCamp)">🏋️</button>
                 `;
             }
         });
