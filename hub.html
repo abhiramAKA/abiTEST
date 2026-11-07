@@ -19,7 +19,6 @@
             link.href = 'styles.css?t=' + buster;
             document.head.appendChild(link);
 
-            // СТРОГО ВЫВЕРЕННЫЙ ПОРЯДОК ЗАГРУЗКИ (Сначала базы данных -> ядра -> рендеринг -> листенеры)
             const scripts = [
                 'game.js', 
                 'background.js', 
@@ -62,7 +61,6 @@
                 s.src = scripts[idx] + '?v=' + window.GAME_VERSION + '&t=' + buster;
                 s.async = false;
                 s.onload = function() { injectScript(idx + 1); };
-                s.onerror = function() { console.error("КРИТИЧЕСКАЯ ОШИБКА: Не удалось загрузить модуль " + scripts[idx]); };
                 document.head.appendChild(s);
             }
             document.addEventListener("DOMContentLoaded", function() { injectScript(0); });
@@ -92,7 +90,6 @@
                 <button id="to-chronicle-btn" class="emoji-grid-btn">📜</button>
                 <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
             </div>
-            <div id="game-version" class="version-footer">v5.2.9-BETA</div>
         </div>
 
         <!-- ДИНАМИЧЕСКИЕ СЛОТЫ ДЛЯ ИНЪЕКЦИЙ ЭКРАНОВ -->
