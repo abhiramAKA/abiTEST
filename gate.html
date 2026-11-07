@@ -6,51 +6,46 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>КХАМАЧ — Пробуждение Горнила</title>
-    <script>
-        (function() {
-            window.GAME_VERSION = "v5.7.26-FIX";
-            
-            // Если первый бой уже пройден — мгновенно перенаправляем в Хаб без лишней отрисовки
-            if (localStorage.getItem('khamach_combat_tutorial_done') === 'true') {
-                window.location.href = 'hub.html?t=' + Date.now();
-            }
-        })();
-    </script>
+    <title>КХАМАЧ — Чертоги Испытаний</title>
 </head>
 <body>
     <canvas id="bg-canvas"></canvas>
     <div id="game-interface">
-        <!-- ОБОЛОЧКА СТАРТОВОЙ КНОПКИ ВУЛКАНА -->
-        <div id="onboarding-welcome-zone" class="game-window" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 320px; text-align: center; z-index: 10;">
-            <span class="subtitle" style="border: none; margin-bottom: 25px; font-size: 13px; color: #8a7350; letter-spacing: 2px;">ГОРНИЛО СТИХИЙ ПРОБУЖДЕНО</span>
+        
+        <!-- ГОТИЧЕСКОЕ ОКНО С КОРИЧНЕВОЙ РАМКОЙ -->
+        <div id="onboarding-gothic-window" class="game-window" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; box-sizing: border-box;">
+            <h1 id="onboarding-title" style="font-size: 28px; margin-bottom: 5px;">ПРИКЛЮЧЕНИЕ</h1>
+            <span id="onboarding-subtitle" class="subtitle" style="margin-bottom: 20px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Первый шаг в Горнило</span>
             
-            <div style="display: flex; min-height: 160px; align-items: center; justify-content: center;">
-                <button id="fast-intro-combat-btn" class="emoji-grid-btn" style="width: 130px; height: 130px; font-size: 74px; border-radius: 50%;" onclick="executeOnboardingBattleLaunch()">🌋</button>
+            <p id="onboarding-description" style="font-size: 13px; line-height: 1.6; color: #bfae96; margin-bottom: 25px; padding: 0 10px;">
+                Древние подземелья Абхирамбурга пробудились. Соберите волю в кулак, управляйте камнями стихий и сокрушите огнедышащих тварей в тактических битвах!
+            </p>
+
+            <!-- ДИНАМИЧЕСКИЙ КОНТЕЙНЕР ДЛЯ КНОПОК -->
+            <div id="onboarding-buttons-zone" style="display: flex; justify-content: center; align-items: center; gap: 20px; min-height: 140px; width: 100%;">
+                <!-- Кнопки создаются автоматически скриптом ниже -->
             </div>
         </div>
         
-        <!-- ДИНАМИЧЕСКИЕ СЛОТЫ ДЛЯ ПОСЛЕДУЮЩЕЙ КОРРЕКТНОЙ СБОРКИ БОЯ -->
+        <!-- ТЕХНИЧЕСКИЕ СЛОТЫ ДЛЯ СБОРКИ БОЕВОГО ДВИЖКА И ВОЕННОГО ЛАГЕРЯ -->
         <div id="main-menu" style="display: none;"></div>
         <div id="dynamic-combat-screen"></div>
+        <div id="squad-heroes-spec-screen" class="game-window" style="display: none; z-index: 100;"></div>
+        <div id="dynamic-town-screens" style="display: none;"></div>
     </div>
 
     <script>
-        function executeOnboardingBattleLaunch() {
-            // 1. Анимированно или мгновенно полностью уничтожаем блок приветствия с кнопкой вулкана
-            const welcomeZone = document.getElementById('onboarding-welcome-zone');
-            if (welcomeZone) {
-                welcomeZone.remove();
+        window.GAME_VERSION = "v5.7.27-FIX";
+
+        // Функция ленивой сборки и загрузки всех игровых модулей при первом клике
+        function loadGameModulesAndExecute(callback) {
+            // Удаляем только окно приветствия, если переходим в полноценный бой
+            const windowEl = document.getElementById('onboarding-gothic-window');
+            if (windowEl && callback.name === 'launchBattle') {
+                windowEl.style.display = 'none';
             }
 
-            // 2. Форсированно подгружаем стили игры, чтобы сетка Match-3 выглядела правильно
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'styles.css?t=' + enforceBuster;
-            document.head.appendChild(link);
-
-            // 3. Массив последовательного развертывания игровых модулей боевого движка
             const scripts = [
                 'game.js', 'background.js', 'audio-engine.js', 'match3-fx.js',
                 'match3-input.js', 'match3.js', 'match3-logic.js', 'match3-data.js',
@@ -63,14 +58,8 @@
 
             function injectScriptSequentially(index) {
                 if (index >= scripts.length) {
-                    // Как только все скрипты загрузились — собираем и включаем бой напрямую
                     if (typeof initDispatcherModule === 'function') initDispatcherModule();
-                    if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
-                    if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
-                    if (typeof showScreen === 'function') showScreen('combat-screen');
-                    if (typeof startCombatSession === 'function') {
-                        startCombatSession(1); 
-                    }
+                    callback();
                     return;
                 }
                 const script = document.createElement('script');
@@ -79,10 +68,59 @@
                 script.onload = function() { injectScriptSequentially(index + 1); };
                 document.head.appendChild(script);
             }
-
-            // Запускаем инжекцию скриптов в момент клика
             injectScriptSequentially(0);
         }
+
+        function launchBattle() {
+            if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
+            if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
+            if (typeof showScreen === 'function') showScreen('combat-screen');
+            if (typeof startCombatSession === 'function') startCombatSession(1); 
+        }
+
+        function launchCamp() {
+            if (typeof updateSquadHeroesSpecScreenDOM === 'function') updateSquadHeroesSpecScreenDOM();
+            if (typeof showScreen === 'function') showScreen('squad-heroes-spec-screen');
+            
+            // Подменяем кнопку возврата в Военном лагере, чтобы возвращала на этот же экран
+            const closeBtn = document.getElementById('close-heroes-spec-btn');
+            if (closeBtn) {
+                closeBtn.onclick = function() {
+                    document.getElementById('squad-heroes-spec-screen').style.display = 'none';
+                    document.getElementById('onboarding-gothic-window').style.display = 'flex';
+                };
+            }
+        }
+
+        // Отрисовка кнопок в зависимости от прогресса
+        document.addEventListener("DOMContentLoaded", function() {
+            // Динамически подключаем базовые стили оформления рамок Цитадели
+            const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'styles.css?t=' + enforceBuster;
+            document.head.appendChild(link);
+
+            const isVictory = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
+            const btnZone = document.getElementById('onboarding-buttons-zone');
+            
+            if (!isVictory) {
+                // ЭТАП 1: Строго одна кнопка вулкана 
+                btnZone.innerHTML = `
+                    <button class="emoji-grid-btn" style="width: 120px; height: 120px; font-size: 64px; border-radius: 50%;" onclick="loadGameModulesAndExecute(launchBattle)">🌋</button>
+                `;
+            } else {
+                // ЭТАП 2: Две кнопки — Вулкан и Спортзал (Военный Лагерь)
+                document.getElementById('onboarding-title').innerText = "ЦИТАДЕЛЬ";
+                document.getElementById('onboarding-subtitle').innerText = "Управление Прогрессом";
+                document.getElementById('onboarding-description').innerText = "Дракон отступил! Силы вашего отряда выросли. Потратьте заработанные трофеи в Военном Лагере для прокачки характеристик бойцов или отправляйтесь в новый тактический рейд.";
+                
+                btnZone.innerHTML = `
+                    <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="В бой" onclick="loadGameModulesAndExecute(launchBattle)">🌋</button>
+                    <button class="emoji-grid-btn" style="width: 110px; height: 110px; font-size: 54px; border-radius: 4px;" title="Прокачка" onclick="loadGameModulesAndExecute(launchCamp)">🏋️</button>
+                `;
+            }
+        });
     </script>
 </body>
 </html>
