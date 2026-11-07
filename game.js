@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (СТАБИЛИЗИРОВАН - v5.2.9)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v5.3.2)
    ========================================================================== */
 
 const BOARD_ROWS = 8;
@@ -52,16 +52,18 @@ function sanitizeAndMigrateStorage() {
 }
 
 function initDispatcherModule() {
-    sanitizeAndMigrateStorage();
-
+    // ВАЖНО: Сначала инжектим всю разметку в DOM, чтобы элементы гарантированно существовали
     if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
     if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
     if (typeof injectSquadInterfaceDOM === 'function') injectSquadInterfaceDOM();
     if (typeof injectMissionsInterfaceBaseDOM === 'function') injectMissionsInterfaceBaseDOM();
+
+    sanitizeAndMigrateStorage();
     
     const versionElement = document.getElementById('game-version');
     if (versionElement && window.GAME_VERSION) versionElement.innerText = window.GAME_VERSION;
 
+    // Только после этого вешаем листенеры на готовые кнопки
     if (typeof setupAllGameListeners === 'function') {
         try { setupAllGameListeners(); } catch (e) { console.error("Ошибка листенеров:", e); }
     }
