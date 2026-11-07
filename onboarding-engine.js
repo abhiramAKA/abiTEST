@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫДЕЛЕННЫЙ ДВИЖОК ПОЭТАПНОГО ОБУЧЕНИЯ (ОБНОВЛЕН - v5.7.44-FIX)
+   КХАМАЧ — ВЫДЕЛЕННЫЙ ДВИЖОК ПОЭТАПНОГО ОБУЧЕНИЯ (ИСПРАВЛЕН - v5.7.45-FIX)
    ========================================================================== */
 
-window.GAME_VERSION = "v5.7.44-FIX";
+window.GAME_VERSION = "v5.7.45-FIX";
 
 const ONBOARDING_MISSIONS_LOCAL_POOL = [
     { id: "m_t1", allowedHero: "tank", heroName: "Защитник", heroIcon: "🛡️", reward: 133, text: "Кузнец просит придержать тяжелую наковальню.", title: "Помощь в кузнице" },
@@ -25,7 +25,9 @@ function loadGameModulesAndExecute(modeType) {
 
     function injectScriptSequentially(index) {
         if (index >= scripts.length) {
-            if (typeof initDispatcherModule === 'function') initDispatcherModule();
+            if (modeType === 'battle' && typeof initDispatcherModule === 'function') {
+                initDispatcherModule();
+            }
             if (modeType === 'battle') { launchBattle(); } 
             else if (modeType === 'camp') { launchCamp(); }
             else if (modeType === 'missions') { launchMissions(); }
@@ -106,7 +108,6 @@ function executeOnboardingMission(missionId, heroId, finalExpectedReward, missio
     const currentFatigue = Math.min(100, Math.max(0, parseFloat(localStorage.getItem(`khamach_fatigue_${heroId}`) || '0')));
     localStorage.setItem(`khamach_fatigue_${heroId}`, Math.min(100, Math.round(currentFatigue + 15)));
     
-    // КНОПКА СРАБОТАЛА: Генерируем запись отправки напрямую в локальные логи Летописи Цитадели
     let logs = [];
     try { logs = JSON.parse(localStorage.getItem('khamach_chronicle_logs') || '[]'); } catch(e) { logs = []; }
     const timeStr = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
