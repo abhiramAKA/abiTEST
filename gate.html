@@ -16,7 +16,7 @@
         <!-- ГОТИЧЕСКОЕ ОКНО С КОРИЧНЕВОЙ РАМКОЙ -->
         <div id="onboarding-gothic-window" class="game-window" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; box-sizing: border-box;">
             <h1 id="onboarding-title" style="font-size: 28px; margin-bottom: 5px;">ПРИКЛЮЧЕНИЕ</h1>
-            <span id="onboarding-subtitle" class="subtitle" style="margin-bottom: 20px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Первый шаг in Горнило</span>
+            <span id="onboarding-subtitle" class="subtitle" style="margin-bottom: 20px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Первый шаг в Горнило</span>
             
             <p id="onboarding-description" style="font-size: 13px; line-height: 1.6; color: #bfae96; margin-bottom: 25px; padding: 0 10px;">
                 Древние подземелья Абхирамбурга пробудились. Соберите волю в кулак, управляйте камнями стихий и сокрушите огнедышащих тварей в тактических битвах!
@@ -32,19 +32,24 @@
         <div id="main-menu" style="display: none;"></div>
         <div id="dynamic-combat-screen"></div>
         <div id="squad-heroes-spec-screen" class="game-window" style="display: none; z-index: 100;"></div>
-        
-        <!-- НАСТОЯЩИЙ СЛОТ ДЛЯ ИНЪЕКЦИИ ДОСКИ ПОРУЧЕНИЙ -->
         <div id="missions-screen" class="game-window" style="display: none; z-index: 100; flex-direction: column;">
             <h2>Доска Поручений</h2>
             <span class="subtitle">Городские Контракты</span>
             <div id="missions-list-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 55vh; overflow-y: auto; margin-bottom: 10px;"></div>
-            <button id="close-missions-btn" class="menu-btn back-btn" style="width: 100%; display: none;">Назад в меню</button>
+            <button id="close-missions-btn" class="menu-btn back-btn" style="width: 100%; display: none;">Назад</button>
+        </div>
+
+        <!-- КРИТИЧЕСКИЙ ФИКС: Слот карты Кампании для безопасного рендеринга глав на 4-м шаге -->
+        <div id="dragon-select-screen" class="game-window" style="display: none; z-index: 100;">
+            <h2 id="adventure-screen-title">Выбор Рейда</h2>
+            <span id="adventure-screen-subtitle" class="subtitle">Выберите тир дракона</span>
+            <div id="dragon-levels-grid" style="display: flex; flex-direction: column; width: 100%; max-height: 50vh; overflow-y: auto; gap: 4px;"></div>
+            <button id="from-select-to-menu-btn" class="menu-btn back-btn" style="width: 100%; display: none;">Назад</button>
         </div>
 
         <div id="dynamic-town-screens" style="display: none;"></div>
     </div>
 
-    <!-- Подключаем выделенный вычислительный модуль онбординга -->
-    <script src="onboarding-engine.js?v=v5.7.36-FIX"></script>
+    <script src="onboarding-engine.js?v=v5.7.43-FIX"></script>
 </body>
 </html>
