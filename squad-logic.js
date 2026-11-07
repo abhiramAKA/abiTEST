@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ МОДУЛЬ ТРЕНИРОВОК И ПОТОЛКА ОТРЯДА (ИСПРАВЛЕН - v5.7.34-FIX)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ МОДУЛЬ ТРЕНИРОВОК И ПОТОЛКА ОТРЯДА (ИСПРАВЛЕН - v5.7.36-FIX)
    ========================================================================== */
 
 const SQUAD_HERO_LORE = {
@@ -89,7 +89,7 @@ window.triggerHeroLevelUpgrade = function(heroId) {
     const heroLvl = window.getHeroLevel(heroId);
 
     if (currentRes < 1) {
-        alert(`Недостаточно трофеев! Требуется 1 шт.`);
+        alert(`Недостаточно трофеев!`);
         return;
     }
 
@@ -103,8 +103,6 @@ window.triggerHeroLevelUpgrade = function(heroId) {
     const isTrainingPhase = localStorage.getItem('khamach_training_tutorial_done') !== 'true';
     if (isTrainingPhase) {
         localStorage.setItem('khamach_training_tutorial_done', 'true');
-        
-        // ФИКС: Убрали alert()! Сразу переключаем стейт страницы и отправляем на 3 шаг
         document.getElementById('squad-heroes-spec-screen').style.display = 'none';
         window.location.href = 'gate.html?t=' + Date.now();
         return;
