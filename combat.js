@@ -5,6 +5,11 @@
 let activeSessionLevel = 1;
 
 function startCombatSession(level) {
+    // Автоматическая инициализация базового стейта, если его забыли создать модули цитадели
+    if (typeof combatData === 'undefined') {
+        window.combatData = { currentRound: 1, squad: [] };
+    }
+
     activeSessionLevel = level || 1;
     combatData.currentRound = 1;
     combatData.pendingComboTutorial = false;
@@ -31,7 +36,6 @@ function startCombatSession(level) {
     
     const tankHpBonus = (typeof getBuildingLevel === 'function' ? getBuildingLevel('tank') : 0) * 20;
     
-    // Жесткая защита: очищаем busy-кэш, чтобы камни гарантированно упали и было кому сражаться
     const heroIds = ['tank', 'damage', 'archer', 'mage'];
     heroIds.forEach(id => localStorage.removeItem(`khamach_hero_busy_${id}`));
 
@@ -48,6 +52,8 @@ function startCombatSession(level) {
         hero.hp = hero.maxHP; hero.sp = Math.min(hero.maxSP, spPerk * 5); 
     });
     
+    // БЕЗОПАСНЫЙ ИНЖЕКТ И ЗАПУСК ПОЛЯ
+    if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
     if (typeof buildDragonDOM === 'function') buildDragonDOM();
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
     if (typeof initMatch3Board === 'function') initMatch3Board();
@@ -67,7 +73,8 @@ function usePlayerActionPoint() {
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
     if (combatData.playerAP <= 0) {
         if (typeof isBoardLocked !== 'undefined') isBoardLocked = true;
-        document.getElementById('combat-ap-display').innerText = "Ход Дракона...";
+        const apDisplay = document.getElementById('combat-ap-display');
+        if (apDisplay) apDisplay.innerText = "Ход Дракона...";
         setTimeout(executeDragonTurnAI, 700);
     }
 }
@@ -98,7 +105,8 @@ function executeDragonTurnAI() {
         if (dModel) dModel.className = 'dragon-idle';
         combatData.currentRound++; combatData.playerAP = combatData.playerMaxAP;
         if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
-        document.getElementById('combat-ap-display').innerText = "Сделайте ход на поле!";
+        const apDisplay = document.getElementById('combat-ap-display');
+        if (apDisplay) apDisplay.innerText = "Сделайте ход на поле!";
         if (typeof checkBattleResolution === 'function') checkBattleResolution();
     }, 1000);
 }
