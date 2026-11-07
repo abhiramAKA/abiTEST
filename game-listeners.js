@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.28-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (СТАБИЛИЗИРОВАН)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
@@ -21,7 +21,6 @@ function setupAllGameListeners() {
     document.onclick = null;
     document.body.onclick = null;
 
-    // ПАТТЕРН НАДЁЖНОГО ИЗОЛИРОВАННОГО ПЕРЕХВАТА КЛИКОВ КНОПОК
     const mainMenuEl = document.getElementById('main-menu');
     if (mainMenuEl) {
         mainMenuEl.onclick = function(e) {
@@ -34,7 +33,6 @@ function setupAllGameListeners() {
             const missionsBtn = e.target.closest('#to-missions-btn');
             const chronicleBtn = e.target.closest('#to-chronicle-btn');
 
-            // Если элемент заблокирован онбордингом — прерываем обработку клика полностью
             if (e.target.closest('.progression-locked')) {
                 e.preventDefault(); e.stopPropagation();
                 return false;
@@ -44,8 +42,6 @@ function setupAllGameListeners() {
                 e.preventDefault(); e.stopPropagation();
                 if (typeof window.openModeDescription === 'function') {
                     window.openModeDescription('clans');
-                } else if (typeof openModeDescription === 'function') {
-                    openModeDescription('clans');
                 }
             } else if (combatBtn) {
                 e.preventDefault(); e.stopPropagation();
@@ -67,7 +63,9 @@ function setupAllGameListeners() {
                 showScreen('squad-screen');
             } else if (storageBtn) {
                 e.preventDefault(); e.stopPropagation();
-                if (typeof updateSquadHeroesSpecScreenDOM === 'function') updateSquadHeroesSpecScreenDOM();
+                if (typeof window.updateSquadHeroesSpecScreenDOM === 'function') {
+                    window.updateSquadHeroesSpecScreenDOM();
+                }
                 showScreen('squad-heroes-spec-screen');
             } else if (missionsBtn) {
                 e.preventDefault(); e.stopPropagation();
@@ -198,9 +196,7 @@ function setupCombatHelpListeners() {
             if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
             const screen = document.getElementById('combat-welcome-tutorial-screen');
             if (screen) screen.style.display = 'none';
-            // После закрытия туториала принудительно снимаем классы блокировок с иконок меню без перезагрузки страницы
-            const lockIds = ['to-squad-btn', 'to-storage-btn', 'to-chronicle-btn', 'to-clans-btn'];
-            lockIds.forEach(id => {
+            ['to-squad-btn', 'to-storage-btn', 'to-chronicle-btn', 'to-clans-btn'].forEach(id => {
                 const btn = document.getElementById(id);
                 if (btn) btn.classList.remove('progression-locked');
             });
