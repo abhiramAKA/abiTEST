@@ -13,10 +13,10 @@ function injectCombatPopupsDOM() {
                 <h2>ГОРНИЛО РУН</h2>
                 <span class="subtitle">Справочник Сил</span>
                 <div style="text-align: left; font-size: 13px; line-height: 1.4; display: flex; flex-direction: column; gap: 8px; color: #cdb38c;">
-                    <div>🛡️ <strong>Защитник:</strong> Блокирует урон Дракона.</div>
-                    <div>🔥 <strong>Воин:</strong> Наносит чистый урон.</div>
-                    <div>⚡ <strong>Стрелок:</strong> Ослепляет змея молнией.</div>
-                    <div>💚 <strong>Маг:</strong> Массовое исцеление.</div>
+                    <div>🛡️ <strong>Защитник:</strong> Наносит слабый урон и активирует провокацию, принимая следующий удар на себя.</div>
+                    <div>🔥 <strong>Воин:</strong> Наносит сокрушительный урон.</div>
+                    <div>⚡ <strong>Стрелок:</strong> Наносит слабый удар и ослепляет врага. Свой следующую атаку враг совершает в полсилы.</div>
+                    <div>💚 <strong>Маг:</strong> Наносит слабый удар и совершает массовое исцеление.</div>
                 </div>
                 <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в бой</button>
             </div>
