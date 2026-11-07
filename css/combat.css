@@ -37,7 +37,9 @@
 #dragon-model {
     width: 100px;
     height: 100px;
-    background: url('../assets/dragon-lowpoly.webp') no-repeat center/contain;
+    /* ИСПРАВЛЕНО: Картинка 404 заменена на чистый CSS готический ореол свечения вокруг эмодзи */
+    background: transparent;
+    filter: drop-shadow(0 0 10px #ff3333);
     transition: transform 0.2s ease;
 }
 
@@ -124,7 +126,6 @@
     box-sizing: border-box;
 }
 
-/* 👥 ИНТЕРФЕЙС КАРТОЧЕК ГЕРОЕВ С ОРЕОЛАМИ СУПЕРСИЛ */
 .hero-gothic-card {
     background: rgba(20, 16, 14, 0.95);
     border: 1px solid #544432;
@@ -140,7 +141,6 @@
     transition: all 0.3s ease-in-out;
 }
 
-/* 🎇 ЭФФЕКТ СИЯЮЩЕГО ОРЕОЛА ДЛЯ КАРТОЧКИ ГЕРОЯ */
 .ready-glow {
     cursor: pointer !important;
     border-color: #ffd700 !important;
