@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНОЕ ЯДРО ПОШАГОВОГО БОЯ (ИСПРАВЛЕН - v5.7.18-FIX)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНОЕ ЯДРО ПОШАГОВОГО БОЯ (ИСПРАВЛЕН - v5.7.39-FIX)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -36,10 +36,8 @@ function startCombatSession(level) {
     }
     
     const tankHpBonus = (typeof getBuildingLevel === 'function' ? getBuildingLevel('tank') : 0) * 20;
-    
-    const heroIds = ['tank', 'damage', 'archer', 'mage'];
-    heroIds.forEach(id => localStorage.removeItem(`khamach_hero_busy_${id}`));
 
+    // ГЕНЕРАЦИЯ БАЗОВОГО ОТРЯДА
     combatData.squad = [
         { id: "tank", name: "Защитник", hp: 150, maxHP: 150, sp: 0, maxSP: 100, icon: "🛡️", color: "#4a90e2" },
         { id: "damage", name: "Воин", hp: 90, maxHP: 90, sp: 0, maxSP: 100, icon: "🔥", color: "#ff4500" },
@@ -50,7 +48,15 @@ function startCombatSession(level) {
     combatData.squad.forEach(hero => {
         let base = (hero.id === "tank" ? 150 : hero.id === "damage" ? 90 : hero.id === "archer" ? 100 : 80);
         hero.maxHP = base + (hero.id === "tank" ? tankHpBonus : 0);
-        hero.hp = hero.maxHP; hero.sp = Math.min(hero.maxSP, spPerk * 5); 
+        
+        // КРИТИЧЕСКИЙ ФИКС: Если в localStorage отмечено, что герой занят — выключаем его из боя (hp = 0)
+        if (localStorage.getItem(`khamach_hero_busy_${hero.id}`) === 'true') {
+            hero.hp = 0;
+            hero.sp = 0;
+        } else {
+            hero.hp = hero.maxHP; 
+            hero.sp = Math.min(hero.maxSP, spPerk * 5); 
+        }
     });
     
     if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
@@ -123,7 +129,12 @@ function executeDragonTurnAI() {
             combatData.dragonHP = combatData.dragonMaxHP;
         }
         if (combatData.squad.every(h => h.hp <= 0)) {
-            combatData.squad.forEach(h => h.hp = h.maxHP);
+            combatData.squad.forEach(h => {
+                // Воскрешаем только тех, кто не ушёл на заработки в Ратушу
+                if (localStorage.getItem(`khamach_hero_busy_${h.id}`) !== 'true') {
+                    h.hp = h.maxHP;
+                }
+            });
         }
 
         combatData.currentRound++; 
@@ -141,4 +152,3 @@ function executeDragonTurnAI() {
         if (typeof renderBoardDOM === 'function') renderBoardDOM(false,); 
     }, 1000);
 }
-
