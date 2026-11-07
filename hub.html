@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            window.GAME_VERSION = "v5.2.9-BETA";
+            window.GAME_VERSION = "v5.3.1-BETA";
             if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
                 localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
             }
@@ -45,7 +45,7 @@
 
             function injectScript(idx) {
                 if (idx >= scripts.length) {
-                    console.log("КХАМАЧ: Все архитектурные модули успешно инициализированы.");
+                    console.log("КХАМАЧ: Модули успешно инжектированы.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -92,10 +92,10 @@
             </div>
         </div>
 
-        <!-- ДИНАМИЧЕСКИЕ СЛОТЫ ДЛЯ ИНЪЕКЦИЙ ЭКРАНОВ -->
-        <div id="dynamic-town-screens"></div>
+        <!-- ЖЕСТКОЕ СКРЫТИЕ СЛОТОВ ПРИ СТАРТЕ ПРОТИВ НАЛОЖЕНИЯ СЛОЕВ -->
+        <div id="dynamic-town-screens" style="display: none;"></div>
         <div id="squad-screen" class="game-window" style="display: none;"></div>
-        <div id="dynamic-combat-screen"></div>
+        <div id="dynamic-combat-screen" style="display: none;"></div>
     </div>
 </body>
 </html>
