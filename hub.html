@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>КХАМАЧ — Легенды Абхирамбурга</title>
+    <script>
+        (function() {
+            window.GAME_VERSION = "v5.2.0-ALPHA";
+            
+            if (localStorage.getItem('khamach_sys_version') !== window.GAME_VERSION) {
+                localStorage.setItem('khamach_sys_version', window.GAME_VERSION);
+            }
+
+            const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
+            
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'styles.css?t=' + enforceBuster;
+            document.head.appendChild(link);
+
+            const scripts = [
+                'game.js', 'background.js', 'audio-engine.js', 'match3-fx.js',
+                'match3-input.js', 'match3.js', 'match3-logic.js', 'match3-data.js',
+                'match3-progression.js', 'town-engine.js', 'town-chronicle.js',
+                'town-missions-pool.js', 'town-missions-engine.js', 'town-dom.js',
+                'squad-dom.js', 'combat-dom.js', 'town-missions-dom.js',
+                'squad-engine-logic.js', 'squad-engine.js', 'combat.js', 'game-listeners.js'
+            ];
+
+            function injectScript(index) {
+                if (index >= scripts.length) {
+                    console.log("КХАМАЧ: Модули успешно загружены.");
+                    if (typeof initDispatcherModule === 'function') {
+                        initDispatcherModule();
+                    }
+                    
+                    const tutorialDone = localStorage.getItem('khamach_combat_tutorial_done') === 'true';
+                    if (!tutorialDone) {
+                        ['to-squad-btn', 'to-storage-btn', 'to-chronicle-btn', 'to-clans-btn'].forEach(id => {
+                            const btn = document.getElementById(id);
+                            if (btn) btn.classList.add('progression-locked');
+                        });
+                    }
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = scripts[index] + '?v=' + window.GAME_VERSION + '&t=' + enforceBuster;
+                script.async = false; 
+                script.onload = function() { injectScript(index + 1); };
+                document.head.appendChild(script);
+            }
+
+            document.addEventListener("DOMContentLoaded", function() {
+                injectScript(0);
+            });
+        })();
+    </script>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="game-interface">
+        
+        <!-- ================= ГЛАВНОЕ МЕНЮ ИГРЫ ================= -->
+        <div id="main-menu" class="game-window" style="display: flex;">
+            
+            <!-- Компактная шапка ресурсов (Золото и Усталость) -->
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px; padding: 0 4px; background: rgba(20, 15, 12, 0.5); border-bottom: 1px double #544432; box-sizing: border-box;">
+                <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0</span>
+                <h1 style="font-size: 24px; margin: 0; letter-spacing: 2px; padding: 4px 0;">КХАМАЧ</h1>
+                <span id="team-fatigue-display" style="color: #ffb3ba; cursor: pointer; font-size: 14px; font-weight: bold; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffb3ba'">🥱 0%</span>
+            </div>
+            
+            <span class="subtitle" style="font-size: 11px; margin-bottom: 10px; padding-bottom: 4px; letter-spacing: 1px;">Легенды Абхирамбурга</span>
+            
+            <!-- Служебный верхний ряд управления -->
+            <div style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 14px; box-sizing: border-box;">
+                <button id="to-settings-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">⚙️ Настройки</button>
+                <button id="info-btn" class="info-btn" style="flex: 1; height: 38px; font-size: 14px;">❓ Справка</button>
+            </div>
+
+            <!-- Игровая сетка крупных кнопок-эмодзи -->
+            <div class="menu-emoji-grid">
+                <button id="to-combat-btn" class="emoji-grid-btn">🌋</button>
+                <button id="to-missions-btn" class="emoji-grid-btn">💰</button>
+                <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
+                <button id="to-storage-btn" class="emoji-grid-btn">🏋️</button>
+                <button id="to-chronicle-btn" class="emoji-grid-btn">📜</button>
+                <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
+            </div>
+
+            <div id="game-version" class="version-footer">v5.2.0-ALPHA</div>
+        </div>
+
+        <div id="dynamic-town-screens"></div>
+        <div id="squad-screen" class="game-window" style="display: none;"></div>
+        <div id="dynamic-combat-screen"></div>
+
+    </div>
+</body>
+</html>
