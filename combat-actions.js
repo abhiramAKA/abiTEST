@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УЛЬТИМЕЙТОВ И ИСХОДОВ БИТВЫ (ИСПРАВЛЕН - v5.7.28-FIX)
+   КХАМАЧ — МОДУЛЬ УЛЬТИМЕЙТОВ И ИСХОДОВ БИТВЫ (ИСПРАВЛЕН - v5.7.37-FIX)
    ========================================================================== */
 
 function activateHeroSuperpower(heroId) {
@@ -56,9 +56,7 @@ function checkBattleResolution() {
         if (typeof saveCompletedTier === 'function') saveCompletedTier(activeSessionLevel);
         if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
         
-        alert(`ВЕЛИКАЯ ПОБЕДА! Дракон повержен!\n📦 На склад Цитадели доставлено: ${lootName} (1 шт).\n\nПоздравляем! Вам открыт доступ к Спортзалу!`);
-        
-        // РЕДИРЕКТ НА СТАРТОВЫЙ ШЛЮЗ ДЛЯ ОТОБРАЖЕНИЯ ДВУХ КНОПОК-КВАДРАТИКОВ
+        // КРИТИЧЕСКИЙ ФИКС: alert() полностью удален для бесшовного перехода на Спортзал!
         window.location.href = 'gate.html?t=' + Date.now();
     } else if (combatData.squad.every(hero => hero.hp <= 0)) {
         let id = window.setTimeout(function() {}, 0);
